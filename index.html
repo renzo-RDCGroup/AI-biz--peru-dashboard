@@ -77,9 +77,9 @@ tfoot td{background:var(--paper);font-weight:800;border-top:2px solid var(--navy
 </div>
 <script>
 (function(){
-  var PW="Rocky";
+  var PW="rocky";
   function unlock(){var g=document.getElementById("gate");if(g)g.style.display="none";try{sessionStorage.setItem("kv_gate","1");}catch(e){}}
-  function check(){var v=document.getElementById("gatepw").value;if(v===PW){unlock();}else{document.getElementById("gateerr").textContent="Contraseña incorrecta.";document.getElementById("gatepw").value="";document.getElementById("gatepw").focus();}}
+  function check(){var v=(document.getElementById("gatepw").value||"").trim().toLowerCase();if(v===PW){unlock();}else{document.getElementById("gateerr").textContent="Contraseña incorrecta.";document.getElementById("gatepw").value="";document.getElementById("gatepw").focus();}}
   document.addEventListener("DOMContentLoaded",function(){
     try{if(sessionStorage.getItem("kv_gate")==="1"){var g=document.getElementById("gate");if(g)g.style.display="none";return;}}catch(e){}
     var b=document.getElementById("gatebtn");if(b)b.addEventListener("click",check);
