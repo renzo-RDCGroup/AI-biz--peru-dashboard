@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalevisión · Calculadora de Planes y Márgenes</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{color-scheme:light;--navy:#1A1B23;--cyan:#009FE3;--beige:#DCD6C4;--gris:#E5E5E5;--gray:#52617A;--paper:#F4F6FA;--line:#E3EBF6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--navy);background:#fff;padding:22px;line-height:1.45}
+.wrap{max-width:1000px;margin:0 auto}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.iso{width:40px;height:32px;flex:none}
+.head h1{font-size:1.5rem;letter-spacing:-.02em}
+.tag{display:inline-block;background:#FDECEF;color:#B00020;font-weight:700;font-size:.66rem;letter-spacing:.08em;padding:4px 9px;border-radius:6px;margin-bottom:16px}
+.bar{height:4px;width:100%;background:linear-gradient(90deg,var(--cyan),#4FC9F2);border-radius:3px;margin:4px 0 18px}
+.controls{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.seg{display:inline-flex;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:none;background:none;padding:8px 18px;border-radius:999px;font-weight:600;font-size:.9rem;cursor:pointer;color:var(--gray)}
+.seg button.on{background:var(--navy);color:#fff}
+.field{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600}
+.field input{width:64px;padding:7px 9px;border:1.5px solid var(--line);border-radius:9px;font:inherit;text-align:center}
+.reset{margin-left:auto;background:none;border:1.5px solid var(--line);border-radius:999px;padding:8px 16px;font-weight:600;cursor:pointer;color:var(--gray)}
+table{width:100%;border-collapse:collapse;margin-bottom:8px}
+th{background:var(--navy);color:#fff;font-size:.74rem;font-weight:700;padding:9px 8px;text-align:right}
+th:first-child{text-align:left;border-radius:8px 0 0 0}th:last-child{border-radius:0 8px 0 0}
+td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right;font-size:.9rem}
+td:first-child{text-align:left;font-weight:700}
+tr:nth-child(even) td{background:#FAFCFE}
+td input{width:78px;padding:6px 7px;border:1.5px solid var(--line);border-radius:8px;font:inherit;text-align:right}
+td input:focus{outline:none;border-color:var(--cyan)}
+.calc{color:var(--gray)}
+.net{font-weight:800;color:var(--cyan)}
+tfoot td{background:var(--paper);font-weight:800;border-top:2px solid var(--navy);border-bottom:none}
+.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;margin-top:24px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.panel h3{font-size:1.02rem;margin-bottom:4px}
+.panel .muted{color:var(--gray);font-size:.82rem;margin-bottom:14px}
+.proj-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+.proj-row input{width:54px;padding:5px 7px;border:1.5px solid var(--line);border-radius:8px;text-align:center;font:inherit}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.kpi div{background:var(--paper);border-radius:12px;padding:12px 14px}
+.kpi div.hl{background:#E6F6FD;border:1px solid #B9E6F8}
+.kpi .l{font-size:.72rem;color:var(--gray);font-weight:600}
+.kpi .v{font-size:1.25rem;font-weight:800;color:var(--navy)}
+.kpi .v.cy{color:var(--cyan)}
+.kpi-h{grid-column:1/-1;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);margin:4px 0 -2px;background:none!important;padding:0!important;border:none!important}
+.chartbox{height:240px;position:relative}
+.note{font-size:.74rem;color:var(--gray);margin-top:14px;line-height:1.5}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}td input{width:64px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <svg class="iso" viewBox="0 0 112 88" fill="none" stroke="#1A1B23" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"><path d="M74 8 L12 44 L74 80"/><path d="M74 8 Q105 25 105 44 Q105 63 74 80"/><path d="M74 8 V80"/><path d="M77 45 L100 51 Q95 72 77 78 Z" fill="#009FE3" stroke="none"/></svg>
+    <h1>Calculadora de Planes y Márgenes · Kalevisión</h1>
+  </div>
+  <span class="tag">USO INTERNO — RENZO &amp; ROBERT</span>
+  <div class="bar"></div>
+
+  <div class="controls">
+    <div class="seg">
+      <button id="bStd" class="on" onclick="setScenario('standard')">Estándar</button>
+      <button id="bPrem" onclick="setScenario('premium')">Premium</button>
+    </div>
+    <label class="field">Comisión Robert <input id="com" type="number" min="0" max="100" step="1" oninput="onCom(this.value)">%</label>
+    <button class="reset" onclick="resetAll()">Restaurar valores</button>
+  </div>
+
+  <table>
+    <thead><tr>
+      <th>Plan</th><th>Precio/mes</th><th>Difusión</th><th>Costos plataforma</th>
+      <th>Base servicio</th><th>Neto Robert</th><th>Neto Renzo</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+    <tfoot><tr>
+      <td>TOTAL (1 c/u)</td><td id="tPre"></td><td id="tDif"></td><td id="tPlat"></td>
+      <td id="tBase"></td><td id="tCom"></td><td class="net" id="tNet"></td>
+    </tr></tfoot>
+  </table>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3>Proyección de cartera</h3>
+      <p class="muted">¿Cuántas ópticas en cada plan? Calcula el neto de Renzo.</p>
+      <div id="proj"></div>
+      <div class="kpi">
+        <div class="kpi-h">Para Robert (socio comercial)</div>
+        <div class="hl"><div class="l">Neto Robert / mes</div><div class="v cy" id="kRobNet"></div></div>
+        <div class="hl"><div class="l">Neto Robert / año</div><div class="v cy" id="kRobYear"></div></div>
+        <div class="kpi-h">Para Renzo</div>
+        <div><div class="l">Neto Renzo / mes</div><div class="v" id="kNet"></div></div>
+        <div><div class="l">Neto Renzo / año</div><div class="v" id="kYear"></div></div>
+        <div class="kpi-h">Total negocio</div>
+        <div><div class="l">Ingreso mensual total</div><div class="v" id="kRev"></div></div>
+        <div><div class="l">Neto Renzo prepago anual*</div><div class="v" id="kPre"></div></div>
+      </div>
+      <p class="note">* Prepago anual = el cliente paga 10 meses (2 gratis); el neto anual baja ~2 meses de margen a cambio de caja por adelantado y retención. La comisión de Robert (30%) se calcula sobre la base de servicio (precio − difusión), no sobre la difusión que se traspasa.</p>
+    </div>
+    <div class="panel">
+      <h3>Neto por plan · Robert vs Renzo</h3>
+      <p class="muted">Por 1 cliente, escenario activo.</p>
+      <div class="chartbox"><canvas id="chart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEF={
+  standard:{com:30,plans:[
+    {name:"Esencial",precio:1200,dif:0,plat:250,clients:1},
+    {name:"Crecimiento",precio:2500,dif:590,plat:450,clients:1},
+    {name:"Alianza Pro",precio:5900,dif:1400,plat:700,clients:1}]},
+  premium:{com:30,plans:[
+    {name:"Esencial",precio:1800,dif:0,plat:250,clients:1},
+    {name:"Crecimiento",precio:3600,dif:850,plat:450,clients:1},
+    {name:"Alianza Pro",precio:8500,dif:2000,plat:700,clients:1}]}
+};
+const KEY="kv_dash_v1";
+let state, scen="standard", chart;
+function load(){try{const s=localStorage.getItem(KEY);state=s?JSON.parse(s):JSON.parse(JSON.stringify(DEF));}catch(e){state=JSON.parse(JSON.stringify(DEF));}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function S(n){return "S/ "+Math.round(n).toLocaleString("es-PE");}
+function calc(p,com){const base=p.precio-p.dif;const c=base*com/100;const net=base-c-p.plat;return{base,c,net};}
+
+function render(){
+  const sc=state[scen];
+  document.getElementById("com").value=sc.com;
+  document.getElementById("bStd").classList.toggle("on",scen==="standard");
+  document.getElementById("bPrem").classList.toggle("on",scen==="premium");
+  let tPre=0,tDif=0,tPlat=0,tBase=0,tCom=0,tNet=0;
+  document.getElementById("rows").innerHTML=sc.plans.map((p,i)=>{
+    const r=calc(p,sc.com);tPre+=p.precio;tDif+=p.dif;tPlat+=p.plat;tBase+=r.base;tCom+=r.c;tNet+=r.net;
+    return `<tr>
+      <td>${p.name}</td>
+      <td><input type="number" min="0" step="50" value="${p.precio}" oninput="upd(${i},'precio',this.value)"></td>
+      <td><input type="number" min="0" step="50" value="${p.dif}" oninput="upd(${i},'dif',this.value)"></td>
+      <td><input type="number" min="0" step="50" value="${p.plat}" oninput="upd(${i},'plat',this.value)"></td>
+      <td class="calc">${S(r.base)}</td><td class="calc">${S(r.c)}</td><td class="net">${S(r.net)}</td>
+    </tr>`;}).join("");
+  document.getElementById("tPre").textContent=S(tPre);
+  document.getElementById("tDif").textContent=S(tDif);
+  document.getElementById("tPlat").textContent=S(tPlat);
+  document.getElementById("tBase").textContent=S(tBase);
+  document.getElementById("tCom").textContent=S(tCom);
+  document.getElementById("tNet").textContent=S(tNet);
+
+  document.getElementById("proj").innerHTML=sc.plans.map((p,i)=>{
+    const r=calc(p,sc.com);
+    return `<div class="proj-row"><span>${p.name} <span style="color:var(--gray);font-size:.78rem">(neto ${S(r.net)})</span></span>
+      <span><input type="number" min="0" step="1" value="${p.clients}" oninput="upd(${i},'clients',this.value)"> clientes</span></div>`;}).join("");
+  let mRev=0,mNet=0,mRob=0;
+  sc.plans.forEach(p=>{const r=calc(p,sc.com);mRev+=p.precio*p.clients;mNet+=r.net*p.clients;mRob+=r.c*p.clients;});
+  document.getElementById("kRev").textContent=S(mRev);
+  document.getElementById("kNet").textContent=S(mNet);
+  document.getElementById("kYear").textContent=S(mNet*12);
+  document.getElementById("kPre").textContent=S(mNet*10);
+  document.getElementById("kRobNet").textContent=S(mRob);
+  document.getElementById("kRobYear").textContent=S(mRob*12);
+  drawChart(sc);
+  save();
+}
+function drawChart(sc){
+  const labels=sc.plans.map(p=>p.name);
+  const rob=sc.plans.map(p=>calc(p,sc.com).c);
+  const renzo=sc.plans.map(p=>calc(p,sc.com).net);
+  if(chart){chart.data.labels=labels;chart.data.datasets[0].data=rob;chart.data.datasets[1].data=renzo;chart.update();return;}
+  chart=new Chart(document.getElementById("chart"),{type:"bar",
+    data:{labels,datasets:[
+      {label:"Neto Robert",data:rob,backgroundColor:"#009FE3",borderRadius:6},
+      {label:"Neto Renzo",data:renzo,backgroundColor:"#1A1B23",borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom"},
+      tooltip:{callbacks:{label:c=>c.dataset.label+": S/ "+Math.round(c.parsed.y).toLocaleString("es-PE")}}},
+      scales:{y:{ticks:{callback:v=>"S/ "+v.toLocaleString("es-PE")},grid:{color:"#EEF2F7"}},x:{grid:{display:false}}}}});
+}
+function upd(i,k,v){state[scen].plans[i][k]=Math.max(0,parseFloat(v)||0);render();}
+function onCom(v){state[scen].com=Math.max(0,Math.min(100,parseFloat(v)||0));render();}
+function setScenario(s){scen=s;render();}
+function resetAll(){state=JSON.parse(JSON.stringify(DEF));render();}
+load();render();
+</script>
+</body>
+</html>
