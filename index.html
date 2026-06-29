@@ -48,10 +48,41 @@ tfoot td{background:var(--paper);font-weight:800;border-top:2px solid var(--navy
 .kpi-h{grid-column:1/-1;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);margin:4px 0 -2px;background:none!important;padding:0!important;border:none!important}
 .chartbox{height:240px;position:relative}
 .note{font-size:.74rem;color:var(--gray);margin-top:14px;line-height:1.5}
+#gate{position:fixed;inset:0;z-index:9999;background:#1A1B23;display:flex;align-items:center;justify-content:center;padding:24px}
+.gate-card{background:#fff;border-radius:18px;padding:30px 26px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px -20px rgba(0,0,0,.5)}
+.gate-card .iso{width:46px;height:36px;margin:0 auto 6px;display:block}
+.gate-card h2{font-size:1.2rem;margin:6px 0 4px;color:var(--navy)}
+.gate-card p{color:var(--gray);font-size:.86rem;margin-bottom:16px}
+.gate-card input{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;font:inherit;text-align:center;margin-bottom:10px}
+.gate-card input:focus{outline:none;border-color:var(--cyan)}
+.gate-card button{width:100%;padding:11px;border:none;border-radius:10px;background:var(--cyan);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer}
+#gateerr{color:#B00020;font-size:.8rem;min-height:1em;margin:8px 0 0}
 @media(max-width:760px){.grid2{grid-template-columns:1fr}td input{width:64px}}
 </style>
 </head>
 <body>
+<div id="gate">
+  <div class="gate-card">
+    <svg class="iso" viewBox="0 0 112 88" fill="none" stroke="#1A1B23" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"><path d="M74 8 L12 44 L74 80"/><path d="M74 8 Q105 25 105 44 Q105 63 74 80"/><path d="M74 8 V80"/><path d="M77 45 L100 51 Q95 72 77 78 Z" fill="#009FE3" stroke="none"/></svg>
+    <h2>Acceso restringido</h2>
+    <p>Ingresa la contraseña para ver el dashboard.</p>
+    <input id="gatepw" type="password" placeholder="Contraseña" autocomplete="off">
+    <button id="gatebtn" type="button">Entrar</button>
+    <p id="gateerr"></p>
+  </div>
+</div>
+<script>
+(function(){
+  var PW="Rocky";
+  function unlock(){var g=document.getElementById("gate");if(g)g.style.display="none";try{sessionStorage.setItem("kv_gate","1");}catch(e){}}
+  function check(){var v=document.getElementById("gatepw").value;if(v===PW){unlock();}else{document.getElementById("gateerr").textContent="Contraseña incorrecta.";document.getElementById("gatepw").value="";document.getElementById("gatepw").focus();}}
+  document.addEventListener("DOMContentLoaded",function(){
+    try{if(sessionStorage.getItem("kv_gate")==="1"){var g=document.getElementById("gate");if(g)g.style.display="none";return;}}catch(e){}
+    var b=document.getElementById("gatebtn");if(b)b.addEventListener("click",check);
+    var i=document.getElementById("gatepw");if(i){i.addEventListener("keydown",function(ev){if(ev.key==="Enter")check();});i.focus();}
+  });
+})();
+</script>
 <div class="wrap">
   <div class="head">
     <svg class="iso" viewBox="0 0 112 88" fill="none" stroke="#1A1B23" stroke-width="8.5" stroke-linecap="round" stroke-linejoin="round"><path d="M74 8 L12 44 L74 80"/><path d="M74 8 Q105 25 105 44 Q105 63 74 80"/><path d="M74 8 V80"/><path d="M77 45 L100 51 Q95 72 77 78 Z" fill="#009FE3" stroke="none"/></svg>
