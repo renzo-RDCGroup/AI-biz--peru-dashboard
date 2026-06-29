@@ -41,9 +41,11 @@ tfoot td{background:var(--paper);font-weight:800;border-top:2px solid var(--navy
 .proj-row input{width:54px;padding:5px 7px;border:1.5px solid var(--line);border-radius:8px;text-align:center;font:inherit}
 .kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .kpi div{background:var(--paper);border-radius:12px;padding:12px 14px}
+.kpi div.hl{background:#E6F6FD;border:1px solid #B9E6F8}
 .kpi .l{font-size:.72rem;color:var(--gray);font-weight:600}
 .kpi .v{font-size:1.25rem;font-weight:800;color:var(--navy)}
 .kpi .v.cy{color:var(--cyan)}
+.kpi-h{grid-column:1/-1;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);margin:4px 0 -2px;background:none!important;padding:0!important;border:none!important}
 .chartbox{height:240px;position:relative}
 .note{font-size:.74rem;color:var(--gray);margin-top:14px;line-height:1.5}
 @media(max-width:760px){.grid2{grid-template-columns:1fr}td input{width:64px}}
@@ -70,7 +72,7 @@ tfoot td{background:var(--paper);font-weight:800;border-top:2px solid var(--navy
   <table>
     <thead><tr>
       <th>Plan</th><th>Precio/mes</th><th>Difusión</th><th>Costos plataforma</th>
-      <th>Base servicio</th><th>Robert</th><th>Neto Renzo</th>
+      <th>Base servicio</th><th>Neto Robert</th><th>Neto Renzo</th>
     </tr></thead>
     <tbody id="rows"></tbody>
     <tfoot><tr>
@@ -85,15 +87,20 @@ tfoot td{background:var(--paper);font-weight:800;border-top:2px solid var(--navy
       <p class="muted">¿Cuántas ópticas en cada plan? Calcula el neto de Renzo.</p>
       <div id="proj"></div>
       <div class="kpi">
-        <div><div class="l">Ingreso mensual</div><div class="v" id="kRev"></div></div>
-        <div><div class="l">Neto Renzo / mes</div><div class="v cy" id="kNet"></div></div>
+        <div class="kpi-h">Para Robert (socio comercial)</div>
+        <div class="hl"><div class="l">Neto Robert / mes</div><div class="v cy" id="kRobNet"></div></div>
+        <div class="hl"><div class="l">Neto Robert / año</div><div class="v cy" id="kRobYear"></div></div>
+        <div class="kpi-h">Para Renzo</div>
+        <div><div class="l">Neto Renzo / mes</div><div class="v" id="kNet"></div></div>
         <div><div class="l">Neto Renzo / año</div><div class="v" id="kYear"></div></div>
-        <div><div class="l">Neto con prepago anual*</div><div class="v" id="kPre"></div></div>
+        <div class="kpi-h">Total negocio</div>
+        <div><div class="l">Ingreso mensual total</div><div class="v" id="kRev"></div></div>
+        <div><div class="l">Neto Renzo prepago anual*</div><div class="v" id="kPre"></div></div>
       </div>
       <p class="note">* Prepago anual = el cliente paga 10 meses (2 gratis); el neto anual baja ~2 meses de margen a cambio de caja por adelantado y retención. La comisión de Robert (30%) se calcula sobre la base de servicio (precio − difusión), no sobre la difusión que se traspasa.</p>
     </div>
     <div class="panel">
-      <h3>Neto Renzo por plan</h3>
+      <h3>Neto por plan · Robert vs Renzo</h3>
       <p class="muted">Por 1 cliente, escenario activo.</p>
       <div class="chartbox"><canvas id="chart"></canvas></div>
     </div>
@@ -144,23 +151,28 @@ function render(){
     const r=calc(p,sc.com);
     return `<div class="proj-row"><span>${p.name} <span style="color:var(--gray);font-size:.78rem">(neto ${S(r.net)})</span></span>
       <span><input type="number" min="0" step="1" value="${p.clients}" oninput="upd(${i},'clients',this.value)"> clientes</span></div>`;}).join("");
-  let mRev=0,mNet=0;
-  sc.plans.forEach(p=>{const r=calc(p,sc.com);mRev+=p.precio*p.clients;mNet+=r.net*p.clients;});
+  let mRev=0,mNet=0,mRob=0;
+  sc.plans.forEach(p=>{const r=calc(p,sc.com);mRev+=p.precio*p.clients;mNet+=r.net*p.clients;mRob+=r.c*p.clients;});
   document.getElementById("kRev").textContent=S(mRev);
   document.getElementById("kNet").textContent=S(mNet);
   document.getElementById("kYear").textContent=S(mNet*12);
   document.getElementById("kPre").textContent=S(mNet*10);
+  document.getElementById("kRobNet").textContent=S(mRob);
+  document.getElementById("kRobYear").textContent=S(mRob*12);
   drawChart(sc);
   save();
 }
 function drawChart(sc){
-  const data=sc.plans.map(p=>calc(p,sc.com).net);
   const labels=sc.plans.map(p=>p.name);
-  if(chart){chart.data.labels=labels;chart.data.datasets[0].data=data;chart.update();return;}
+  const rob=sc.plans.map(p=>calc(p,sc.com).c);
+  const renzo=sc.plans.map(p=>calc(p,sc.com).net);
+  if(chart){chart.data.labels=labels;chart.data.datasets[0].data=rob;chart.data.datasets[1].data=renzo;chart.update();return;}
   chart=new Chart(document.getElementById("chart"),{type:"bar",
-    data:{labels,datasets:[{label:"Neto Renzo",data,backgroundColor:["#1A1B23","#0C3A55","#009FE3"],borderRadius:8}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:c=>"S/ "+Math.round(c.parsed.y).toLocaleString("es-PE")}}},
+    data:{labels,datasets:[
+      {label:"Neto Robert",data:rob,backgroundColor:"#009FE3",borderRadius:6},
+      {label:"Neto Renzo",data:renzo,backgroundColor:"#1A1B23",borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:"bottom"},
+      tooltip:{callbacks:{label:c=>c.dataset.label+": S/ "+Math.round(c.parsed.y).toLocaleString("es-PE")}}},
       scales:{y:{ticks:{callback:v=>"S/ "+v.toLocaleString("es-PE")},grid:{color:"#EEF2F7"}},x:{grid:{display:false}}}}});
 }
 function upd(i,k,v){state[scen].plans[i][k]=Math.max(0,parseFloat(v)||0);render();}
