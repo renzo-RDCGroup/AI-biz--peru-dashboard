@@ -1,0 +1,99 @@
+{%- comment -%}
+  Category photo mosaic (styles: assets/section-mosaic.css) — the 2-3-2 grid of lifestyle tiles
+  from the client's previous site, rebuilt on the brand system: photo + brand-yellow gradient,
+  big uppercase Urbanist title in BLACK (white on yellow fails contrast), optional one-liner,
+  whole tile is one link. Blocks marked "wide" span half the row on desktop, the rest a third.
+  Mobile: one column; wide tiles stay 16:9, normal tiles 16:10.
+{%- endcomment -%}
+{{ 'section-mosaic.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign title_id = 'MosaicTitle-' | append: section.id
+  assign tile_tag = 'h2'
+  if section.settings.heading != blank
+    assign tile_tag = 'h3'
+  endif
+-%}
+
+{%- if section.blocks.size > 0 -%}
+  <section class="mosaic section scheme-{{ section.settings.scheme }}" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;"{% if section.settings.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
+    <div class="page-width">
+      {%- render 'section-heading', title: section.settings.heading, subtitle: section.settings.subheading, id: title_id -%}
+      <ul class="mosaic__grid mosaic__grid--{{ section.settings.overlay }}" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign b = block.settings
+            assign col = b.collection
+            assign t_title = b.title | default: col.title
+            assign t_url = b.link | default: col.url
+            assign t_img = b.image | default: col.featured_image
+            assign t_sizes = '(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw'
+            if b.wide
+              assign t_sizes = '(min-width: 750px) 50vw, 100vw'
+            endif
+          -%}
+          <li class="mosaic__item{% if b.wide %} mosaic__item--wide{% endif %}" data-reveal style="--reveal-delay: {{ forloop.index0 | modulo: 3 | times: 80 }}ms;" {{ block.shopify_attributes }}>
+            <a class="mosaic__tile"{% if t_url != blank %} href="{{ t_url }}"{% endif %}>
+              <div class="mosaic__media">
+                {%- render 'image', image: t_img, widths: '360,540,720,900,1080,1296,1600', sizes: t_sizes, lazy: true, alt: '', class: 'mosaic__img', placeholder: 'lifestyle-1' -%}
+              </div>
+              <div class="mosaic__body">
+                <{{ tile_tag }} class="mosaic__title">{{ t_title | escape }}</{{ tile_tag }}>
+                {%- if b.text != blank -%}
+                  <span class="mosaic__text">{{ b.text | escape }}</span>
+                {%- endif -%}
+              </div>
+              <span class="mosaic__arrow" aria-hidden="true">{% render 'icon', name: 'arrow-right' %}</span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Mosaico de categorías",
+  "tag": "div",
+  "class": "mosaic-section",
+  "max_blocks": 9,
+  "settings": [
+    {"type": "paragraph", "content": "Fotos grandes que llevan a cada categoría. Marca «Ancho» en los bloques que deben ocupar media fila en escritorio (patrón 2-3-2: ancho, ancho, normal ×3, ancho, ancho)."},
+    {"type": "text", "id": "heading", "label": "Título (opcional)", "default": "Rueda a tu manera"},
+    {"type": "text", "id": "subheading", "label": "Subtítulo (opcional)"},
+    {"type": "select", "id": "overlay", "label": "Degradado sobre la foto", "options": [{"value": "brand", "label": "Amarillo de marca (texto negro)"}, {"value": "dark", "label": "Oscuro (texto blanco)"}], "default": "brand"},
+    {"type": "select", "id": "scheme", "label": "Fondo de la sección", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56}
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Categoría",
+      "settings": [
+        {"type": "collection", "id": "collection", "label": "Colección"},
+        {"type": "image_picker", "id": "image", "label": "Foto", "info": "Vacío = imagen de la colección. Mejor una foto horizontal con el sujeto al centro."},
+        {"type": "text", "id": "title", "label": "Título", "info": "Vacío = nombre de la colección."},
+        {"type": "text", "id": "text", "label": "Frase corta (opcional)"},
+        {"type": "url", "id": "link", "label": "Enlace", "info": "Vacío = la colección elegida."},
+        {"type": "checkbox", "id": "wide", "label": "Ancho (media fila en escritorio)", "default": false}
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Mosaico de categorías",
+      "blocks": [
+        {"type": "tile", "settings": {"collection": "cascos", "title": "Cascos", "wide": true}},
+        {"type": "tile", "settings": {"collection": "asientos", "title": "Asientos", "wide": true}},
+        {"type": "tile", "settings": {"collection": "espejos", "title": "Espejos"}},
+        {"type": "tile", "settings": {"collection": "luces", "title": "Luces"}},
+        {"type": "tile", "settings": {"collection": "pedales", "title": "Pedales"}}
+      ]
+    }
+  ],
+  "disabled_on": {"groups": ["header", "footer"]}
+}
+{% endschema %}

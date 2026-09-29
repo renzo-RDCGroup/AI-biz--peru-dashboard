@@ -1,0 +1,126 @@
+/* Category photo mosaic (sections/category-mosaic.liquid).
+   Desktop grid = 6 columns: wide tiles span 3, normal tiles span 2 → the 2-3-2 rhythm of the
+   client's previous site. The yellow gradient keeps titles in black for contrast; the "dark"
+   variant swaps to a black scrim with white text. */
+.mosaic__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.mosaic__item { min-width: 0; }
+
+.mosaic__tile {
+  position: relative;
+  display: block;
+  height: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-decoration: none;
+  isolation: isolate;
+}
+.mosaic__item--wide .mosaic__tile { aspect-ratio: 16 / 9; }
+
+.mosaic__media,
+.mosaic__media img,
+.mosaic__media svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.mosaic__media img { object-fit: cover; transition: transform .6s var(--ease); }
+
+/* Gradient: photo stays clean at the top, melts into brand yellow where the title sits. */
+.mosaic__tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg,
+    rgb(255 210 25 / 0) 30%,
+    rgb(255 210 25 / .55) 58%,
+    rgb(255 210 25 / .94) 86%,
+    var(--color-brand) 100%);
+}
+.mosaic__grid--dark .mosaic__tile { color: #fff; }
+.mosaic__grid--dark .mosaic__tile::after {
+  background: linear-gradient(180deg, rgb(0 0 0 / 0) 35%, rgb(0 0 0 / .55) 68%, rgb(0 0 0 / .85) 100%);
+}
+
+.mosaic__body {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px 64px 20px 20px;
+  display: grid;
+  gap: 4px;
+}
+.mosaic__title {
+  margin: 0;
+  font: 900 clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem)/1 var(--font-heading);
+  letter-spacing: -.01em;
+  text-transform: uppercase;
+}
+.mosaic__item--wide .mosaic__title { font-size: clamp(1.75rem, 1.2rem + 2.2vw, 3rem); }
+.has-heading-dot .mosaic__title::after {
+  content: ".";
+  color: var(--color-accent);
+}
+.mosaic__grid--brand .mosaic__title::after { color: var(--color-ink); }
+.mosaic__text {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1.35;
+  max-width: 34ch;
+}
+
+.mosaic__arrow {
+  position: absolute;
+  z-index: 2;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: var(--color-brand);
+  font-size: 20px;
+  transition: transform var(--dur) var(--ease);
+}
+.mosaic__grid--dark .mosaic__arrow { background: var(--color-brand); color: var(--color-ink); }
+
+.mosaic__tile:hover .mosaic__media img { transform: scale(1.05); }
+.mosaic__tile:hover .mosaic__arrow { transform: translateX(3px); }
+.mosaic__tile:focus-visible { outline-offset: 3px; }
+
+@media (min-width: 750px) {
+  .mosaic__grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .mosaic__tile,
+  .mosaic__item--wide .mosaic__tile { aspect-ratio: 16 / 10; }
+}
+
+@media (min-width: 990px) {
+  .mosaic__grid { grid-template-columns: repeat(6, 1fr); gap: 20px; }
+  .mosaic__item { grid-column: span 2; }
+  .mosaic__item--wide { grid-column: span 3; }
+  .mosaic__tile { aspect-ratio: 4 / 3; }
+  .mosaic__item--wide .mosaic__tile { aspect-ratio: 2 / 1; }
+  .mosaic__body { padding: 28px 80px 28px 32px; }
+  .mosaic__arrow { right: 24px; bottom: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mosaic__media img,
+  .mosaic__arrow { transition: none; }
+  .mosaic__tile:hover .mosaic__media img { transform: none; }
+}

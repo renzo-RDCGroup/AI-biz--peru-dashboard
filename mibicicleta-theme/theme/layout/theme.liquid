@@ -141,7 +141,8 @@
       {% section 'cart-drawer' %}
     {%- endif -%}
 
-    {% render 'whatsapp-button', style: 'float' %}
+    {%- comment -%} On product pages the float asks about that product (see whatsapp-button). {%- endcomment -%}
+    {% render 'whatsapp-button', style: 'float', product: product %}
 
     <div id="A11yLive" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 

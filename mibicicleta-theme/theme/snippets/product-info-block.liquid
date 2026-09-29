@@ -214,9 +214,8 @@
     {%- endif -%}
 
   {%- when 'whatsapp' -%}
-    {%- comment -%} Placeholder + replace: t would HTML-escape the title (20" → &quot;) before url_encode. {%- endcomment -%}
-    {%- assign wa_msg = 'products.product.whatsapp_message' | t: title: '[title]' | replace: '[title]', product.title -%}
-    {%- render 'whatsapp-button', style: 'card', label: bs.heading, text: bs.text, message: wa_msg, class: 'product__whatsapp' -%}
+    {%- comment -%} Product mode: the chat is prefilled with name, option, code, price and link, and follows variant changes. {%- endcomment -%}
+    {%- render 'whatsapp-button', style: 'card', label: bs.heading, text: bs.text, product: product, variant: current, class: 'product__whatsapp' -%}
 
   {%- when 'trust' -%}
     <ul class="trust" role="list">

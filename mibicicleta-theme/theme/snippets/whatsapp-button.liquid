@@ -5,8 +5,13 @@
     label: '…',        visible text (default: general.whatsapp.label)
     text: '…',         secondary line for style 'card' (default: general.whatsapp.card_text)
     message: '…',      prefilled chat text (default: settings.whatsapp_message)
+    product: product,  optional: prefill an inquiry about this product (name, option, code,
+                       price, link) instead of the generic message; ignored when message is set
+    variant: v,        optional with product (default: selected or first available variant)
     class: ''          extra classes (e.g. 'btn--block btn--sm' for style 'button')
   %}
+  Product mode also prints data-wa-* attributes; global-ui.js rebuilds the link on variant:change
+  so the chat always names the option the shopper has selected.
   Renders NOTHING when settings.whatsapp_number is blank; 'float' also needs settings.whatsapp_float.
   The number is never invented — it only comes from theme settings.
 {%- endcomment -%}
@@ -33,12 +38,47 @@
 {%- if wa_show -%}
   {%- liquid
     assign wa_message = message | default: settings.whatsapp_message
-    assign wa_url = 'https://wa.me/' | append: wa_digits
+    assign wa_base = 'https://wa.me/' | append: wa_digits
+    assign wa_is_product = false
+    if product != blank and message == blank
+      assign wa_is_product = true
+      assign wa_v = variant | default: product.selected_or_first_available_variant
+      assign wa_intro = 'general.whatsapp.product_intro' | t
+      assign wa_l_option = 'general.whatsapp.product_option' | t
+      assign wa_l_code = 'general.whatsapp.product_code' | t
+      assign wa_l_price = 'general.whatsapp.product_price' | t
+      # Lines are joined with a marker that survives url_encode, then turned into %0A newlines.
+      assign wa_message = wa_intro | append: '__NL__' | append: product.title
+      if product.has_only_default_variant == false
+        assign wa_message = wa_message | append: '__NL__' | append: wa_l_option | append: ': ' | append: wa_v.title
+      endif
+      if wa_v.sku != blank
+        assign wa_message = wa_message | append: '__NL__' | append: wa_l_code | append: ': ' | append: wa_v.sku
+      endif
+      assign wa_price = wa_v.price | money
+      assign wa_message = wa_message | append: '__NL__' | append: wa_l_price | append: ': ' | append: wa_price
+      assign wa_message = wa_message | append: '__NL__' | append: request.origin | append: wa_v.url
+    endif
+    assign wa_url = wa_base
     if wa_message != blank
       # url_encode turns spaces into "+" (form encoding); wa.me expects %20. A literal "+" is
       # already %2B at this point, so only encoded spaces are replaced.
-      assign wa_text_param = wa_message | url_encode | replace: '+', '%20'
+      assign wa_text_param = wa_message | url_encode | replace: '+', '%20' | replace: '__NL__', '%0A'
       assign wa_url = wa_url | append: '?text=' | append: wa_text_param
+    endif
+    assign wa_attrs = ''
+    if wa_is_product
+      assign wa_title_attr = product.title | escape
+      capture wa_attrs
+        echo ' data-wa-base="' | append: wa_base | append: '"'
+        echo ' data-wa-intro="' | append: wa_intro | append: '"'
+        echo ' data-wa-title="' | append: wa_title_attr | append: '"'
+        echo ' data-wa-labels="' | append: wa_l_option | append: '|' | append: wa_l_code | append: '|' | append: wa_l_price | append: '"'
+        echo ' data-wa-url="' | append: request.origin | append: product.url | append: '"'
+        if product.has_only_default_variant
+          echo ' data-wa-single'
+        endif
+      endcapture
     endif
     assign wa_label = label | default: ''
     if wa_label == ''
@@ -52,17 +92,25 @@
   -%}
   {%- case wa_style -%}
     {%- when 'float' -%}
-      <a class="whatsapp-float{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}" target="_blank" rel="noopener" aria-label="{{ 'general.whatsapp.float_label' | t }} ({{ wa_new_tab }})">
+      {%- liquid
+        assign wa_float_label = 'general.whatsapp.float_label' | t
+        assign wa_float_text = 'general.whatsapp.float_text' | t
+        if wa_is_product
+          assign wa_float_label = 'general.whatsapp.float_label_product' | t
+          assign wa_float_text = 'general.whatsapp.float_text_product' | t
+        endif
+      -%}
+      <a class="whatsapp-float{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}"{{ wa_attrs }} target="_blank" rel="noopener" aria-label="{{ wa_float_label }} ({{ wa_new_tab }})">
         {%- render 'icon', name: 'whatsapp' -%}
-        <span class="whatsapp-float__label" aria-hidden="true">{{ 'general.whatsapp.float_text' | t }}</span>
+        <span class="whatsapp-float__label" aria-hidden="true">{{ wa_float_text }}</span>
       </a>
     {%- when 'link' -%}
-      <a class="whatsapp-link{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}" target="_blank" rel="noopener">
+      <a class="whatsapp-link{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}"{{ wa_attrs }} target="_blank" rel="noopener">
         {%- render 'icon', name: 'whatsapp' -%}
         <span>{{ wa_label }}</span><span class="visually-hidden"> ({{ wa_new_tab }})</span>
       </a>
     {%- when 'card' -%}
-      <a class="whatsapp-card{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}" target="_blank" rel="noopener">
+      <a class="whatsapp-card{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}"{{ wa_attrs }} target="_blank" rel="noopener">
         <span class="whatsapp-card__icon">{% render 'icon', name: 'whatsapp' %}</span>
         <span class="whatsapp-card__body">
           <strong>{{ wa_label }}</strong>
@@ -72,7 +120,7 @@
         <span class="visually-hidden">({{ wa_new_tab }})</span>
       </a>
     {%- else -%}
-      <a class="btn btn--whatsapp{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}" target="_blank" rel="noopener">
+      <a class="btn btn--whatsapp{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}"{{ wa_attrs }} target="_blank" rel="noopener">
         {%- render 'icon', name: 'whatsapp' -%}
         <span>{{ wa_label }}</span><span class="visually-hidden"> ({{ wa_new_tab }})</span>
       </a>

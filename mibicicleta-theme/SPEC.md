@@ -698,3 +698,13 @@ Pluralization: `{ "one": "…", "other": "…" }` + `count:`.
   mibicicleta.pe until RDC Group provides real ones; the store's footer menu item "Contacto y
   showroom" implies a physical showroom (not a verified fact) and the linked pages
   `/pages/devoluciones` and `/pages/contacto` don't exist yet (only `/pages/contact`).
+
+## 14. Additions after client review (2026-09-29)
+* `sections/category-mosaic.liquid` + `assets/section-mosaic.css`: photo tiles per collection,
+  6-column grid on desktop (wide = span 3, normal = span 2 → 2-3-2), brand-yellow gradient with
+  black titles (or dark scrim with white titles). On the homepage after "Destacados".
+* The second promo banner now targets scooter riders (llantas y cámaras) since the mosaic
+  already has an "Espejos" tile.
+* `whatsapp-button` product mode (`product:`/`variant:` params): prefilled inquiry with name,
+  option, SKU, price and variant URL; `data-wa-*` attributes let global-ui.js rebuild the link on
+  `variant:change`. The float uses product mode on product pages.

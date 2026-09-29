@@ -295,6 +295,23 @@
 
   if (!('ResizeObserver' in window)) window.addEventListener('resize', M.debounce(M.measureHeader, 150));
 
+  // WhatsApp product inquiries (snippets/whatsapp-button, product mode): keep the prefilled chat
+  // on the option the shopper picked — name, option, code, price and a link to that variant.
+  doc.addEventListener('variant:change', (e) => {
+    const v = e.detail && e.detail.variant;
+    if (!v) return;
+    doc.querySelectorAll('a[data-wa-base]').forEach((a) => {
+      const d = a.dataset;
+      const [lOption, lCode, lPrice] = (d.waLabels || '').split('|');
+      const lines = [d.waIntro, d.waTitle];
+      if (!('waSingle' in d) && v.title) lines.push(lOption + ': ' + v.title);
+      if (v.sku) lines.push(lCode + ': ' + v.sku);
+      lines.push(lPrice + ': ' + M.formatMoney(v.price));
+      lines.push(d.waUrl + '?variant=' + v.id);
+      a.href = d.waBase + '?text=' + encodeURIComponent(lines.join('\n'));
+    });
+  });
+
   // Theme editor: re-run per-section setup when a section is re-rendered.
   doc.addEventListener('shopify:section:load', (e) => {
     M.initReveal(e.target);

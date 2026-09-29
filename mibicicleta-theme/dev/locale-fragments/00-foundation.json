@@ -19,7 +19,13 @@
       "label": "Escríbenos por WhatsApp",
       "float_label": "Escríbenos por WhatsApp",
       "float_text": "¿Dudas? Escríbenos",
-      "card_text": "Te respondemos por chat"
+      "card_text": "Te respondemos por chat",
+      "float_label_product": "Consultar por este producto en WhatsApp",
+      "float_text_product": "¿Dudas con este producto?",
+      "product_intro": "Hola Mi Bicicleta, quiero consultar por este producto:",
+      "product_option": "Opción",
+      "product_code": "Código",
+      "product_price": "Precio"
     },
     "social": {
       "follow": "Síguenos en {{ network }}"
