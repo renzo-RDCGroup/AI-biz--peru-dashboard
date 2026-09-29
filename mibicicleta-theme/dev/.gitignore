@@ -1,0 +1,5 @@
+preview/.cache/
+screens/
+node_modules/
+*.zip
+dist/

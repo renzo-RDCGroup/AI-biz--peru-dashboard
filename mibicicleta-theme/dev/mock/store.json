@@ -1,0 +1,1030 @@
+{
+ "shop": {
+  "name": "Mi Bicicleta",
+  "domain": "mibicicleta.pe",
+  "currency": "PEN",
+  "money_format": "S/ {{amount}}",
+  "money_with_currency_format": "S/ {{amount}} PEN",
+  "email": "renzo.s.orellana@gmail.com",
+  "city": "San Isidro",
+  "country": "Peru",
+  "locale": "es",
+  "shipping": {
+   "zone": "Perú (Domestic)",
+   "standard_rate_cents": 1400,
+   "free_threshold_cents": 22000,
+   "verified_at": "2026-09-29 via Admin API deliveryProfiles"
+  }
+ },
+ "collections": [
+  {
+   "handle": "luces",
+   "title": "Luces y seguridad",
+   "image": "mibi-ia-luces-lima-anochecer.png",
+   "count": 28
+  },
+  {
+   "handle": "llantas-y-camaras",
+   "title": "Llantas y cámaras",
+   "image": "mibi-ia-llantas-scooter-lima.png",
+   "count": 16
+  },
+  {
+   "handle": "pinones-y-transmision",
+   "title": "Piñones y transmisión",
+   "image": null,
+   "count": 17
+  },
+  {
+   "handle": "espejos",
+   "title": "Espejos",
+   "image": "mibi-ia-espejos-lima.png",
+   "count": 17
+  },
+  {
+   "handle": "asientos",
+   "title": "Asientos y tubos",
+   "image": "mibi-ia-asientos-lima.png",
+   "count": 11
+  },
+  {
+   "handle": "pedales",
+   "title": "Pedales",
+   "image": null,
+   "count": 8
+  },
+  {
+   "handle": "grips",
+   "title": "Grips y puños",
+   "image": null,
+   "count": 8
+  },
+  {
+   "handle": "tapabarros",
+   "title": "Tapabarros",
+   "image": null,
+   "count": 4
+  },
+  {
+   "handle": "cascos",
+   "title": "Cascos y protección",
+   "image": "mibi-ia-cascos-lima.png",
+   "count": 16
+  },
+  {
+   "handle": "accesorios",
+   "title": "Accesorios",
+   "image": null,
+   "count": 51
+  },
+  {
+   "handle": "rockbros",
+   "title": "Rockbros",
+   "image": null,
+   "count": 47
+  },
+  {
+   "handle": "neco",
+   "title": "Neco",
+   "image": null,
+   "count": 11
+  },
+  {
+   "handle": "destacados",
+   "title": "Destacados",
+   "image": null,
+   "count": 12
+  },
+  {
+   "handle": "componentes",
+   "title": "Componentes",
+   "image": null,
+   "count": 31
+  }
+ ],
+ "products": [
+  {
+   "id": 9615361736948,
+   "handle": "lentes-deportivos-tornasolado-hm-l1-hm-l1",
+   "title": "Lentes Deportivos Tornasolados HM-L1",
+   "vendor": "Mi Bicicleta",
+   "product_type": "Accesorios",
+   "tags": [
+    "Accesorios"
+   ],
+   "created_at": "2026-08-15T04:26:29Z",
+   "description": "Los Lentes Deportivos Tornasolados están diseñados para brindar protección visual completa, comodidad y un estilo aerodinámico durante actividades de ciclismo y movilidad urbana. Su estructura envolvente resguarda los ojos frente al viento, el polvo y los rayos UV.",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Amarillo",
+      "Blanco",
+      "Negro",
+      "Rojo Negro"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1mTdajF3UVQea7rTWCnlnxWuRc0VSypPB_w1600.jpg",
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1pC9-basz856aOjFU59GNu2Jy7kNWLrPk_w1600.jpg",
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1NBFoZzQDTpI1M2Vp6sRFOewIg1WewBtQ_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49161354477812,
+     "title": "Amarillo",
+     "price": 3300,
+     "compare_at_price": 4800,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "HM-L1-amarillo",
+     "options": [
+      "Amarillo"
+     ]
+    },
+    {
+     "id": 49161354510580,
+     "title": "Blanco",
+     "price": 3300,
+     "compare_at_price": 4800,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "HM-L1-blanco",
+     "options": [
+      "Blanco"
+     ]
+    },
+    {
+     "id": 49161354543348,
+     "title": "Negro",
+     "price": 3300,
+     "compare_at_price": 4800,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "HM-L1-negro",
+     "options": [
+      "Negro"
+     ]
+    },
+    {
+     "id": 49161354576116,
+     "title": "Rojo Negro",
+     "price": 3300,
+     "compare_at_price": 4800,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "HM-L1-rojo-negro",
+     "options": [
+      "Rojo Negro"
+     ]
+    }
+   ],
+   "collections": [
+    "accesorios",
+    "destacados"
+   ]
+  },
+  {
+   "id": 9615333163252,
+   "handle": "linterna-multifuncional-m29",
+   "title": "Linterna Táctica LED Ultra Potencia Rockbros M29",
+   "vendor": "Rockbros",
+   "product_type": "Luces",
+   "tags": [
+    "Luces"
+   ],
+   "created_at": "2026-08-15T03:48:54Z",
+   "description": "La Rock Bros M29 es una linterna táctica de potencia ultra alta, posicionada como uno de los modelos más robustos de la serie «High Power» de la marca. Está diseñada para usuarios que requieren una iluminación excepcional en campo abierto.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/19yMfQQpUfRyv2o_2fnYtit2ZE1bSqMxG_w1600.jpg",
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1icDw_JIHfsmI2Zlka4w8YIBXl-6C3lHx_w1600.jpg",
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1qe4KFXNfEFtbmi5GgLuli0Vruj7gcqX3_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49161055043828,
+     "title": "Default Title",
+     "price": 9300,
+     "compare_at_price": 12500,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "M29",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "luces",
+    "rockbros",
+    "destacados"
+   ]
+  },
+  {
+   "id": 9615333196020,
+   "handle": "linterna-tactica-led-multifuncional-m24",
+   "title": "Linterna Táctica LED Alta Potencia Rockbros M24",
+   "vendor": "Rockbros",
+   "product_type": "Luces",
+   "tags": [
+    "Luces"
+   ],
+   "created_at": "2026-08-15T03:48:55Z",
+   "description": "La Rock Bros M24 es una linterna táctica profesional de alta potencia, diseñada para situaciones que requieren una iluminación intensa y un control preciso del estado del equipo.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/15HkX6cBY_RUcfdscfXWFc9Zil_go1qVb_w1600.jpg",
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/19AsVcoofZZ2bUXCP_qdvxoYWz_4_tvTu_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49161055076596,
+     "title": "Default Title",
+     "price": 8100,
+     "compare_at_price": 10500,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "M24",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "luces",
+    "rockbros"
+   ]
+  },
+  {
+   "id": 9615737389300,
+   "handle": "tapabarros-tp-09pl-tp-09pl",
+   "title": "Tapabarros Telescópicos Aro 26-29″ TP-09PL",
+   "vendor": "Mi Bicicleta",
+   "product_type": "Tapabarros",
+   "tags": [
+    "Tapabarros"
+   ],
+   "created_at": "2026-08-15T14:22:16Z",
+   "description": "Tapabarros retráctiles o telescópicos para aros 26-29″, diseñado para ofrecer máxima versatilidad y portabilidad.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1a17WhhPZgE25ibg369vDbOqhqM1Ylx5O_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49165738148084,
+     "title": "Default Title",
+     "price": 2300,
+     "compare_at_price": 3500,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "TP-09PL",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "tapabarros",
+    "componentes"
+   ]
+  },
+  {
+   "id": 9615750234356,
+   "handle": "pedales-wg-38-wg-38",
+   "title": "Pedales para Ciclismo de Ruta WG-38",
+   "vendor": "Wellgo",
+   "product_type": "Pedales",
+   "tags": [
+    "Pedales"
+   ],
+   "created_at": "2026-08-15T14:38:48Z",
+   "description": "Pedales WG-38, una opción diseñada específicamente para ciclismo de ruta (Road Bike), pensados para ser utilizados con calas y zapatillas de ruta.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1FgRKNLAat8MBx4ni5ifqux8HxxYjUmrZ_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49165859553524,
+     "title": "Default Title",
+     "price": 5400,
+     "compare_at_price": 8300,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "WG-38",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "pedales",
+    "componentes",
+    "destacados"
+   ]
+  },
+  {
+   "id": 9615741485300,
+   "handle": "tapabarros-tb-09-rb-tb-09-rb",
+   "title": "Set de Tapabarros Delantero y Posterior TB-09-RB",
+   "vendor": "Rockbros",
+   "product_type": "Tapabarros",
+   "tags": [
+    "Tapabarros"
+   ],
+   "created_at": "2026-08-15T14:28:41Z",
+   "description": "Set de tapabarros delantero y posterior. Diseño aerodinámico, minimalista y de perfil ancho que se adapta a bicicletas de montaña, urbanas o scooters eléctricos.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/17CPqDho_FfAODK_4tcuH4POnQI4uXwP0_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49165783204084,
+     "title": "Default Title",
+     "price": 3600,
+     "compare_at_price": 4800,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "TB-09-RB",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "tapabarros",
+    "componentes"
+   ]
+  },
+  {
+   "id": 9615750103284,
+   "handle": "neco-pd-12nc-pd-12nc",
+   "title": "Pedales de Plataforma Neco PD-12NC",
+   "vendor": "Neco",
+   "product_type": "Pedales",
+   "tags": [
+    "Neco"
+   ],
+   "created_at": "2026-08-15T14:38:47Z",
+   "description": "Pedales de plataforma Neco, diseñados para ofrecer una base sólida, ligera y altamente resistente.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/15xIfAyFmiZlMEpmkdbN8D_5aAuFhnJOE_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49165858111732,
+     "title": "Default Title",
+     "price": 2900,
+     "compare_at_price": 4000,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "PD-12NC",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "neco",
+    "pedales",
+    "destacados"
+   ]
+  },
+  {
+   "id": 9615749447924,
+   "handle": "llantas-l14-08-l14-08",
+   "title": "Llanta Sólida Antipinchazos para Scooter 8.5 x 2.0 L14-08",
+   "vendor": "Mi Bicicleta",
+   "product_type": "Llantas",
+   "tags": [
+    "Llantas"
+   ],
+   "created_at": "2026-08-15T14:37:41Z",
+   "description": "Llanta para scooter 8.5 x 2.0. Neumático sólido antipinchazos con diseño de panal, diseñado específicamente para scooters eléctricos.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1QTbJHau1Wu84EfakGH7BwoagqDQNQys3_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49165851492596,
+     "title": "Default Title",
+     "price": 3600,
+     "compare_at_price": 5000,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "L14-08",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "llantas-y-camaras",
+    "destacados"
+   ]
+  },
+  {
+   "id": 9615749972212,
+   "handle": "luz-led-ld-18rb",
+   "title": "Luz Delantera de Alta Potencia Rockbros LD-18RB",
+   "vendor": "Rockbros",
+   "product_type": "Luces",
+   "tags": [
+    "Luces"
+   ],
+   "created_at": "2026-08-15T14:38:44Z",
+   "description": "Una luz delantera de gama alta que se distingue por su potencia superior y su construcción robusta, diseñada para ciclistas que necesitan una iluminación seria.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1NnUsfqaLQHmloWPeSjBg7GGIKL1M8xQ0_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49165857980660,
+     "title": "Default Title",
+     "price": 3200,
+     "compare_at_price": 6000,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "LD-18RB",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "luces",
+    "rockbros",
+    "destacados"
+   ]
+  },
+  {
+   "id": 9615737520372,
+   "handle": "luces-x10-x10",
+   "title": "Linterna LED Rockbros X10",
+   "vendor": "Rockbros",
+   "product_type": "Luces",
+   "tags": [
+    "Luces"
+   ],
+   "created_at": "2026-08-15T14:22:19Z",
+   "description": "La Rockbros X10 es una linterna LED de alto rendimiento diseñada tanto para uso táctico como para actividades al aire libre.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/11GZbuJisX98APkPqxIBMWSI7VBqsdmer_w1600.jpg",
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1_yci-EDkt6dMXv0EuYWXfyaGbv0i4e17_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49165738279156,
+     "title": "Default Title",
+     "price": 4700,
+     "compare_at_price": 7300,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "X10",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "luces",
+    "rockbros"
+   ]
+  },
+  {
+   "id": 9615749546228,
+   "handle": "llantas-ll-35a-ll-35a",
+   "title": "Llanta Todo Terreno para Scooter 10 x 2.75 LL-35A",
+   "vendor": "Mi Bicicleta",
+   "product_type": "Llantas",
+   "tags": [
+    "Llantas"
+   ],
+   "created_at": "2026-08-15T14:37:44Z",
+   "description": "Llanta para scooter 10 x 2.75. Diseño de banda de rodadura agresivo, ideal para superficies mixtas como asfalto, tierra o grava.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1mKTTZ81hZtsjzJw_lLlUPHfDDtHDTi2h_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49165851623668,
+     "title": "Default Title",
+     "price": 9000,
+     "compare_at_price": 10500,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "LL-35A",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "llantas-y-camaras"
+   ]
+  },
+  {
+   "id": 9615737094388,
+   "handle": "llantas-ll22-08-ll22-08",
+   "title": "Llantas Macizas para Scooter 8.5 x 2.0 Nedong LL22-08",
+   "vendor": "Mi Bicicleta",
+   "product_type": "Llantas",
+   "tags": [
+    "Llantas"
+   ],
+   "created_at": "2026-08-15T14:22:11Z",
+   "description": "Llantas para scooter 8.5 x 2.0. Macizas, con insertos de colores en los orificios de amortiguación.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1jIOABf0yEIabS71QwLxUAaeBrfc3wKl5_w1600.jpg",
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1v6rry09or-XDUCNkSKrtpTQoMx0CEEpn_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49165736837364,
+     "title": "Default Title",
+     "price": 4700,
+     "compare_at_price": 6000,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "LL22-08",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "llantas-y-camaras"
+   ]
+  },
+  {
+   "id": 9615339421940,
+   "handle": "luz-posterior-para-bicicleta-ld-12rb",
+   "title": "Luz Posterior Compacta Rockbros LD-12RB",
+   "vendor": "Rockbros",
+   "product_type": "Luces",
+   "tags": [
+    "Luces"
+   ],
+   "created_at": "2026-08-15T03:50:00Z",
+   "description": "Luz posterior compacta y recargable para ser visto de noche.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1AjNVknChVQ3uRvJgtgbBznl-xDRt2xf5_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49161000000001,
+     "title": "Default Title",
+     "price": 2500,
+     "compare_at_price": 5500,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "LD-12RB",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "luces",
+    "rockbros",
+    "destacados"
+   ]
+  },
+  {
+   "id": 9615343059188,
+   "handle": "pedales-para-bicicleta-pd-49rb",
+   "title": "Pedales de Plataforma MTB Alto Agarre Rockbros PD-49RB",
+   "vendor": "Rockbros",
+   "product_type": "Pedales",
+   "tags": [
+    "Pedales"
+   ],
+   "created_at": "2026-08-15T03:52:00Z",
+   "description": "Pedales de plataforma MTB con pines de alto agarre.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1uJpkBdpjo5jHgVLAtjiiJ2kTxd3v8wtt_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49161000000002,
+     "title": "Default Title",
+     "price": 11700,
+     "compare_at_price": 14500,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "PD-49RB",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "pedales",
+    "rockbros",
+    "componentes"
+   ]
+  },
+  {
+   "id": 9615361540340,
+   "handle": "tapa-barro-tp-05",
+   "title": "Set de Tapabarros Delantero y Trasero Aro 26-27″ TP-05",
+   "vendor": "Mi Bicicleta",
+   "product_type": "Tapabarros",
+   "tags": [
+    "Tapabarros"
+   ],
+   "created_at": "2026-08-15T04:20:00Z",
+   "description": "Set económico de tapabarros delantero y trasero.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/1b-_d4btRQh0Ilk4lXI7TvgXBMs-uM78k_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49161000000003,
+     "title": "Default Title",
+     "price": 900,
+     "compare_at_price": 1600,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "TP-05",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "tapabarros"
+   ]
+  },
+  {
+   "id": 9615749316852,
+   "handle": "espejos-rt-co05-rt-co05",
+   "title": "Espejos Retrovisores Retro Smart RT-CO05",
+   "vendor": "Mi Bicicleta",
+   "product_type": "Espejos",
+   "tags": [
+    "Espejos"
+   ],
+   "created_at": "2026-08-15T14:37:40Z",
+   "description": "Espejos retrovisores de estilo retro para manubrio.",
+   "options": [
+    {
+     "name": "Title",
+     "values": [
+      "Default Title"
+     ]
+    }
+   ],
+   "images": [
+    "https://cdn.shopify.com/s/files/1/0846/2250/8276/files/10Pz0-G-baj_HCJiLt2YH0tqxZN2a4TQp_w1600.jpg"
+   ],
+   "variants": [
+    {
+     "id": 49161000000004,
+     "title": "Default Title",
+     "price": 2900,
+     "compare_at_price": 4000,
+     "available": true,
+     "inventory_quantity": 0,
+     "inventory_policy": "continue",
+     "inventory_management": "shopify",
+     "sku": "RT-CO05",
+     "options": [
+      "Default Title"
+     ]
+    }
+   ],
+   "collections": [
+    "espejos",
+    "destacados"
+   ]
+  },
+  {
+   "id": 9615361999999,
+   "handle": "casco-open-face-mt-33g2",
+   "title": "Casco Open Face MT-33G2",
+   "vendor": "Mi Bicicleta",
+   "product_type": "Cascos",
+   "tags": [
+    "Cascos"
+   ],
+   "created_at": "2026-08-16T10:00:00Z",
+   "description": "Casco open face para scooter y bicicleta urbana. (Producto de ejemplo para la vista previa local: sin stock.)",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "AZUL BRILLO",
+      "NEGRO BRILLO / BLANCO",
+      "ROJO BRILLO",
+      "NEGRO MATE / ROSA"
+     ]
+    }
+   ],
+   "images": [],
+   "variants": [
+    {
+     "id": 49161000000010,
+     "title": "AZUL BRILLO",
+     "price": 7800,
+     "compare_at_price": null,
+     "available": false,
+     "inventory_quantity": 0,
+     "inventory_policy": "deny",
+     "inventory_management": "shopify",
+     "sku": "",
+     "options": [
+      "AZUL BRILLO"
+     ]
+    },
+    {
+     "id": 49161000000011,
+     "title": "NEGRO BRILLO / BLANCO",
+     "price": 7800,
+     "compare_at_price": null,
+     "available": true,
+     "inventory_quantity": 3,
+     "inventory_policy": "deny",
+     "inventory_management": "shopify",
+     "sku": "",
+     "options": [
+      "NEGRO BRILLO / BLANCO"
+     ]
+    },
+    {
+     "id": 49161000000012,
+     "title": "ROJO BRILLO",
+     "price": 7800,
+     "compare_at_price": null,
+     "available": true,
+     "inventory_quantity": 12,
+     "inventory_policy": "deny",
+     "inventory_management": "shopify",
+     "sku": "",
+     "options": [
+      "ROJO BRILLO"
+     ]
+    },
+    {
+     "id": 49161000000013,
+     "title": "NEGRO MATE / ROSA",
+     "price": 7800,
+     "compare_at_price": null,
+     "available": true,
+     "inventory_quantity": 5,
+     "inventory_policy": "deny",
+     "inventory_management": "shopify",
+     "sku": "",
+     "options": [
+      "NEGRO MATE / ROSA"
+     ]
+    }
+   ],
+   "collections": [
+    "cascos"
+   ]
+  }
+ ],
+ "menus": {
+  "main-menu": [
+   {
+    "title": "Luces",
+    "url": "/collections/luces",
+    "links": []
+   },
+   {
+    "title": "Llantas y cámaras",
+    "url": "/collections/llantas-y-camaras",
+    "links": []
+   },
+   {
+    "title": "Piñones y transmisión",
+    "url": "/collections/pinones-y-transmision",
+    "links": []
+   },
+   {
+    "title": "Espejos",
+    "url": "/collections/espejos",
+    "links": []
+   },
+   {
+    "title": "Componentes",
+    "url": "/collections/componentes",
+    "links": [
+     {
+      "title": "Asientos y tubos",
+      "url": "/collections/asientos",
+      "links": []
+     },
+     {
+      "title": "Pedales",
+      "url": "/collections/pedales",
+      "links": []
+     },
+     {
+      "title": "Grips y puños",
+      "url": "/collections/grips",
+      "links": []
+     },
+     {
+      "title": "Tapabarros",
+      "url": "/collections/tapabarros",
+      "links": []
+     }
+    ]
+   },
+   {
+    "title": "Accesorios",
+    "url": "/collections/accesorios",
+    "links": []
+   },
+   {
+    "title": "Rockbros",
+    "url": "/collections/rockbros",
+    "links": []
+   }
+  ],
+  "footer": [
+   {
+    "title": "Buscar repuestos",
+    "url": "/search",
+    "links": []
+   },
+   {
+    "title": "Todo el catálogo",
+    "url": "/collections/all",
+    "links": []
+   },
+   {
+    "title": "Devoluciones y garantía",
+    "url": "/pages/devoluciones",
+    "links": []
+   },
+   {
+    "title": "Contacto y showroom",
+    "url": "/pages/contacto",
+    "links": []
+   }
+  ]
+ },
+ "shop_images": [
+  "mibi-ia-luces-lima-anochecer.png",
+  "mibi-ia-cascos-lima.png",
+  "mibi-ia-llantas-scooter-lima.png",
+  "mibi-ia-asientos-lima.png",
+  "mibi-ia-espejos-lima.png"
+ ],
+ "pages": [
+  {
+   "handle": "contact",
+   "title": "Contact"
+  }
+ ]
+}

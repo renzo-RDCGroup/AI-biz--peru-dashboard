@@ -1,0 +1,17 @@
+{
+  "name": "mibicicleta-theme-dev",
+  "private": true,
+  "type": "module",
+  "description": "Dev tooling for the Mi Bicicleta Shopify theme: Theme Check, locale merge, size budget, local preview + screenshots.",
+  "scripts": {
+    "check": "node tools/check.mjs",
+    "sizes": "node tools/sizes.mjs",
+    "locales": "node tools/merge-locales.mjs",
+    "zip": "node tools/zip.mjs"
+  },
+  "dependencies": {
+    "@shopify/theme-check-node": "^3.29.1",
+    "liquidjs": "^10.29.0",
+    "playwright-core": "^1.63.0"
+  }
+}
