@@ -177,7 +177,12 @@
               "url": {{ shop_url | json }},
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": {{ request.origin | append: routes.search_url | append: '?q={search_term_string}' | json }},
+                {%- comment -%}
+                  Built in a tag, not inline: Shopify's tokenizer ends an output tag at the first
+                  "}", even inside a quoted string, so '{search_term_string}' can't live in {{ }}.
+                {%- endcomment -%}
+                {%- assign search_target = request.origin | append: routes.search_url | append: '?q={search_term_string}' %}
+                "target": {{ search_target | json }},
                 "query-input": "required name=search_term_string"
               }
             }

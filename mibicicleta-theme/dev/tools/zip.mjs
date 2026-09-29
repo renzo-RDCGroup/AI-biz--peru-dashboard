@@ -13,9 +13,12 @@ const out = path.join(dist, 'mibici-theme.zip');
 const force = process.argv.includes('--force');
 
 if (!force) {
-  for (const tool of ['check.mjs', 'sizes.mjs']) {
+  // strict-parse.rb uses Shopify's own Ruby Liquid parser: it catches templates that Theme Check
+  // and the liquidjs preview accept but Shopify rejects on upload ("can't be parsed").
+  const gates = [[process.execPath, 'check.mjs'], [process.execPath, 'sizes.mjs'], ['ruby', 'strict-parse.rb']];
+  for (const [bin, tool] of gates) {
     try {
-      execFileSync(process.execPath, [path.join(here, tool)], { stdio: 'inherit' });
+      execFileSync(bin, [path.join(here, tool)], { stdio: 'inherit' });
     } catch {
       console.error(`\n${tool} failed — fix it or pass --force.`);
       process.exit(1);
