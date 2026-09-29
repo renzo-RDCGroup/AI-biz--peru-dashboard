@@ -7,7 +7,10 @@
     "check": "node tools/check.mjs",
     "sizes": "node tools/sizes.mjs",
     "locales": "node tools/merge-locales.mjs",
-    "zip": "node tools/zip.mjs"
+    "zip": "node tools/zip.mjs",
+    "preview": "node preview/server.mjs --port 4173",
+    "shoot": "node preview/shoot.mjs",
+    "preview:test": "node preview/selftest.mjs"
   },
   "dependencies": {
     "@shopify/theme-check-node": "^3.29.1",
