@@ -1,0 +1,41 @@
+{%- comment -%}
+  App blocks section (@app). "include_margins" wraps the blocks in the page width + section
+  spacing; turn it off for apps that manage their own full-width layout.
+{%- endcomment -%}
+{%- liquid
+  assign ss = section.settings
+-%}
+{%- if ss.include_margins -%}
+  <div class="section apps-section scheme-{{ ss.scheme }}" style="--pad-top: {{ ss.padding_top }}px; --pad-bottom: {{ ss.padding_bottom }}px;">
+    <div class="page-width">
+      {%- for block in section.blocks -%}
+        {% render block %}
+      {%- endfor -%}
+    </div>
+  </div>
+{%- else -%}
+  {%- for block in section.blocks -%}
+    {% render block %}
+  {%- endfor -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Apps",
+  "tag": "section",
+  "class": "apps-wrapper",
+  "settings": [
+    {"type": "checkbox", "id": "include_margins", "label": "Usar los márgenes del tema", "default": true},
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40}
+  ],
+  "blocks": [
+    {"type": "@app"}
+  ],
+  "presets": [
+    {"name": "Apps"}
+  ]
+}
+{% endschema %}

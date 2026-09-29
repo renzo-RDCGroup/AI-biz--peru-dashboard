@@ -1,0 +1,117 @@
+{%- comment -%}
+  Variant picker (block "variant_picker" of main-product). JS: <variant-picker> in assets/product.js;
+  <product-info> listens to its `change` events and resolves the variant from the JSON below.
+  {% render 'variant-picker', product: product, block: block, section_id: section.id %}
+    block.settings.picker_style: auto | pills | dropdown
+      auto → color options as swatch buttons (name shown in the legend "Color: Negro"),
+             other options as pills, options with more than 12 values as a dropdown.
+    Unavailable combinations stay selectable, crossed out (+ visually-hidden "agotado").
+  Color option test (same as color-swatch): option name "color", "colour" or "color/colour".
+  Renders nothing for products with only the default variant.
+{%- endcomment -%}
+{%- unless product.has_only_default_variant -%}
+  {%- liquid
+    assign picker_style = block.settings.picker_style | default: 'auto'
+    assign label_sold_out = 'products.product.picker.sold_out' | t
+    assign label_unavailable = 'products.product.picker.unavailable' | t
+  -%}
+  <variant-picker class="variant-picker" data-section-id="{{ section_id }}" data-label-sold-out="{{ label_sold_out }}" data-label-unavailable="{{ label_unavailable }}">
+    {%- for option in product.options_with_values -%}
+      {%- liquid
+        assign option_name = option.name | downcase | strip
+        assign is_color = false
+        if option_name == 'color' or option_name == 'colour' or option_name == 'color/colour'
+          assign is_color = true
+        endif
+        assign style = picker_style
+        if style == 'auto'
+          if option.values.size > 12
+            assign style = 'dropdown'
+          elsif is_color
+            assign style = 'swatch'
+          else
+            assign style = 'pills'
+          endif
+        endif
+        assign opt_id = 'Option-' | append: section_id | append: '-' | append: option.position
+      -%}
+      {%- if style == 'dropdown' -%}
+        <div class="variant-picker__option variant-picker__option--dropdown">
+          <label class="variant-picker__label" for="{{ opt_id }}">{{ option.name | escape }}</label>
+          <div class="select">
+            <select id="{{ opt_id }}" data-option-index="{{ forloop.index0 }}">
+              {%- for value in option.values -%}
+                <option value="{{ value | escape }}" data-value="{{ value | escape }}"{% if value.selected %} selected{% endif %}>
+                  {{- value | escape -}}
+                  {%- unless value.available %} — {{ label_sold_out }}{% endunless -%}
+                </option>
+              {%- endfor -%}
+            </select>
+          </div>
+        </div>
+      {%- else -%}
+        <fieldset class="variant-picker__option variant-picker__option--{{ style }}" data-option-index="{{ forloop.index0 }}">
+          <legend class="variant-picker__label">
+            {{- option.name | escape }}: <span class="variant-picker__current" data-selected-value>{{ option.selected_value | escape }}</span>
+          </legend>
+          <div class="variant-picker__values">
+            {%- for value in option.values -%}
+              {%- liquid
+                assign input_id = opt_id | append: '-' | append: forloop.index0
+                assign swatch_html = ''
+                if is_color
+                  capture swatch_html
+                    render 'color-swatch', value: value, size: 'lg'
+                  endcapture
+                endif
+                assign value_style = 'pill'
+                assign pill_dot = false
+                if is_color
+                  unless swatch_html contains 'swatch--unknown'
+                    if style == 'swatch'
+                      assign value_style = 'swatch'
+                    else
+                      assign pill_dot = true
+                    endif
+                  endunless
+                endif
+              -%}
+              <input
+                type="radio"
+                class="variant-picker__input visually-hidden"
+                id="{{ input_id }}"
+                name="{{ opt_id }}"
+                value="{{ value | escape }}"
+                {% if value.selected %}checked{% endif %}
+              >
+              <label for="{{ input_id }}" class="variant-picker__value variant-picker__value--{{ value_style }}{% unless value.available %} is-unavailable{% endunless %}"{% if value_style == 'swatch' %} title="{{ value | escape }}"{% endif %}>
+                {%- if value_style == 'swatch' -%}
+                  {{ swatch_html }}<span class="visually-hidden">{{ value | escape }}</span>
+                {%- else -%}
+                  {%- if pill_dot -%}{{ swatch_html }}{%- endif -%}
+                  <span>{{ value | escape }}</span>
+                {%- endif -%}
+                <span class="visually-hidden" data-value-status>{% unless value.available %} ({{ label_sold_out }}){% endunless %}</span>
+              </label>
+            {%- endfor -%}
+          </div>
+        </fieldset>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- comment -%} Variant data for product.js (stock only for tracked "deny" variants — SPEC §8). {%- endcomment -%}
+    <script type="application/json" data-product-json>
+      [
+        {%- for v in product.variants -%}
+          {%- liquid
+            assign v_stock = 'null'
+            if v.inventory_management == 'shopify' and v.inventory_policy == 'deny'
+              assign v_stock = v.inventory_quantity | default: 0
+            endif
+          -%}
+          {"id":{{ v.id }},"title":{{ v.title | json }},"options":{{ v.options | json }},"price":{{ v.price | default: 0 }},"compare_at_price":{{ v.compare_at_price | default: 0 }},"available":{{ v.available | json }},"sku":{{ v.sku | default: '' | json }},"media":{{ v.featured_media.id | default: 0 }},"stock":{{ v_stock }}}{% unless forloop.last %},{% endunless %}
+        {%- endfor -%}
+      ]
+    </script>
+  </variant-picker>
+{%- endunless -%}

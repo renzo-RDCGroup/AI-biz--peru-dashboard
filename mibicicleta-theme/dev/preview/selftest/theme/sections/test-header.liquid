@@ -1,0 +1,9 @@
+<header class="fx-header" style="display:flex;gap:12px;align-items:center;padding:8px 16px;">
+  <button type="button" data-drawer-open="MenuDrawer" aria-label="Menú">Menú</button>
+  <predictive-search style="flex:1"><form action="{{ routes.search_url }}"><input type="search" name="q" aria-label="Buscar" style="width:100%"></form><div data-results></div></predictive-search>
+  <a href="{{ routes.cart_url }}" data-cart-open>Carrito ({{ cart.item_count }})</a>
+</header>
+<side-drawer id="MenuDrawer" class="drawer"><nav>{% for link in section.settings.menu.links %}<a href="{{ link.url }}">{{ link.title }}</a> {% endfor %}</nav></side-drawer>
+{% schema %}
+{ "name": "Header", "settings": [ { "type": "link_list", "id": "menu", "label": "Menú", "default": "main-menu" } ] }
+{% endschema %}

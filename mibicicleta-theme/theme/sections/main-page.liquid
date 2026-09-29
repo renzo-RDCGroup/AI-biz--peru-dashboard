@@ -1,0 +1,64 @@
+{%- comment -%}
+  Generic page: title band (soft yellow + "mi" watermark, or plain) with breadcrumbs and the
+  h1 (+ red dot), then page.content as rich text in a readable column.
+  The body is skipped when the page has no content (e.g. the contact page, where the form
+  section follows).
+{%- endcomment -%}
+{{ 'section-pages.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign ss = section.settings
+  assign title_dot = true
+  assign title_last = page.title | strip | slice: -1
+  if title_last == '.' or title_last == '?' or title_last == '!' or title_last == ':' or title_last == '…'
+    assign title_dot = false
+  endif
+  if ss.width == 'wide'
+    assign width_class = 'page-width'
+  else
+    assign width_class = 'page-width page-width--read'
+  endif
+-%}
+
+<div class="main-page scheme-{{ ss.scheme }}">
+  <header class="page-hero page-hero--{{ ss.align }}{% if ss.band %} scheme-cream has-watermark{% endif %}">
+    <div class="{{ width_class }}">
+      {%- if ss.show_breadcrumbs -%}
+        {%- render 'breadcrumbs', class: 'page-hero__crumbs' -%}
+      {%- endif -%}
+      <h1 class="page-hero__title{% if title_dot %} heading-dot{% endif %}">{{ page.title | escape }}</h1>
+      {%- if ss.intro != blank -%}
+        <div class="page-hero__text">{{ ss.intro }}</div>
+      {%- endif -%}
+    </div>
+    {%- if ss.band -%}
+      {%- render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'mi-watermark' -%}
+    {%- endif -%}
+  </header>
+
+  {%- if page.content != blank -%}
+    <div class="section main-page__body" style="--pad-top: {{ ss.padding_top }}px; --pad-bottom: {{ ss.padding_bottom }}px;">
+      <div class="{{ width_class }}">
+        <div class="rte main-page__content">{{ page.content }}</div>
+      </div>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Página",
+  "class": "main-page-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "checkbox", "id": "band", "label": "Título sobre banda amarilla suave", "default": true},
+    {"type": "checkbox", "id": "show_breadcrumbs", "label": "Mostrar ruta de navegación", "default": true},
+    {"type": "select", "id": "align", "label": "Alineación del título", "options": [{"value": "left", "label": "Izquierda"}, {"value": "center", "label": "Centro"}], "default": "left"},
+    {"type": "richtext", "id": "intro", "label": "Texto bajo el título (opcional)"},
+    {"type": "select", "id": "width", "label": "Ancho del contenido", "options": [{"value": "narrow", "label": "Lectura (angosto)"}, {"value": "wide", "label": "Ancho completo"}], "default": "narrow"},
+    {"type": "header", "content": "Espaciado del contenido"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 72}
+  ]
+}
+{% endschema %}

@@ -1,0 +1,170 @@
+/* ==========================================================================
+   Mi Bici 2026 — section-hero.css (sections/hero-slideshow.liquid)
+   Mobile: 4:3 photo on top + compact colour panel. ≥990: split 45/55 (or
+   overlay card) at min(640px, 70vh). The carousel is a size container so the
+   panel text can line up with .page-width content (100cqw = slider width).
+   ========================================================================== */
+
+.hero { --hero-h: min(640px, 70vh); }
+.hero--h-sm { --hero-h: min(520px, 62vh); }
+.hero--h-lg { --hero-h: min(760px, 82vh); }
+
+.hero__carousel {
+  --per-view: 1;
+  --gap: 0px;
+  /* Left edge of .page-width content, measured against the slider itself. */
+  --hero-edge: max(var(--gutter), calc((100vw - var(--page-width)) / 2));
+  container-type: inline-size;
+}
+@supports (width: 1cqw) {
+  .hero__carousel > * { --hero-edge: max(var(--gutter), calc((100cqw - var(--page-width)) / 2)); }
+}
+
+.hero__track { align-items: stretch; }
+
+.hero__slide {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--scheme-bg);
+  color: var(--scheme-fg);
+}
+
+/* ---------- Media -------------------------------------------------------- */
+.hero__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+.hero__media picture { display: contents; }
+.hero__img,
+.hero__media .placeholder-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- Panel -------------------------------------------------------- */
+.hero__panel {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 28px var(--gutter) 36px;
+}
+.hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  max-width: 36rem;
+}
+.hero__eyebrow { color: var(--scheme-fg); font-size: .8125rem; }
+.hero__heading {
+  font-size: clamp(2.25rem, 1.25rem + 4.2vw, 4.75rem);
+  line-height: .96;
+  letter-spacing: -.028em;
+  text-wrap: balance;
+}
+.hero__text {
+  max-width: 30rem;
+  color: var(--scheme-muted);
+  font-size: var(--fs-md);
+  line-height: 1.45;
+}
+.hero__buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.hero__btn .icon { transition: transform var(--dur) var(--ease); }
+.hero__btn:hover .icon { transform: translateX(3px); }
+
+/* "mi" watermark bleeding off the bottom-right corner of the panel. */
+.hero__watermark {
+  right: -12%;
+  bottom: -20%;
+  width: min(74%, 400px);
+}
+.scheme-dark .hero__watermark { opacity: .09; }
+
+/* ---------- Controls: white pill (reads on photos and on every panel) ---- */
+.hero__controls {
+  position: absolute;
+  z-index: 3;
+  top: calc(75vw - 58px);
+  right: 12px;
+  gap: 2px;
+  margin: 0;
+  padding: 4px 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, .94);
+  box-shadow: var(--shadow-md);
+}
+@supports (width: 1cqw) {
+  .hero__controls { top: calc(75cqw - 58px); }
+}
+.hero__controls .btn--outline { --btn-border: transparent; }
+.hero__controls .btn:hover { background: var(--color-surface); }
+.hero__arrow { display: none; }
+.no-js .hero__controls { display: none; }
+.hero__dots { padding-inline: 2px; }
+
+/* First-load entrance (plays once; zeroed under reduced motion). */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__slide:first-child .hero__img { animation: hero-zoom 1.6s var(--ease) both; }
+  .hero__slide:first-child .hero__content > * { animation: hero-rise .7s var(--ease) both; }
+  .hero__slide:first-child .hero__content > :nth-child(2) { animation-delay: 80ms; }
+  .hero__slide:first-child .hero__content > :nth-child(3) { animation-delay: 160ms; }
+  .hero__slide:first-child .hero__content > :nth-child(4) { animation-delay: 240ms; }
+}
+@keyframes hero-zoom { from { transform: scale(1.06); } }
+@keyframes hero-rise { from { opacity: 0; transform: translateY(16px); } }
+
+/* ---------- Tablet ------------------------------------------------------- */
+@media (min-width: 750px) {
+  .hero__panel { padding: 36px var(--gutter) 44px; }
+  .hero__content { gap: 16px; }
+}
+
+/* ---------- Desktop: split / overlay ------------------------------------ */
+@media (min-width: 990px) {
+  .hero__slide {
+    grid-template-rows: none;
+    grid-template-columns: 45fr 55fr;
+    grid-template-areas: "panel media";
+    min-height: var(--hero-h);
+  }
+  .hero__slide--img-left {
+    grid-template-columns: 55fr 45fr;
+    grid-template-areas: "media panel";
+  }
+  .hero__media { grid-area: media; aspect-ratio: auto; }
+  .hero__panel {
+    grid-area: panel;
+    padding: 64px clamp(40px, 4vw, 72px) 80px var(--hero-edge);
+  }
+  .hero__slide--img-left .hero__panel { padding-inline: clamp(48px, 5vw, 88px) var(--hero-edge); }
+  .hero__content { gap: 20px; }
+  .hero__text { font-size: var(--fs-lg); }
+  .hero__buttons { margin-top: 10px; }
+  .hero__watermark { right: -10%; bottom: -24%; width: min(80%, 540px); }
+
+  /* Overlay: photo fills the slide, the panel floats as a rounded card. */
+  .hero__slide--overlay { grid-template-columns: 1fr; grid-template-areas: "stack"; }
+  .hero__slide--overlay .hero__media { grid-area: stack; }
+  .hero__slide--overlay .hero__panel {
+    grid-area: stack;
+    align-self: center;
+    justify-self: start;
+    width: min(560px, 46%);
+    margin: 48px 0 48px var(--hero-edge);
+    padding: 48px 48px 56px;
+    border-radius: var(--radius-lg);
+    background: var(--scheme-bg);
+    box-shadow: var(--shadow-lg);
+  }
+  .hero__slide--overlay.hero__slide--img-left .hero__panel { justify-self: end; margin-inline: 0 var(--hero-edge); }
+
+  .hero__controls { top: auto; right: var(--hero-edge); bottom: 24px; }
+  .hero__arrow { display: inline-flex; }
+}

@@ -1,0 +1,2 @@
+<div class="contact">{% form 'contact' %}<span class="posted">{{ form.posted_successfully? }}</span>{% if form.errors %}<span class="errs">{{ form.errors | default_errors }}</span>{% endif %}<input name="contact[email]">{% endform %}</div>
+{% schema %}{ "name": "Contacto", "settings": [] }{% endschema %}

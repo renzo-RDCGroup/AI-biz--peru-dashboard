@@ -1,0 +1,57 @@
+{%- comment -%}
+  Settings-driven design tokens (colors, fonts, radii, logo sizes).
+  Rendered inside <head> by layout/theme.liquid and layout/password.liquid.
+  Static tokens (surfaces, spacing, type scale, schemes…) live in assets/base.css.
+{%- endcomment -%}
+{%- liquid
+  assign r_sm = 8
+  assign r_md = 14
+  assign r_lg = 22
+  assign r_card = 16
+  assign r_pill = 999
+  case settings.corner_style
+    when 'soft'
+      assign r_sm = 4
+      assign r_md = 7
+      assign r_lg = 11
+      assign r_card = 8
+    when 'square'
+      assign r_sm = 0
+      assign r_md = 0
+      assign r_lg = 0
+      assign r_card = 0
+      assign r_pill = 4
+  endcase
+
+  assign font_heading = "'Urbanist', 'Helvetica Neue', Arial, sans-serif"
+  assign fw_heading = 800
+  assign fw_display = 900
+  if settings.adobe_fonts_kit != blank
+    assign font_heading = "'all-round-gothic', 'Urbanist', 'Helvetica Neue', Arial, sans-serif"
+    assign fw_heading = 700
+    assign fw_display = 700
+  endif
+
+  assign body_scale = settings.body_scale | default: 100 | divided_by: 100.0
+-%}
+<style>
+  :root {
+    --color-brand: {{ settings.color_brand | default: '#FFD219' }};
+    --color-brand-soft: {{ settings.color_brand_soft | default: '#FFF6CF' }};
+    --color-ink: {{ settings.color_ink | default: '#0B0B0B' }};
+    --color-accent: {{ settings.color_accent | default: '#FF0000' }};
+    --color-sale: {{ settings.color_sale | default: '#D10000' }};
+    --font-heading: {{ font_heading }};
+    --font-body: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif;
+    --fw-heading: {{ fw_heading }};
+    --fw-display: {{ fw_display }};
+    --body-scale: {{ body_scale }};
+    --radius-sm: {{ r_sm }}px;
+    --radius: {{ r_md }}px;
+    --radius-lg: {{ r_lg }}px;
+    --radius-card: {{ r_card }}px;
+    --radius-pill: {{ r_pill }}px;
+    --logo-width: {{ settings.logo_width | default: 168 }}px;
+    --logo-width-mobile: {{ settings.logo_width_mobile | default: 132 }}px;
+  }
+</style>

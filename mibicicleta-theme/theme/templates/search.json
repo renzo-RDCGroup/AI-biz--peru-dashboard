@@ -1,0 +1,28 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-search",
+      "settings": {
+        "scheme": "light",
+        "placeholder": "Busca por código, medida o nombre…",
+        "suggestions": "luces, llantas, espejos, asientos, pedales, piñones",
+        "products_per_page": 24,
+        "columns_desktop": "4",
+        "columns_mobile": "2",
+        "paging": "load_more",
+        "enable_filtering": true,
+        "filter_layout": "sidebar",
+        "enable_sorting": true,
+        "show_whatsapp": true,
+        "whatsapp_label": "¿No lo encuentras? Mándanos una foto",
+        "whatsapp_text": "Escríbenos con una foto de la pieza o del modelo.",
+        "empty_menu": "main-menu",
+        "empty_heading": "Te puede interesar",
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

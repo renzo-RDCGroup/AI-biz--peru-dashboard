@@ -1,0 +1,82 @@
+{%- comment -%}
+  Rich text band (styles: assets/section-home-2.css): eyebrow, heading (red dot), rich text,
+  up to two buttons; left/center alignment, narrow or wide measure, any scheme.
+{%- endcomment -%}
+{{ 'section-home-2.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign s = section.settings
+  assign h_last = s.heading | strip | slice: -1
+  assign h_dot = true
+  if h_last == '.' or h_last == '?' or h_last == '!' or h_last == ':' or h_last == '…'
+    assign h_dot = false
+  endif
+  assign title_id = 'RichTextTitle-' | append: section.id
+  assign has_btn1 = false
+  if s.button_label != blank and s.button_link != blank
+    assign has_btn1 = true
+  endif
+  assign has_btn2 = false
+  if s.button2_label != blank and s.button2_link != blank
+    assign has_btn2 = true
+  endif
+  assign wm_tone = 'mono-dark'
+  if s.scheme == 'dark'
+    assign wm_tone = 'mono-light'
+  endif
+-%}
+
+<section class="rich-text section scheme-{{ s.scheme }} rich-text--{{ s.alignment }}{% if s.show_watermark %} has-watermark{% endif %}" style="--pad-top: {{ s.padding_top }}px; --pad-bottom: {{ s.padding_bottom }}px;"{% if s.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
+  <div class="page-width{% if s.narrow %} page-width--narrow{% endif %}">
+    <div class="rich-text__inner" data-reveal>
+      {%- if s.eyebrow != blank -%}
+        <p class="eyebrow eyebrow--dot">{{ s.eyebrow | escape }}</p>
+      {%- endif -%}
+      {%- if s.heading != blank -%}
+        <h2 class="{{ s.heading_size }} rich-text__heading{% if h_dot %} heading-dot{% endif %}" id="{{ title_id }}">{{ s.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if s.text != blank -%}
+        <div class="rte rich-text__text">{{ s.text }}</div>
+      {%- endif -%}
+      {%- if has_btn1 or has_btn2 -%}
+        <div class="rich-text__buttons">
+          {%- if has_btn1 -%}
+            <a class="btn btn--primary" href="{{ s.button_link }}">{{ s.button_label | escape }}</a>
+          {%- endif -%}
+          {%- if has_btn2 -%}
+            <a class="btn btn--outline" href="{{ s.button2_link }}">{{ s.button2_label | escape }}</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+  {%- if s.show_watermark -%}
+    {%- render 'logo', variant: 'mark', tone: wm_tone, label: '', class: 'mi-watermark rich-text__watermark' -%}
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Texto enriquecido",
+  "tag": "div",
+  "class": "rich-text-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "select", "id": "alignment", "label": "Alineación", "options": [{"value": "center", "label": "Centro"}, {"value": "left", "label": "Izquierda"}], "default": "center"},
+    {"type": "checkbox", "id": "narrow", "label": "Ancho de lectura angosto", "default": true},
+    {"type": "checkbox", "id": "show_watermark", "label": "Mostrar la marca «mi» de fondo", "default": false},
+    {"type": "text", "id": "eyebrow", "label": "Antetítulo"},
+    {"type": "text", "id": "heading", "label": "Título", "default": "Accesorios y repuestos para bici y scooter"},
+    {"type": "select", "id": "heading_size", "label": "Tamaño del título", "options": [{"value": "h2", "label": "Mediano"}, {"value": "h1", "label": "Grande"}, {"value": "display", "label": "Extra grande"}], "default": "h1"},
+    {"type": "richtext", "id": "text", "label": "Texto", "default": "<p>Seguridad, confort y estilo en cada trayecto.</p>"},
+    {"type": "text", "id": "button_label", "label": "Botón principal"},
+    {"type": "url", "id": "button_link", "label": "Enlace del botón principal"},
+    {"type": "text", "id": "button2_label", "label": "Botón secundario"},
+    {"type": "url", "id": "button2_link", "label": "Enlace del botón secundario"},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64}
+  ],
+  "presets": [{"name": "Texto enriquecido"}]
+}
+{% endschema %}

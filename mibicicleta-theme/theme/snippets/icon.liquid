@@ -1,0 +1,81 @@
+{%- comment -%}
+  Inline SVG icon set (24px grid, 1.75 stroke, round caps/joins; brand/social glyphs are filled).
+  Usage: {% render 'icon', name: 'cart', size: 20, class: 'x' %}
+    name  (required) one of the names in the case below
+    size  optional px; omitted = 1em box (inherits font-size)
+    class optional extra classes
+  Always decorative (aria-hidden) → give the parent control an accessible name.
+{%- endcomment -%}
+<svg class="icon icon--{{ name }}{% if class != blank %} {{ class }}{% endif %}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"{% if size %} width="{{ size }}" height="{{ size }}" style="--icon-size:{{ size }}px"{% endif %}>
+  {%- case name -%}
+    {%- when 'menu' -%}<path d="M4 7h16M4 12h16M4 17h11"/>
+    {%- when 'close' -%}<path d="M6 6l12 12M18 6 6 18"/>
+    {%- when 'search' -%}<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>
+    {%- when 'user' -%}<circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.2-3.8 4.2-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/>
+    {%- when 'cart' -%}<path d="M2.5 3.5h2.6l2.2 11.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/>
+    {%- when 'bag' -%}<path d="M5.2 8.5h13.6l-.9 11a1.5 1.5 0 0 1-1.5 1.4H7.6a1.5 1.5 0 0 1-1.5-1.4zM8.8 10.5V7a3.2 3.2 0 0 1 6.4 0v3.5"/>
+    {%- when 'bag-plus' -%}<path d="M5.2 8.5h13.6l-.9 11a1.5 1.5 0 0 1-1.5 1.4H7.6a1.5 1.5 0 0 1-1.5-1.4zM8.8 8.5V7a3.2 3.2 0 0 1 6.4 0v1.5M12 12v5.5M9.3 14.7h5.4"/>
+    {%- when 'heart' -%}<path d="M12 20c-.4 0-8-4.6-8-10.3C4 7 6 5 8.4 5c1.6 0 2.8.8 3.6 2 .8-1.2 2-2 3.6-2C18 5 20 7 20 9.7 20 15.4 12.4 20 12 20z"/>
+    {%- when 'chevron-down' -%}<path d="m6 9 6 6 6-6"/>
+    {%- when 'chevron-up' -%}<path d="m6 15 6-6 6 6"/>
+    {%- when 'chevron-left' -%}<path d="m15 6-6 6 6 6"/>
+    {%- when 'chevron-right' -%}<path d="m9 6 6 6-6 6"/>
+    {%- when 'arrow-right' -%}<path d="M4 12h16m-6-6 6 6-6 6"/>
+    {%- when 'arrow-left' -%}<path d="M20 12H4m6-6-6 6 6 6"/>
+    {%- when 'plus' -%}<path d="M12 5v14M5 12h14"/>
+    {%- when 'minus' -%}<path d="M5 12h14"/>
+    {%- when 'trash' -%}<path d="M4 7h16M9.5 7V5.2c0-.7.5-1.2 1.2-1.2h2.6c.7 0 1.2.5 1.2 1.2V7m-8 0 .8 12.1c.1.8.7 1.4 1.5 1.4h6.4c.8 0 1.4-.6 1.5-1.4L17.5 7M10 11v6m4-6v6"/>
+    {%- when 'check' -%}<path d="m5 12.5 4.5 4.5L19 7.5"/>
+    {%- when 'check-circle' -%}<circle cx="12" cy="12" r="8.5"/><path d="m8.2 12.3 2.6 2.6 5-5.3"/>
+    {%- when 'truck' -%}<path d="M13.5 17V6h-11v11H5m4 0h6m-1.5-8h4.2l2.8 3.5V17H19"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+    {%- when 'shield' -%}<path d="M12 3.2 5 5.8v5.4c0 4.4 3 7.9 7 9.6 4-1.7 7-5.2 7-9.6V5.8z"/><path d="m9 12 2.2 2.2L15.2 10"/>
+    {%- when 'medal' -%}<circle cx="12" cy="9" r="6"/><path d="m8.5 13.9-1.3 7.1 4.8-2.6 4.8 2.6-1.3-7.1M9.4 9.1l1.8 1.8 3.4-3.5"/>
+    {%- when 'whatsapp' -%}<path d="m3.5 20.5 1.3-4.4a8.3 8.3 0 1 1 3.2 3.2z"/><path fill="currentColor" stroke="none" d="M9.3 7.6c.3-.3.8-.3 1 .1l.9 1.9c.1.3.1.6-.2.9l-.6.6c.6 1.2 1.5 2.1 2.7 2.7l.6-.6c.3-.3.6-.3.9-.2l1.9.9c.4.2.4.7.1 1-.6.7-1.5 1.2-2.4.9-2.4-.8-4.2-2.6-5-5-.3-.9.2-1.8.9-2.4z"/>
+    {%- when 'store' -%}<path d="M3 9.5 4.8 4.5h14.4L21 9.5M3 9.5a2.25 2.25 0 0 0 4.5 0 2.25 2.25 0 0 0 4.5 0 2.25 2.25 0 0 0 4.5 0 2.25 2.25 0 0 0 4.5 0M4.5 12v8h15v-8M10 20v-4.5h4V20"/>
+    {%- when 'clock' -%}<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>
+    {%- when 'card' -%}<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>
+    {%- when 'lock' -%}<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5v-3a3.5 3.5 0 0 1 7 0v3M12 14.5V17"/>
+    {%- when 'return' -%}<path d="M9 14 4.5 9.5 9 5M4.5 9.5H14a5.5 5.5 0 0 1 0 11h-4"/>
+    {%- when 'wrench' -%}<path d="M14.5 4.5a4 4 0 0 0-4.8 5.2l-5.9 5.9a1.9 1.9 0 0 0 2.7 2.7l5.9-5.9a4 4 0 0 0 5.2-4.8l-2.4 1-1.7-1.7z"/>
+    {%- when 'bike' -%}<circle cx="5.5" cy="16" r="3.5"/><circle cx="18.5" cy="16" r="3.5"/><path d="M5.5 16 9.5 9H16M5.5 16H12l4-7 2.5 7M12 16 9 7.5M7.5 7.5h3M16 9l-.8-3h2.3"/>
+    {%- when 'scooter' -%}<circle cx="5" cy="17.5" r="2.5"/><circle cx="19" cy="17.5" r="2.5"/><path d="M19 17.5 16.4 4M14.4 4h4M5 15h13.5M7.5 17.5h9"/>
+    {%- when 'light' -%}<path d="M10 6.5C6.1 6.5 3 9 3 12s3.1 5.5 7 5.5a1.5 1.5 0 0 0 1.5-1.5V8A1.5 1.5 0 0 0 10 6.5z"/><path d="M15 8h6M15 12h6M15 16h6"/>
+    {%- when 'tire' -%}<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6.4"/><circle cx="12" cy="12" r="1.5"/><path d="m13.3 12.75 4.24 2.45M12 13.5v4.9m-1.3-5.65-4.24 2.45m4.24-3.95L6.46 8.8M12 10.5V5.6m1.3 5.65 4.24-2.45"/>
+    {%- when 'gear' -%}<path d="M10.8 4.4 10.9 2.5h2.2l.1 1.9 1.5.4 1.2-1.6 1.8 1.1-.8 1.7L18 7.1l1.7-.8 1.1 1.8-1.6 1.2.4 1.5 1.9.1v2.2l-1.9.1-.4 1.5 1.6 1.2-1.1 1.8-1.7-.8-1.1 1.1.8 1.7-1.8 1.1-1.2-1.6-1.5.4-.1 1.9h-2.2l-.1-1.9-1.5-.4-1.2 1.6-1.8-1.1.8-1.7L6 16.9l-1.7.8-1.1-1.8 1.6-1.2-.4-1.5-1.9-.1v-2.2l1.9-.1.4-1.5-1.6-1.2 1.1-1.8 1.7.8L7.1 6l-.8-1.7 1.8-1.1 1.2 1.6z"/><circle cx="12" cy="12" r="3.6"/>
+    {%- when 'mirror' -%}<rect x="8.5" y="3.5" width="13" height="8.5" rx="4.25"/><path d="M11.5 12v2.5a2 2 0 0 1-2 2H3.5m8.3-9.3a2.6 2.6 0 0 1 2.4-1.6"/>
+    {%- when 'seat' -%}<path d="M3.2 9.2C4 7.6 6.5 7.3 9 7.8c3.5.7 7.5 1.7 10.8 2 .9.1 1.4.7 1.2 1.4-.2.6-.8.8-1.5.8H14c-2.5 0-4.5 1.8-7.7 1.8-2.3 0-3.7-2.8-3.1-4.6zM11 13.6V21m-2.5 0h5"/>
+    {%- when 'pedal' -%}<circle cx="8" cy="8" r="5"/><circle cx="8" cy="8" r="1.2"/><path d="m8.9 9 5.6 6.8"/><rect x="11" y="15.8" width="10.5" height="4.7" rx="2.35"/>
+    {%- when 'grip' -%}<rect x="4" y="7.5" width="2.8" height="9" rx="1"/><path d="M1.5 12H4m2.8-3.5h11.7a3.5 3.5 0 0 1 0 7H6.8M10.3 8.5v7m3.5-7v7m3.5-7v7"/>
+    {%- when 'mudguard' -%}<circle cx="12" cy="14" r="5"/><circle cx="12" cy="14" r="1.2"/><path d="M3.73 10.99A8.8 8.8 0 0 1 20.27 17.01l-1.69-.62A7 7 0 0 0 5.42 11.61z"/>
+    {%- when 'helmet' -%}<path d="M3 16c0-5.8 4.3-10 9.8-10 4.6 0 8.2 3.2 8.2 7.6 0 1.5-1 2.4-2.5 2.4zM9.3 6.8l1.4 3.6m3.1-4.3.4 3.9m3.4-2.5-1.2 3.2M8 16l2.2 3.5h3.3"/>
+    {%- when 'glasses' -%}<path d="M2.5 9.5h19l-.7 3.2a3.8 3.8 0 0 1-3.7 3h-2.3a2.8 2.8 0 0 1-2.4-1.4L12 13.6l-.4.7a2.8 2.8 0 0 1-2.4 1.4H6.9a3.8 3.8 0 0 1-3.7-3zM2.5 9.5 1.5 8m20 1.5 1-1.5"/>
+    {%- when 'tag' -%}<path d="M3.5 12.3V4.5a1 1 0 0 1 1-1h7.8l8.2 8.2a1.4 1.4 0 0 1 0 2l-6.8 6.8a1.4 1.4 0 0 1-2 0z"/><circle cx="8" cy="8" r="1.5"/>
+    {%- when 'star' -%}<path d="M12 3.2 14.4 9.3 20.9 9.7 15.9 13.9 17.5 20.2 12 16.7 6.5 20.2 8.1 13.9 3.1 9.7 9.6 9.3z"/>
+    {%- when 'star-filled' -%}<path fill="currentColor" d="M12 3.2 14.4 9.3 20.9 9.7 15.9 13.9 17.5 20.2 12 16.7 6.5 20.2 8.1 13.9 3.1 9.7 9.6 9.3z"/>
+    {%- when 'filter' -%}<path d="M4 7h9m4 0h3M4 17h3m4 0h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>
+    {%- when 'sort' -%}<path d="M7 4v16M3.5 7.5 7 4l3.5 3.5M17 20V4m-3.5 12.5L17 20l3.5-3.5"/>
+    {%- when 'grid' -%}<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>
+    {%- when 'zoom' -%}<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5M11 8.5v5M8.5 11h5"/>
+    {%- when 'play' -%}<path d="M8 5.5v13l10.5-6.5z"/>
+    {%- when 'pause' -%}<path d="M9 5.5v13m6-13v13"/>
+    {%- when 'instagram' -%}<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17 7h.01"/>
+    {%- when 'facebook' -%}<path fill="currentColor" stroke="none" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H7.9v3h2.6V21z"/>
+    {%- when 'tiktok' -%}<path fill="currentColor" stroke="none" d="M16.6 3h-3.1v12.2a2.7 2.7 0 1 1-2.7-2.7c.3 0 .5 0 .8.1V9.5a5.8 5.8 0 1 0 5 5.7V9.1a7 7 0 0 0 4 1.3V7.3a4 4 0 0 1-4-4.3z"/>
+    {%- when 'youtube' -%}<path fill="currentColor" stroke="none" fill-rule="evenodd" d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4a2.5 2.5 0 0 0-1.8 1.8A26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8zM10 15V9l5.2 3z"/>
+    {%- when 'mail' -%}<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/>
+    {%- when 'phone' -%}<path d="M8.2 3.5H5.8a1.8 1.8 0 0 0-1.8 2C4.6 13.8 10.2 19.4 18.5 20a1.8 1.8 0 0 0 2-1.8v-2.4a1.5 1.5 0 0 0-1.2-1.5l-3-.6a1.5 1.5 0 0 0-1.4.4l-1.2 1.2a12 12 0 0 1-5-5l1.2-1.2a1.5 1.5 0 0 0 .4-1.4l-.6-3a1.5 1.5 0 0 0-1.5-1.2z"/>
+    {%- when 'map-pin' -%}<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>
+    {%- when 'info' -%}<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8h.01"/>
+    {%- when 'alert' -%}<path d="M10.3 4.2 2.9 17.5a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0zM12 9.5v4M12 17h.01"/>
+    {%- when 'gift' -%}<rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v7.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V12M12 8v12.5M12 8c-1-2.5-2.3-4-4-4a2 2 0 0 0 0 4m4 0c1-2.5 2.3-4 4-4a2 2 0 0 1 0 4"/>
+    {%- when 'bolt' -%}<path d="M13 2.8 5 13.5h6.2l-.7 7.7 8.5-10.7h-6.2z"/>
+    {%- when 'share' -%}<circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1m-7.6 6.5 7.6 4.1"/>
+    {%- when 'eye' -%}<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>
+    {%- when 'box' -%}<path d="M12 3 3.8 7.3v9.4L12 21l8.2-4.3V7.3zM3.8 7.3l8.2 4.3 8.2-4.3M12 11.6V21M7.9 5.1l8.2 4.4"/>
+    {%- when 'copy' -%}<rect x="8.5" y="8.5" width="12" height="12" rx="2.5"/><path d="M15.5 8.5V6A2.5 2.5 0 0 0 13 3.5H6A2.5 2.5 0 0 0 3.5 6v7A2.5 2.5 0 0 0 6 15.5h2.5"/>
+    {%- when 'link' -%}<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1.2 1.2M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.2-1.2"/>
+    {%- when 'percent' -%}<path d="M18.5 5.5l-13 13"/><circle cx="7" cy="7" r="2.3"/><circle cx="17" cy="17" r="2.3"/>
+    {%- when 'external' -%}<path d="M14 4h6v6m0-6-8.5 8.5M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/>
+    {%- else -%}<circle cx="12" cy="12" r="3"/>
+  {%- endcase -%}
+</svg>

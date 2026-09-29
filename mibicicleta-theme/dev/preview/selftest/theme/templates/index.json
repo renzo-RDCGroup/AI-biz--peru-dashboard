@@ -1,0 +1,30 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-test",
+      "settings": {
+        "title": "Custom title",
+        "link": "shopify://collections/luces",
+        "image": "shopify://shop_images/mibi-ia-cascos-lima.png",
+        "collection": "luces"
+      },
+      "blocks": {
+        "b1": { "type": "note", "settings": { "label": "First" } },
+        "b2": { "type": "note", "settings": {} },
+        "b3": { "type": "note", "disabled": true, "settings": { "label": "hidden" } }
+      },
+      "block_order": ["b2", "b1", "b3"]
+    },
+    "runtime": { "type": "broken-runtime", "settings": {} },
+    "syntax": { "type": "broken-syntax", "settings": {} },
+    "missing": { "type": "missing-snippet", "settings": {} },
+    "ghost": { "type": "does-not-exist", "settings": {} },
+    "after": { "type": "after-marker", "settings": { "text": "After all" } }
+  },
+  "order": ["main", "runtime", "syntax", "missing", "ghost", "after"]
+}

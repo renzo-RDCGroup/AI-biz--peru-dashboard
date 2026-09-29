@@ -1,0 +1,102 @@
+{%- comment -%}
+  Newsletter band (styles: assets/section-home-2.css). Shopify customer form: email +
+  contact[tags]=newsletter. Success replaces the field; errors show under it (aria-invalid).
+  Brand yellow by default with the "mi" watermark.
+{%- endcomment -%}
+{{ 'section-home-2.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign scheme = section.settings.scheme
+  assign wm_tone = 'mono-dark'
+  if scheme == 'dark'
+    assign wm_tone = 'mono-light'
+  endif
+  assign form_id = 'Newsletter-' | append: section.id
+  assign input_id = 'NewsletterEmail-' | append: section.id
+  assign error_id = 'NewsletterError-' | append: section.id
+  assign title_id = 'NewsletterTitle-' | append: section.id
+  assign h_last = section.settings.heading | strip | slice: -1
+  assign h_dot = true
+  if h_last == '.' or h_last == '?' or h_last == '!' or h_last == ':' or h_last == '…'
+    assign h_dot = false
+  endif
+-%}
+
+<section class="newsletter section scheme-{{ scheme }} has-watermark" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;"{% if section.settings.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
+  <div class="page-width newsletter__grid" data-reveal>
+    <div class="newsletter__intro">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="h1 newsletter__heading{% if h_dot %} heading-dot{% endif %}" id="{{ title_id }}">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.text != blank -%}
+        <p class="newsletter__text">{{ section.settings.text | escape | replace: 'S/ ', 'S/ ' }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="newsletter__form-wrap">
+      {%- form 'customer', id: form_id, class: 'newsletter__form', novalidate: 'novalidate' -%}
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        {%- if form.posted_successfully? -%}
+          <p class="form-message form-message--success newsletter__success" role="status">{{ 'newsletter.success' | t }}</p>
+        {%- else -%}
+          <div class="newsletter__field">
+            <label class="visually-hidden" for="{{ input_id }}">{{ 'newsletter.label' | t }}</label>
+            <input
+              class="input input--pill newsletter__input"
+              type="email"
+              id="{{ input_id }}"
+              name="contact[email]"
+              value="{{ form.email }}"
+              placeholder="{{ 'newsletter.placeholder' | t }}"
+              autocomplete="email"
+              autocapitalize="off"
+              spellcheck="false"
+              required
+              aria-required="true"
+              {% if form.errors %}aria-invalid="true" aria-describedby="{{ error_id }}"{% endif %}
+            >
+            <button type="submit" class="btn btn--primary btn--lg newsletter__btn">
+              {{- 'newsletter.submit' | t -}}
+              {%- render 'icon', name: 'arrow-right' -%}
+            </button>
+          </div>
+          {%- if form.errors -%}
+            <p class="form-message form-message--error newsletter__error" id="{{ error_id }}" role="alert">
+              {%- for field in form.errors -%}
+                {%- if field == 'form' -%}
+                  {{- form.errors.messages[field] -}}
+                {%- else -%}
+                  {{- form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] -}}
+                {%- endif -%}
+                {%- unless forloop.last %} {% endunless -%}
+              {%- endfor -%}
+            </p>
+          {%- endif -%}
+          {%- if section.settings.show_note -%}
+            <p class="newsletter__note">{{ 'newsletter.note' | t }}</p>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endform -%}
+    </div>
+  </div>
+  {%- render 'logo', variant: 'mark', tone: wm_tone, label: '', class: 'mi-watermark mi-watermark--left newsletter__watermark' -%}
+</section>
+
+{% schema %}
+{
+  "name": "Boletín",
+  "tag": "div",
+  "class": "newsletter-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}, {"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}], "default": "brand"},
+    {"type": "text", "id": "heading", "label": "Título", "default": "Entérate de lo que llega"},
+    {"type": "text", "id": "text", "label": "Texto", "default": "Déjanos tu correo y te avisamos cuando entre stock nuevo o haya una oferta. Sin spam."},
+    {"type": "checkbox", "id": "show_note", "label": "Mostrar nota «Puedes darte de baja cuando quieras»", "default": true},
+    {"type": "paragraph", "content": "Los correos se guardan como clientes con la etiqueta «newsletter» (Clientes › Suscriptores de marketing por correo)."},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64}
+  ],
+  "presets": [{"name": "Boletín"}]
+}
+{% endschema %}

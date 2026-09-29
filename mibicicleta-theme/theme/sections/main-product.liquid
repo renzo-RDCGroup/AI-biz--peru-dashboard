@@ -1,0 +1,254 @@
+{%- comment -%}
+  Product page (SPEC §7 Product). Gallery 58% | info 42% ≥990px (both columns sticky: the
+  shorter one follows the scroll). Blocks render through snippets/product-info-block.liquid;
+  a first "breadcrumbs" block is lifted above the grid. JS: assets/product.js.
+{%- endcomment -%}
+{{ 'section-main-product.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign current = product.selected_or_first_available_variant
+  assign product_form_id = 'product-form-' | append: section.id
+  assign buy_id = 'ProductBuy-' | append: section.id
+  assign first_block = section.blocks.first
+  assign lift_crumbs = false
+  if first_block.type == 'breadcrumbs'
+    assign lift_crumbs = true
+  endif
+  assign has_description = false
+  assign has_buy = false
+  for b in section.blocks
+    if b.type == 'description'
+      assign has_description = true
+    elsif b.type == 'buy_buttons'
+      assign has_buy = true
+    endif
+  endfor
+-%}
+
+<section
+  class="section main-product scheme-{{ section.settings.scheme }}"
+  style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;"
+  data-section-id="{{ section.id }}"
+>
+  <div class="page-width">
+    {%- if lift_crumbs -%}
+      <div class="main-product__crumbs" {{ first_block.shopify_attributes }}>
+        {%- render 'breadcrumbs' -%}
+      </div>
+    {%- endif -%}
+
+    <product-info
+      class="product{% if section.settings.sticky_columns %} product--sticky{% endif %}{% unless current.available %} is-soldout{% endunless %}"
+      data-section-id="{{ section.id }}"
+      data-url="{{ product.url }}"
+    >
+      <div class="product__media-col">
+        {%- render 'product-gallery',
+          product: product,
+          variant: current,
+          section_id: section.id,
+          ratio: section.settings.media_ratio,
+          blend: section.settings.image_blend,
+          zoom: section.settings.media_zoom,
+          lightbox: section.settings.lightbox
+        -%}
+      </div>
+
+      <div class="product__info-col">
+        <div class="product__info">
+          {%- for block in section.blocks -%}
+            {%- if forloop.first and lift_crumbs -%}{%- continue -%}{%- endif -%}
+            {%- if block.type == '@app' -%}
+              <div class="product__block product__block--app" {{ block.shopify_attributes }}>{% render block %}</div>
+              {%- continue -%}
+            {%- endif -%}
+            {%- capture block_html -%}
+              {%- render 'product-info-block',
+                block: block,
+                product: product,
+                variant: current,
+                section_id: section.id,
+                form_id: product_form_id,
+                buy_id: buy_id,
+                has_description: has_description
+              -%}
+            {%- endcapture -%}
+            {%- assign block_html = block_html | strip -%}
+            {%- if block_html != '' or request.design_mode -%}
+              <div class="product__block product__block--{{ block.type }}" {{ block.shopify_attributes }}>{{ block_html }}</div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+
+      {%- if section.settings.sticky_atc and has_buy -%}
+        {%- render 'sticky-atc', product: product, variant: current, form_id: product_form_id, target: buy_id -%}
+      {%- endif -%}
+    </product-info>
+  </div>
+
+  <script type="application/ld+json">
+    {{ product | structured_data }}
+  </script>
+</section>
+
+{% stylesheet %}
+  .share { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+  .share__btn { font-size: var(--fs-sm); }
+  .share__msg { font-size: var(--fs-sm); font-weight: 600; color: var(--color-success); }
+
+  /* Sticky add-to-cart bar */
+  .sticky-atc {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 80;
+    display: block;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, .08);
+    visibility: hidden;
+    transform: translateY(105%);
+    transition: transform var(--dur) var(--ease), visibility 0s linear var(--dur);
+  }
+  .sticky-atc.is-visible { visibility: visible; transform: none; transition-delay: 0s; }
+  .sticky-atc__inner { display: flex; align-items: center; gap: 12px; min-height: 72px; padding-block: 10px; }
+  .sticky-atc__media { --ratio: 1; flex: none; width: 52px; border-radius: 10px; }
+  .sticky-atc__media.media--contain img { padding: 6%; }
+  .sticky-atc__noimg { position: absolute; inset: 0; display: grid; place-items: center; }
+  .sticky-atc__noimg .logo { width: 50%; min-width: 0; opacity: .12; }
+  .sticky-atc__info { display: grid; flex: 1 1 auto; gap: 2px; min-width: 0; }
+  .sticky-atc__title { overflow: hidden; font: 800 var(--fs-sm)/1.25 var(--font-heading); white-space: nowrap; text-overflow: ellipsis; }
+  .sticky-atc__variant { overflow: hidden; font-size: var(--fs-xs); color: var(--color-muted); white-space: nowrap; text-overflow: ellipsis; }
+  .sticky-atc__price { --price-size: 1rem; }
+  .sticky-atc__price .price__compare { font-size: .8125rem; }
+  .sticky-atc__btn { flex: none; padding-inline: 18px; }
+  @media (max-width: 749.98px) {
+    .sticky-atc__variant { display: none; }
+  }
+  @media (min-width: 990px) {
+    .sticky-atc__inner { gap: var(--space-5); min-height: 80px; }
+    .sticky-atc__media { width: 56px; }
+    .sticky-atc__title { font-size: var(--fs-base); }
+    .sticky-atc__btn { min-width: 220px; min-height: 52px; }
+    /* Price next to the button: title/variant left, price right. */
+    .sticky-atc__info { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-6); align-items: center; }
+    .sticky-atc__title, .sticky-atc__variant { grid-column: 1; }
+    .sticky-atc__price { --price-size: 1.25rem; grid-column: 2; grid-row: 1 / span 2; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Producto",
+  "class": "main-product-section",
+  "settings": [
+    { "type": "select", "id": "scheme", "label": "Esquema de color", "options": [
+      { "value": "light", "label": "Claro" }, { "value": "soft", "label": "Gris suave" },
+      { "value": "brand", "label": "Amarillo" }, { "value": "dark", "label": "Negro" }
+    ], "default": "light" },
+    { "type": "header", "content": "Galería" },
+    { "type": "select", "id": "media_ratio", "label": "Proporción de imágenes", "options": [
+      { "value": "square", "label": "Cuadrada" }, { "value": "portrait", "label": "Vertical" }, { "value": "natural", "label": "Original" }
+    ], "default": "square" },
+    { "type": "checkbox", "id": "image_blend", "label": "Fundir fondo blanco de las fotos", "info": "Las fotos con fondo blanco se integran al fondo gris claro.", "default": true },
+    { "type": "checkbox", "id": "media_zoom", "label": "Zoom al pasar el mouse (escritorio)", "default": true },
+    { "type": "checkbox", "id": "lightbox", "label": "Ampliar imagen al hacer clic", "default": true },
+    { "type": "header", "content": "Diseño" },
+    { "type": "checkbox", "id": "sticky_columns", "label": "Columnas fijas al desplazarse (escritorio)", "default": true },
+    { "type": "checkbox", "id": "sticky_atc", "label": "Barra fija de compra", "info": "Aparece cuando el botón principal sale de la pantalla.", "default": true },
+    { "type": "range", "id": "padding_top", "label": "Espacio superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "label": "Espacio inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+  ],
+  "blocks": [
+    { "type": "@app" },
+    { "type": "breadcrumbs", "name": "Migas de pan", "limit": 1, "settings": [
+      { "type": "paragraph", "content": "Como primer bloque se muestra encima de la galería." }
+    ] },
+    { "type": "vendor", "name": "Marca", "limit": 1, "settings": [
+      { "type": "paragraph", "content": "Se oculta cuando la marca es el nombre de la tienda." }
+    ] },
+    { "type": "title", "name": "Título", "limit": 1, "settings": [
+      { "type": "checkbox", "id": "show_sku", "label": "Mostrar código (SKU)", "default": true }
+    ] },
+    { "type": "rating", "name": "Calificación", "limit": 1, "settings": [
+      { "type": "paragraph", "content": "Usa los metacampos estándar de reseñas (reviews.rating). Sin app de reseñas no se muestra nada." }
+    ] },
+    { "type": "badges", "name": "Etiquetas", "limit": 1, "settings": [
+      { "type": "paragraph", "content": "Agotado, Oferta, Nuevo (etiqueta «nuevo») y Más vendido (etiqueta «mas-vendido»)." }
+    ] },
+    { "type": "price", "name": "Precio", "limit": 1, "settings": [
+      { "type": "checkbox", "id": "show_save", "label": "Mostrar «Ahorras S/ X»", "default": true },
+      { "type": "checkbox", "id": "show_tax", "label": "Mostrar «Impuestos incluidos»", "info": "Solo si la tienda incluye impuestos en los precios.", "default": true }
+    ] },
+    { "type": "stock", "name": "Disponibilidad", "limit": 1, "settings": [
+      { "type": "range", "id": "low_stock_threshold", "label": "Avisar «¡Solo quedan N!» desde", "info": "Solo para variantes con inventario controlado que no se venden sin stock.", "min": 1, "max": 10, "step": 1, "default": 5 }
+    ] },
+    { "type": "short_description", "name": "Descripción corta", "limit": 1, "settings": [
+      { "type": "range", "id": "length", "label": "Largo máximo", "min": 80, "max": 300, "step": 10, "unit": "car", "default": 160 }
+    ] },
+    { "type": "variant_picker", "name": "Selector de variantes", "limit": 1, "settings": [
+      { "type": "select", "id": "picker_style", "label": "Estilo", "options": [
+        { "value": "auto", "label": "Automático (colores con muestras)" }, { "value": "pills", "label": "Botones" }, { "value": "dropdown", "label": "Lista desplegable" }
+      ], "default": "auto" }
+    ] },
+    { "type": "buy_buttons", "name": "Botones de compra", "limit": 1, "settings": [
+      { "type": "checkbox", "id": "show_buy_now", "label": "Mostrar «Comprar ahora»", "default": true },
+      { "type": "checkbox", "id": "show_dynamic_checkout", "label": "Botones de pago dinámicos", "info": "Botones de pago rápido de Shopify (Shop Pay, etc.).", "default": false }
+    ] },
+    { "type": "free_shipping", "name": "Barra de envío gratis", "limit": 1, "settings": [
+      { "type": "paragraph", "content": "El monto se configura en Configuración del tema › Carrito." }
+    ] },
+    { "type": "delivery_estimate", "name": "Entrega estimada", "limit": 1, "settings": [
+      { "type": "paragraph", "content": "Los plazos se editan en Configuración del tema › Plazos de entrega. ⚠️ Confirma estos plazos antes de publicar." },
+      { "type": "text", "id": "heading", "label": "Título", "default": "Entrega estimada", "info": "⚠️ Confirma estos plazos antes de publicar." }
+    ] },
+    { "type": "pickup", "name": "Retiro en tienda", "limit": 1, "settings": [
+      { "type": "paragraph", "content": "Se muestra solo si la variante tiene retiro en tienda activo en Shopify." }
+    ] },
+    { "type": "whatsapp", "name": "WhatsApp", "limit": 1, "settings": [
+      { "type": "paragraph", "content": "Se oculta si no hay número de WhatsApp en Configuración del tema › Contacto." },
+      { "type": "text", "id": "heading", "label": "Título", "default": "¿Dudas con la medida o compatibilidad?" },
+      { "type": "text", "id": "text", "label": "Texto", "default": "Escríbenos por WhatsApp y te ayudamos" }
+    ] },
+    { "type": "trust", "name": "Garantías", "limit": 1, "settings": [
+      { "type": "select", "id": "icon_1", "label": "Ícono 1", "options": [
+        { "value": "medal", "label": "Medalla" }, { "value": "truck", "label": "Camión" }, { "value": "return", "label": "Cambio" }, { "value": "shield", "label": "Escudo" }, { "value": "lock", "label": "Candado" }, { "value": "store", "label": "Tienda" }, { "value": "whatsapp", "label": "WhatsApp" }
+      ], "default": "medal" },
+      { "type": "text", "id": "text_1", "label": "Texto 1", "default": "Productos originales" },
+      { "type": "select", "id": "icon_2", "label": "Ícono 2", "options": [
+        { "value": "medal", "label": "Medalla" }, { "value": "truck", "label": "Camión" }, { "value": "return", "label": "Cambio" }, { "value": "shield", "label": "Escudo" }, { "value": "lock", "label": "Candado" }, { "value": "store", "label": "Tienda" }, { "value": "whatsapp", "label": "WhatsApp" }
+      ], "default": "truck" },
+      { "type": "text", "id": "text_2", "label": "Texto 2", "default": "Envío gratis desde S/ 220" },
+      { "type": "select", "id": "icon_3", "label": "Ícono 3", "options": [
+        { "value": "medal", "label": "Medalla" }, { "value": "truck", "label": "Camión" }, { "value": "return", "label": "Cambio" }, { "value": "shield", "label": "Escudo" }, { "value": "lock", "label": "Candado" }, { "value": "store", "label": "Tienda" }, { "value": "whatsapp", "label": "WhatsApp" }
+      ], "default": "return" },
+      { "type": "text", "id": "text_3", "label": "Texto 3", "default": "7 días para cambios" }
+    ] },
+    { "type": "description", "name": "Descripción", "limit": 1, "settings": [
+      { "type": "text", "id": "heading", "label": "Título", "default": "Descripción" },
+      { "type": "select", "id": "icon", "label": "Ícono", "options": [
+        { "value": "none", "label": "Ninguno" }, { "value": "info", "label": "Información" }, { "value": "box", "label": "Caja" }
+      ], "default": "none" },
+      { "type": "checkbox", "id": "open", "label": "Abierta por defecto", "default": true }
+    ] },
+    { "type": "collapsible", "name": "Fila desplegable", "settings": [
+      { "type": "text", "id": "heading", "label": "Título", "default": "Envíos" },
+      { "type": "select", "id": "icon", "label": "Ícono", "options": [
+        { "value": "none", "label": "Ninguno" }, { "value": "truck", "label": "Camión" }, { "value": "return", "label": "Cambio" }, { "value": "shield", "label": "Escudo" }, { "value": "wrench", "label": "Llave" }, { "value": "box", "label": "Caja" }, { "value": "info", "label": "Información" }
+      ], "default": "none" },
+      { "type": "richtext", "id": "content", "label": "Contenido" },
+      { "type": "page", "id": "page", "label": "O contenido de una página" },
+      { "type": "checkbox", "id": "open", "label": "Abierta por defecto", "default": false }
+    ] },
+    { "type": "share", "name": "Compartir", "limit": 1, "settings": [] },
+    { "type": "custom_liquid", "name": "Liquid personalizado", "settings": [
+      { "type": "liquid", "id": "custom_liquid", "label": "Código Liquid" }
+    ] }
+  ]
+}
+{% endschema %}

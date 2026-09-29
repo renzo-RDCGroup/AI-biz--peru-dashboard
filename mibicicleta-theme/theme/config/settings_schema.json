@@ -1,0 +1,413 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Mi Bici 2026",
+    "theme_version": "1.0.0",
+    "theme_author": "RDC Group",
+    "theme_documentation_url": "https://mibicicleta.pe",
+    "theme_support_url": "https://mibicicleta.pe"
+  },
+  {
+    "name": "Logo y favicon",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo",
+        "info": "Vacío = se usa el logo vectorial oficial de Mi Bicicleta (recomendado)."
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 100,
+        "max": 260,
+        "step": 4,
+        "unit": "px",
+        "label": "Ancho del logo en escritorio",
+        "default": 168
+      },
+      {
+        "type": "range",
+        "id": "logo_width_mobile",
+        "min": 90,
+        "max": 200,
+        "step": 2,
+        "unit": "px",
+        "label": "Ancho del logo en móvil",
+        "default": 132
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon",
+        "info": "Imagen cuadrada de al menos 32 × 32 px (se recomienda el isotipo «mi» sobre amarillo)."
+      }
+    ]
+  },
+  {
+    "name": "Colores",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Colores del manual de marca. No uses texto blanco sobre amarillo: no cumple contraste."
+      },
+      {
+        "type": "color",
+        "id": "color_brand",
+        "label": "Amarillo de marca",
+        "info": "Fondos destacados y botón principal. Manual: #FFD219 (Pantone 116 C).",
+        "default": "#FFD219"
+      },
+      {
+        "type": "color",
+        "id": "color_brand_soft",
+        "label": "Amarillo suave",
+        "info": "Caja de envío gratis, banners y cabecera de colecciones.",
+        "default": "#FFF6CF"
+      },
+      {
+        "type": "color",
+        "id": "color_ink",
+        "label": "Negro de textos",
+        "info": "Textos y bandas oscuras. El logo siempre usa negro puro.",
+        "default": "#0B0B0B"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "Rojo de acento",
+        "info": "Solo decorativo: punto rojo, marcadores y contador del carrito. Manual: #FF0000.",
+        "default": "#FF0000"
+      },
+      {
+        "type": "color",
+        "id": "color_sale",
+        "label": "Rojo de ofertas",
+        "info": "Precios y etiquetas de oferta. Más oscuro que el rojo de marca para cumplir contraste AA.",
+        "default": "#D10000"
+      }
+    ]
+  },
+  {
+    "name": "Tipografía",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Por defecto: Urbanist (títulos) y Libre Franklin (textos), las alternativas web más cercanas a la tipografía del manual."
+      },
+      {
+        "type": "text",
+        "id": "adobe_fonts_kit",
+        "label": "ID del kit de Adobe Fonts",
+        "info": "Opcional. Pega el ID de un kit web que incluya «All Round Gothic» (ej. abc1def) para usar la tipografía oficial en los títulos."
+      },
+      {
+        "type": "checkbox",
+        "id": "heading_dot",
+        "label": "Punto rojo al final de los títulos",
+        "info": "El recurso del manual («2.»). Se aplica a los títulos de sección.",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "body_scale",
+        "min": 90,
+        "max": 110,
+        "step": 1,
+        "unit": "%",
+        "label": "Tamaño del texto",
+        "default": 100
+      }
+    ]
+  },
+  {
+    "name": "Forma",
+    "settings": [
+      {
+        "type": "select",
+        "id": "corner_style",
+        "label": "Esquinas",
+        "options": [
+          { "value": "rounded", "label": "Redondeadas" },
+          { "value": "soft", "label": "Suaves" },
+          { "value": "square", "label": "Rectas" }
+        ],
+        "default": "rounded"
+      }
+    ]
+  },
+  {
+    "name": "Tarjetas de producto",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "card_show_vendor",
+        "label": "Mostrar marca",
+        "info": "Se oculta automáticamente cuando la marca es la propia tienda.",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_quick_add",
+        "label": "Botón de compra rápida",
+        "info": "Productos con una sola variante se agregan al carrito; con variantes, el botón lleva a la ficha.",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_secondary_image",
+        "label": "Mostrar segunda imagen al pasar el cursor",
+        "default": true
+      },
+      {
+        "type": "select",
+        "id": "card_image_ratio",
+        "label": "Proporción de imagen",
+        "options": [
+          { "value": "square", "label": "Cuadrada (1:1)" },
+          { "value": "portrait", "label": "Vertical (4:5)" },
+          { "value": "natural", "label": "Original" }
+        ],
+        "default": "square"
+      },
+      {
+        "type": "checkbox",
+        "id": "card_blend_white",
+        "label": "Integrar fondos blancos de las fotos",
+        "info": "Las fotos con fondo blanco se funden con el fondo gris claro de la tarjeta.",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "card_show_swatches",
+        "label": "Mostrar muestras de color",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "Carrito",
+    "settings": [
+      {
+        "type": "select",
+        "id": "cart_type",
+        "label": "Tipo de carrito",
+        "options": [
+          { "value": "drawer", "label": "Panel lateral" },
+          { "value": "page", "label": "Página" }
+        ],
+        "default": "drawer"
+      },
+      {
+        "type": "header",
+        "content": "Envío gratis"
+      },
+      {
+        "type": "number",
+        "id": "free_shipping_threshold",
+        "label": "Monto para envío gratis (S/)",
+        "info": "Monto en soles. Verificado en Configuración › Envíos: gratis desde S/ 220 en todo el Perú. 0 = ocultar la barra.",
+        "default": 220
+      },
+      {
+        "type": "text",
+        "id": "free_shipping_zone",
+        "label": "Zona del envío gratis",
+        "info": "Se muestra como «Válido para …».",
+        "default": "todo el Perú"
+      },
+      {
+        "type": "header",
+        "content": "Recomendaciones y pago"
+      },
+      {
+        "type": "collection",
+        "id": "cart_upsell_collection",
+        "label": "Colección para «Complétalo con»",
+        "info": "Vacío = colección «destacados»."
+      },
+      {
+        "type": "text",
+        "id": "cart_upsell_heading",
+        "label": "Título de recomendaciones",
+        "default": "Complétalo con"
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_show_note",
+        "label": "Permitir nota del pedido",
+        "default": false
+      },
+      {
+        "type": "text",
+        "id": "cart_checkout_note",
+        "label": "Texto bajo el subtotal",
+        "default": "Impuestos incluidos. El envío se calcula en el checkout."
+      }
+    ]
+  },
+  {
+    "name": "Contacto y WhatsApp",
+    "settings": [
+      {
+        "type": "text",
+        "id": "whatsapp_number",
+        "label": "Número de WhatsApp",
+        "info": "Solo dígitos con código de país, ej. 51987654321. Vacío = se ocultan todos los botones de WhatsApp."
+      },
+      {
+        "type": "text",
+        "id": "whatsapp_message",
+        "label": "Mensaje inicial",
+        "default": "Hola Mi Bicicleta, tengo una consulta"
+      },
+      {
+        "type": "checkbox",
+        "id": "whatsapp_float",
+        "label": "Botón flotante de WhatsApp",
+        "default": true
+      },
+      {
+        "type": "header",
+        "content": "Datos de contacto",
+        "info": "Se muestran en el pie de página. Los campos vacíos no aparecen."
+      },
+      {
+        "type": "text",
+        "id": "contact_email",
+        "label": "Correo"
+      },
+      {
+        "type": "text",
+        "id": "contact_phone",
+        "label": "Teléfono"
+      },
+      {
+        "type": "text",
+        "id": "contact_address",
+        "label": "Dirección"
+      },
+      {
+        "type": "text",
+        "id": "contact_hours",
+        "label": "Horario de atención"
+      }
+    ]
+  },
+  {
+    "name": "Plazos de entrega",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Estimado de entrega en la ficha de producto",
+        "info": "⚠️ Confirma estos plazos antes de publicar."
+      },
+      {
+        "type": "paragraph",
+        "content": "Días hábiles. Si todos los valores son 0, el estimado no se muestra."
+      },
+      {
+        "type": "range",
+        "id": "delivery_lima_min",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "unit": "d",
+        "label": "Lima: mínimo",
+        "default": 1
+      },
+      {
+        "type": "range",
+        "id": "delivery_lima_max",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "unit": "d",
+        "label": "Lima: máximo",
+        "default": 3
+      },
+      {
+        "type": "range",
+        "id": "delivery_prov_min",
+        "min": 0,
+        "max": 15,
+        "step": 1,
+        "unit": "d",
+        "label": "Provincias: mínimo",
+        "default": 3
+      },
+      {
+        "type": "range",
+        "id": "delivery_prov_max",
+        "min": 0,
+        "max": 15,
+        "step": 1,
+        "unit": "d",
+        "label": "Provincias: máximo",
+        "default": 7
+      },
+      {
+        "type": "range",
+        "id": "delivery_cutoff_hour",
+        "min": 0,
+        "max": 23,
+        "step": 1,
+        "unit": "h",
+        "label": "Hora de corte para despacho",
+        "info": "0 = sin cuenta regresiva. Ej.: 14 = «Compra antes de las 14:00».",
+        "default": 0
+      },
+      {
+        "type": "checkbox",
+        "id": "delivery_skip_sunday",
+        "label": "No contar domingos",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "Redes sociales",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Pega la URL completa de cada perfil. Los campos vacíos no se muestran."
+      },
+      {
+        "type": "text",
+        "id": "social_instagram",
+        "label": "Instagram",
+        "placeholder": "https://instagram.com/…"
+      },
+      {
+        "type": "text",
+        "id": "social_facebook",
+        "label": "Facebook",
+        "placeholder": "https://facebook.com/…"
+      },
+      {
+        "type": "text",
+        "id": "social_tiktok",
+        "label": "TikTok",
+        "placeholder": "https://tiktok.com/@…"
+      },
+      {
+        "type": "text",
+        "id": "social_youtube",
+        "label": "YouTube",
+        "placeholder": "https://youtube.com/@…"
+      }
+    ]
+  },
+  {
+    "name": "Búsqueda",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "predictive_search",
+        "label": "Búsqueda predictiva",
+        "info": "Muestra productos y colecciones mientras el cliente escribe.",
+        "default": true
+      }
+    ]
+  }
+]

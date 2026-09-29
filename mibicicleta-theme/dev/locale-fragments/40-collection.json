@@ -1,0 +1,100 @@
+{
+  "collections": {
+    "product_count": {
+      "one": "{{ count }} producto",
+      "other": "{{ count }} productos"
+    },
+    "banner": {
+      "read_more": "Leer más",
+      "read_less": "Leer menos",
+      "chips_label": "Explora otras categorías",
+      "all": "Todo",
+      "all_in": "Todo en {{ title }}"
+    },
+    "toolbar": {
+      "label": "Opciones de la lista de productos",
+      "grid_heading": "Productos de {{ title }}"
+    },
+    "empty": {
+      "title": "Esta colección aún no tiene productos",
+      "text": "Mientras tanto, explora el resto del catálogo.",
+      "cta": "Ver todo el catálogo"
+    },
+    "load_more": {
+      "button": "Cargar más productos",
+      "status": "Mostrando {{ shown }} de {{ total }}"
+    },
+    "list": {
+      "view": "Ver colección {{ title }}",
+      "empty": "Aún no hay colecciones para mostrar."
+    }
+  },
+  "filters": {
+    "title": "Filtrar",
+    "heading": "Filtros",
+    "open_label": "Abrir filtros",
+    "active_count": {
+      "one": "{{ count }} filtro activo",
+      "other": "{{ count }} filtros activos"
+    },
+    "apply": "Aplicar filtros",
+    "show_results": {
+      "one": "Ver {{ count }} producto",
+      "other": "Ver {{ count }} productos"
+    },
+    "clear": "Limpiar",
+    "clear_all": "Limpiar todo",
+    "clear_filters": "Limpiar filtros",
+    "remove": "Quitar filtro: {{ label }}",
+    "applied": "Filtros aplicados",
+    "show_more": "Ver {{ count }} más",
+    "show_less": "Ver menos",
+    "selected": {
+      "one": "{{ count }} seleccionado",
+      "other": "{{ count }} seleccionados"
+    },
+    "price": {
+      "from": "Desde",
+      "to": "Hasta",
+      "min_label": "Precio mínimo en soles",
+      "max_label": "Precio máximo en soles",
+      "highest": "El precio más alto es {{ price }}",
+      "range": "{{ min }} – {{ max }}",
+      "from_value": "Desde {{ price }}",
+      "up_to": "Hasta {{ price }}"
+    },
+    "sort": {
+      "label": "Ordenar por",
+      "submit": "Ordenar"
+    },
+    "empty": {
+      "title": "Ningún producto coincide con estos filtros",
+      "text": "Prueba quitando algún filtro o ampliando el rango de precio."
+    }
+  },
+  "search": {
+    "results": {
+      "title": "Buscar",
+      "title_terms": "Resultados para «{{ terms }}»",
+      "count": {
+        "one": "{{ count }} resultado",
+        "other": "{{ count }} resultados"
+      },
+      "label": "Buscar en la tienda",
+      "submit": "Buscar",
+      "intro": "Encuentra luces, llantas, repuestos y accesorios para tu bici o scooter.",
+      "empty_title": "Sin resultados para «{{ terms }}»",
+      "empty_text": "Revisa cómo lo escribiste o prueba con una palabra más general.",
+      "suggestions": "Prueba con",
+      "other": "Páginas y artículos",
+      "page": "Página",
+      "article": "Artículo",
+      "catalog": "Ver todo el catálogo",
+      "title_count": {
+        "one": "{{ count }} resultado para «{{ terms }}»",
+        "other": "{{ count }} resultados para «{{ terms }}»"
+      },
+      "categories": "Explora por categoría"
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "general": {
+    "meta": {
+      "tagged_with": "Etiquetado «{{ tags }}»",
+      "page": "Página {{ page }}"
+    },
+    "close": "Cerrar",
+    "loading": "Cargando…",
+    "copied": "¡Copiado!",
+    "view_all": "Ver todo",
+    "home": "Inicio",
+    "search": "Búsqueda",
+    "cart": "Carrito",
+    "collections": "Colecciones",
+    "not_found": "Página no encontrada",
+    "breadcrumbs": "Estás aquí",
+    "payment_methods": "Métodos de pago",
+    "whatsapp": {
+      "label": "Escríbenos por WhatsApp",
+      "float_label": "Escríbenos por WhatsApp",
+      "float_text": "¿Dudas? Escríbenos",
+      "card_text": "Te respondemos por chat"
+    },
+    "social": {
+      "follow": "Síguenos en {{ network }}"
+    },
+    "pagination": {
+      "label": "Paginación",
+      "previous": "Página anterior",
+      "next": "Página siguiente",
+      "page": "Página {{ number }}"
+    },
+    "carousel": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "pause": "Pausar carrusel",
+      "play": "Reproducir carrusel",
+      "go_to": "Ir a la diapositiva {{ index }}",
+      "slide": "{{ index }} de {{ total }}",
+      "label": "carrusel",
+      "slide_label": "diapositiva"
+    }
+  },
+  "accessibility": {
+    "skip_to_content": "Saltar al contenido",
+    "new_window": "se abre en una pestaña nueva",
+    "decrease": "Reducir cantidad",
+    "increase": "Aumentar cantidad",
+    "quantity": "Cantidad"
+  },
+  "products": {
+    "card": {
+      "quick_add": "Agregar al carrito: {{ title }}",
+      "choose_options": "Elegir opciones: {{ title }}",
+      "colors": {
+        "one": "{{ count }} color",
+        "other": "{{ count }} colores"
+      },
+      "placeholder_title": "Nombre del producto",
+      "rating": "Calificación: {{ rating }} de {{ max }}",
+      "rating_count": {
+        "one": "{{ count }} reseña",
+        "other": "{{ count }} reseñas"
+      }
+    },
+    "price": {
+      "sale": "Precio de oferta",
+      "regular": "Precio habitual",
+      "from": "Desde"
+    },
+    "badges": {
+      "sold_out": "Agotado",
+      "sale": "Oferta",
+      "save": "-{{ percent }}%",
+      "new": "Nuevo",
+      "best_seller": "Más vendido"
+    }
+  },
+  "cart": {
+    "general": {
+      "add_to_cart": "Agregar al carrito",
+      "sold_out": "Agotado",
+      "unavailable": "No disponible",
+      "adding": "Agregando…",
+      "added": "¡Listo! Lo agregamos a tu carrito.",
+      "error": "No pudimos actualizar tu carrito. Inténtalo de nuevo.",
+      "updated": "Carrito actualizado",
+      "items_one": "{{ n }} producto",
+      "items_other": "{{ n }} productos"
+    }
+  },
+  "shipping": {
+    "remaining_html": "¡Te faltan <strong>{{ amount }}</strong> para el envío gratis!",
+    "reached_html": "¡Genial! Tu pedido tiene <strong>envío gratis</strong>.",
+    "zone": "Válido para {{ zone }}.",
+    "progress_label": "Progreso hacia el envío gratis"
+  }
+}

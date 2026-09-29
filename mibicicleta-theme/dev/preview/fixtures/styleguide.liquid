@@ -1,0 +1,788 @@
+{%- comment -%}
+  Living style guide (preview only — never uploaded). Route: /_styleguide, rendered inside
+  layout/theme.liquid with the REAL foundation CSS/JS/snippets and mock products, so every
+  component can be reviewed in one page and one screenshot:
+    node preview/shoot.mjs --port 4200 --pages styleguide --out screens/foundation
+  Useful overrides (harness): /_styleguide?__settings=whatsapp_number:51900000000  (WhatsApp UI on)
+                              /_styleguide?__settings=corner_style:square,heading_dot:false
+  Products whose handle starts with "sg-" are preview fixtures (fixtures/products.json).
+  Contracts: SPEC.md §2–§3 (brand, tokens), §6.3 (classes), §6.4 (snippets); dev/FOUNDATION_NOTES.md.
+  Styles for the guide's own chrome use the .sg- prefix and live in this file only.
+{%- endcomment -%}
+{%- liquid
+  assign p_lentes = all_products['lentes-deportivos-tornasolado-hm-l1-hm-l1']
+  assign p_casco = all_products['casco-open-face-mt-33g2']
+  assign p_linterna = all_products['linterna-multifuncional-m29']
+  assign p_agotado = all_products['sg-luz-delantera-agotada']
+  assign p_desde = all_products['sg-grips-ergonomicos-modelos']
+  assign p_tapa = all_products['tapa-barro-tp-05']
+
+  assign grid_handles = 'lentes-deportivos-tornasolado-hm-l1-hm-l1,casco-open-face-mt-33g2,linterna-multifuncional-m29,sg-luz-delantera-agotada,sg-grips-ergonomicos-modelos,pedales-wg-38-wg-38,llantas-l14-08-l14-08,espejos-rt-co05-rt-co05' | split: ','
+  assign carousel_handles = 'luces-x10-x10,luz-led-ld-18rb,luz-posterior-para-bicicleta-ld-12rb,pedales-para-bicicleta-pd-49rb,neco-pd-12nc-pd-12nc,tapabarros-tp-09pl-tp-09pl,llantas-ll-35a-ll-35a,linterna-tactica-led-multifuncional-m24' | split: ','
+
+  assign schemes = 'light,soft,brand,dark' | split: ','
+  assign icon_names = 'menu,close,search,user,cart,bag,bag-plus,heart,chevron-down,chevron-up,chevron-left,chevron-right,arrow-right,arrow-left,plus,minus,trash,check,check-circle,truck,shield,medal,whatsapp,store,clock,card,lock,return,wrench,bike,scooter,light,tire,gear,mirror,seat,pedal,grip,mudguard,helmet,glasses,tag,star,star-filled,filter,sort,grid,zoom,play,pause,instagram,facebook,tiktok,youtube,mail,phone,map-pin,info,alert,gift,bolt,share,eye,box,copy,link,percent,external' | split: ','
+  assign category_icons = 'light:Luces,tire:Llantas,gear:Piñones,mirror:Espejos,seat:Asientos,pedal:Pedales,grip:Grips,mudguard:Tapabarros,helmet:Cascos,glasses:Lentes,bag:Accesorios,scooter:Scooter,bike:Bicicleta,medal:Marcas' | split: ','
+  assign swatch_names = 'Amarillo,Blanco,Negro,Rojo,Azul,Celeste,Verde,Rosa,Fucsia,Naranja,Morado,Lila,Gris,Plateado,Dorado,Marrón,Beige,Transparente,Tornasolado,Rojo Negro,NEGRO BRILLO / BLANCO,NEGRO MATE / ROSA,Camuflado' | split: ','
+  assign static_tokens = '--color-brand-strong:#F2C200 (hover),--color-bg:#FFFFFF,--color-surface:#F5F5F2,--color-surface-2:#ECECE6,--color-border:#E2E2DC,--color-border-strong:#8A8A82,--color-muted:#5C5C56,--color-success:#17803A,--color-warning:#9A5B00,--color-whatsapp:#25D366' | split: ','
+
+  assign wa_digits = settings.whatsapp_number | strip
+-%}
+<style>
+  .sg { padding-block: 16px 96px; }
+  .sg code, .sg-code { font: 500 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .sg-hero { display: grid; gap: 14px; padding: 28px 22px 32px; border-radius: var(--radius-lg); }
+  .sg-hero .mi-watermark { width: min(62%, 420px); right: -6%; bottom: -22%; }
+  .sg-hero__meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--fs-sm); color: var(--scheme-muted); }
+  .sg-nav { margin-top: 20px; }
+  .sg-sec { padding-block: 44px 8px; scroll-margin-top: 16px; }
+  .sg-sec + .sg-sec { border-top: 1px solid var(--color-border); margin-top: 36px; }
+  .sg-sec__head { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: baseline; margin-bottom: 28px; }
+  .sg-sec__num { font: 900 var(--fs-2xl)/1 var(--font-heading); letter-spacing: -.02em; }
+  .sg-sec__desc { grid-column: 2; max-width: 68ch; font-size: var(--fs-sm); color: var(--color-muted); }
+  .sg-label { margin: 0 0 12px; font: 700 11px/1.3 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--scheme-muted); }
+  .sg-label code { text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .sg-block + .sg-block { margin-top: 32px; }
+  .sg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .sg-row--top { align-items: flex-start; }
+  .sg-stack { display: grid; gap: 16px; align-content: start; }
+  .sg-cols { display: grid; gap: 16px; }
+  .sg-panel { position: relative; display: grid; gap: 16px; align-content: start; padding: 20px; border: 1px solid var(--scheme-border); border-radius: var(--radius-lg); }
+  .sg-cell { display: grid; gap: 8px; justify-items: start; align-content: start; }
+  .sg-cell > .sg-label { margin: 0; }
+  .sg-panel .section-heading { margin-bottom: 0; }
+  .sg-note { padding: 14px 16px; border: 1.5px dashed var(--color-border-strong, #8A8A82); border-radius: var(--radius); font-size: var(--fs-sm); color: var(--color-muted); }
+  .sg-note strong { color: var(--color-ink); }
+  @media (min-width: 750px) {
+    .sg-hero { padding: 44px 44px 48px; }
+    .sg-cols--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sg-cols--3, .sg-cols--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sg-panel { padding: 28px; }
+  }
+  @media (min-width: 1200px) {
+    .sg-cols--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .sg-cols--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+
+  /* 01 brand */
+  .sg-logo { display: grid; place-items: center; gap: 18px; min-height: 168px; padding: 28px 20px; border-radius: var(--radius-lg); border: 1px solid var(--scheme-border); }
+  .sg-logo .logo--lockup { width: 168px; }
+  .sg-logo .logo--mark { width: 64px; }
+  .sg-logo__tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--scheme-muted); }
+  .sg-logo .mi-watermark { width: 64%; right: -10%; bottom: -30%; }
+  .sg-logo--red { background: var(--color-accent); color: #fff; border-color: transparent; }
+  .sg-logo--red .sg-logo__tag { color: rgba(255, 255, 255, .85); }
+  .sg-minsize { display: flex; align-items: flex-end; gap: 20px; }
+  .sg-minsize .logo--mark { width: 22px; }
+  .sg-minsize .logo--lockup { width: 90px; }
+
+  /* 02 color */
+  .sg-colors { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 750px) { .sg-colors { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 1200px) { .sg-colors { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .sg-color { overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius); font-size: 12px; }
+  .sg-color__chip { height: 64px; box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .06); }
+  .sg-color__meta { display: grid; gap: 2px; padding: 10px 12px; }
+  .sg-color__meta strong { font: 800 var(--fs-sm)/1.2 var(--font-heading); }
+  .sg-color__meta span { color: var(--color-muted); }
+
+  /* 03 type */
+  .sg-type { display: grid; gap: 22px; }
+  .sg-type__row { display: grid; gap: 6px; }
+  @media (min-width: 990px) { .sg-type__row { grid-template-columns: 220px 1fr; gap: 24px; align-items: baseline; } }
+
+  /* 05 forms */
+  .sg-search { position: relative; }
+  .sg-search .input { padding-right: 56px; }
+  .sg-search .btn { position: absolute; top: 4px; right: 4px; width: 40px; height: 40px; min-height: 40px; }
+  .sg-inline { display: flex; gap: 8px; }
+  .sg-inline .input { flex: 1; min-width: 0; }
+
+  /* 07 prices */
+  .sg-prices { display: grid; gap: 22px 28px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 990px) { .sg-prices { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  /* 08 swatches */
+  .sg-swatches { display: grid; gap: 14px 12px; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+  .sg-swatch { display: grid; justify-items: center; gap: 8px; text-align: center; font-size: 12px; line-height: 1.3; }
+
+  /* 13 cards */
+  .sg-carousel { --per-view: 2.15; --gap: 12px; }
+  @media (min-width: 750px) { .sg-carousel { --per-view: 3; --gap: 24px; } }
+  @media (min-width: 990px) { .sg-carousel { --per-view: 4; } }
+
+  .sg-slide { display: grid; align-content: center; gap: 10px; min-height: 340px; padding: 28px 72px; border-radius: var(--radius-lg); }
+  @media (max-width: 749.98px) { .sg-slide { padding: 24px 20px 24px; min-height: 200px; } }
+
+  /* 16 icons */
+  .sg-icons { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+  .sg-icon { display: grid; justify-items: center; gap: 8px; padding: 14px 4px 10px; border: 1px solid var(--color-border); border-radius: var(--radius); font: 500 11px/1.2 ui-monospace, Menlo, monospace; color: var(--color-muted); }
+  .sg-icon .icon { --icon-size: 26px; color: var(--color-ink); }
+  .sg-bubbles { display: grid; gap: 16px 8px; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); }
+  .sg-bubble { display: grid; justify-items: center; gap: 8px; font: 700 var(--fs-sm)/1.2 var(--font-heading); text-align: center; }
+  .sg-bubble span { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--color-brand); color: #000; }
+  .sg-bubble .icon { --icon-size: 34px; }
+</style>
+
+<div class="sg page-width">
+  {%- comment -%} ============ Intro ============ {%- endcomment -%}
+  <header class="sg-hero scheme-brand has-watermark">
+    <p class="eyebrow eyebrow--dot">Preview local · no se sube a Shopify</p>
+    <h1 class="display heading-dot">Mi Bici 2026</h1>
+    <p class="lead" style="color: var(--scheme-fg); max-width: 56ch;">Sistema de diseño del tema: tokens, tipografía y componentes base, renderizados con los snippets, el CSS y el JS reales del tema.</p>
+    <div class="sg-hero__meta">
+      <span>{{ settings.color_brand }} · #000 · {{ settings.color_accent }}</span>
+      <span>Urbanist + Libre Franklin</span>
+      <span>Esquinas: {{ settings.corner_style }}</span>
+      <span>Punto rojo: {% if settings.heading_dot %}activado{% else %}desactivado{% endif %}</span>
+    </div>
+    {% render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'mi-watermark' %}
+  </header>
+
+  <nav class="sg-nav chip-row chip-row--bleed" aria-label="Secciones del styleguide">
+    <a class="chip" href="#sg-marca">Marca</a>
+    <a class="chip" href="#sg-color">Color</a>
+    <a class="chip" href="#sg-tipo">Tipografía</a>
+    <a class="chip" href="#sg-botones">Botones</a>
+    <a class="chip" href="#sg-forms">Formularios</a>
+    <a class="chip" href="#sg-badges">Badges y chips</a>
+    <a class="chip" href="#sg-precios">Precios</a>
+    <a class="chip" href="#sg-swatches">Colores de producto</a>
+    <a class="chip" href="#sg-cantidad">Cantidad</a>
+    <a class="chip" href="#sg-envio">Envío gratis</a>
+    <a class="chip" href="#sg-acordeon">Acordeón</a>
+    <a class="chip" href="#sg-heading">Encabezados</a>
+    <a class="chip" href="#sg-tarjetas">Tarjetas</a>
+    <a class="chip" href="#sg-drawer">Cajones</a>
+    <a class="chip" href="#sg-whatsapp">WhatsApp</a>
+    <a class="chip" href="#sg-iconos">Íconos</a>
+    <a class="chip" href="#sg-otros">Otros</a>
+  </nav>
+
+  {%- comment -%} ============ 01 Marca ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-marca" data-sg="marca">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">01</span>
+      <h2 class="h2">Marca</h2>
+      <p class="sg-sec__desc">Logo vectorial (<code>snippets/logo.liquid</code>) en los cuatro esquemas de color y sobre rojo, como en «Aplicaciones correctas» del manual. Nunca se recolorea ni se deforma; tamaño mínimo web 22&nbsp;px.</p>
+    </div>
+    <div class="sg-cols sg-cols--4">
+      {%- for s in schemes -%}
+        {%- liquid
+          assign tone = 'dark'
+          if s == 'dark'
+            assign tone = 'light'
+          endif
+        -%}
+        <div class="sg-logo scheme-{{ s }}">
+          {% render 'logo', variant: 'lockup', tone: tone %}
+          {% render 'logo', variant: 'mark', tone: tone, label: '' %}
+          <span class="sg-logo__tag">scheme-{{ s }} · tone {{ tone }}</span>
+        </div>
+      {%- endfor -%}
+    </div>
+    <div class="sg-cols sg-cols--3" style="margin-top: 16px;">
+      <div class="sg-logo sg-logo--red">
+        {% render 'logo', variant: 'lockup', tone: 'mono-light', label: '' %}
+        <span class="sg-logo__tag">Rojo de marca · tone mono-light</span>
+      </div>
+      <div class="sg-logo scheme-brand has-watermark">
+        <p class="h3 heading-dot" style="position: relative;">Marca de agua</p>
+        <span class="sg-logo__tag">.has-watermark + logo mark mono-dark</span>
+        {% render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'mi-watermark' %}
+      </div>
+      <div class="sg-logo scheme-light">
+        <div class="sg-minsize">
+          {% render 'logo', variant: 'mark', tone: 'dark', label: '' %}
+          {% render 'logo', variant: 'lockup', tone: 'dark', label: '' %}
+        </div>
+        <span class="sg-logo__tag">Tamaños mínimos · mark 22 px · lockup 90 px</span>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 02 Color ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-color" data-sg="color">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">02</span>
+      <h2 class="h2">Color</h2>
+      <p class="sg-sec__desc">Los cinco primeros vienen de la configuración del tema. El rojo puro (<code>--color-accent</code>) es solo decorativo (puntos, marcadores, badge del carrito); el texto de oferta usa <code>--color-sale</code>, que cumple AA sobre blanco. Nunca texto blanco sobre amarillo.</p>
+    </div>
+    <div class="sg-colors">
+      <div class="sg-color"><div class="sg-color__chip" style="background: var(--color-brand);"></div><div class="sg-color__meta"><strong>Amarillo marca</strong><code>--color-brand</code><span>{{ settings.color_brand }} · Pantone 116 C</span></div></div>
+      <div class="sg-color"><div class="sg-color__chip" style="background: var(--color-ink);"></div><div class="sg-color__meta"><strong>Tinta</strong><code>--color-ink</code><span>{{ settings.color_ink }} (el logo usa #000)</span></div></div>
+      <div class="sg-color"><div class="sg-color__chip" style="background: var(--color-accent);"></div><div class="sg-color__meta"><strong>Rojo acento</strong><code>--color-accent</code><span>{{ settings.color_accent }} · 485 C · decorativo</span></div></div>
+      <div class="sg-color"><div class="sg-color__chip" style="background: var(--color-sale);"></div><div class="sg-color__meta"><strong>Rojo oferta</strong><code>--color-sale</code><span>{{ settings.color_sale }} · texto AA</span></div></div>
+      <div class="sg-color"><div class="sg-color__chip" style="background: var(--color-brand-soft);"></div><div class="sg-color__meta"><strong>Amarillo suave</strong><code>--color-brand-soft</code><span>{{ settings.color_brand_soft }}</span></div></div>
+      {%- for token in static_tokens -%}
+        {%- assign t = token | split: ':' -%}
+        <div class="sg-color"><div class="sg-color__chip" style="background: var({{ t[0] }});"></div><div class="sg-color__meta"><strong>{{ t[0] | remove: '--color-' | replace: '-', ' ' | capitalize }}</strong><code>{{ t[0] }}</code><span>{{ t[1] }}</span></div></div>
+      {%- endfor -%}
+    </div>
+  </section>
+
+  {%- comment -%} ============ 03 Tipografía ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-tipo" data-sg="tipografia">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">03</span>
+      <h2 class="h2">Tipografía</h2>
+      <p class="sg-sec__desc">Urbanist 700–900 (títulos, precios, botones; sustituto web de All Round Gothic) y Libre Franklin 400–700 (texto). El punto rojo de <code>.heading-dot</code> se omite si el título termina en «?», «!» o «.».</p>
+    </div>
+    <div class="sg-type">
+      <div class="sg-type__row"><p class="sg-label">.display · Urbanist 900</p><p class="display heading-dot">Que te vean</p></div>
+      <div class="sg-type__row"><p class="sg-label">h1 · 32–52 px</p><p class="h1 heading-dot">Llantas para bici y scooter</p></div>
+      <div class="sg-type__row"><p class="sg-label">h2 · 26–36 px</p><p class="h2 heading-dot">Compra por categoría</p></div>
+      <div class="sg-type__row"><p class="sg-label">h3 · 24 px</p><p class="h3">Tu casco, tu mejor accesorio</p></div>
+      <div class="sg-type__row"><p class="sg-label">h4 · 20 px</p><p class="h4">Cascos y protección</p></div>
+      <div class="sg-type__row"><p class="sg-label">.eyebrow / .eyebrow--dot</p><div class="sg-row"><p class="eyebrow">Vendedor autorizado</p><p class="eyebrow eyebrow--dot">Luces y seguridad</p></div></div>
+      <div class="sg-type__row"><p class="sg-label">.lead · 18 px</p><p class="lead">Luces delanteras, posteriores y linternas para cada ruta.</p></div>
+      <div class="sg-type__row"><p class="sg-label">Body · 16 px / 1.55</p><p style="max-width: 62ch;">Seleccionamos accesorios y repuestos que te den seguridad, confort y estilo en cada trayecto. <a href="#sg-tipo">Enlace de texto</a>. <span class="text-muted">Texto secundario (.text-muted).</span> <span class="text-sale">Texto de oferta (.text-sale).</span></p></div>
+      <div class="sg-type__row"><p class="sg-label">.rte (descripciones)</p>
+        <div class="rte" style="max-width: 62ch;">
+          <h3>Características</h3>
+          <ul><li>Batería recargable por USB-C.</li><li>Modo intermitente para el día.</li></ul>
+          <p>¿Dudas con la medida? <a href="#sg-tipo">Mira la guía de compatibilidad</a>.</p>
+          <blockquote>Si no sabes cuál es, escríbenos con una foto.</blockquote>
+          <table><thead><tr><th>Medida</th><th>Aro</th><th>Uso</th></tr></thead><tbody><tr><td>8.5 x 2.0</td><td>8.5"</td><td>Scooter</td></tr><tr><td>26 x 1.95</td><td>26"</td><td>MTB</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 04 Botones ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-botones" data-sg="botones">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">04</span>
+      <h2 class="h2">Botones</h2>
+      <p class="sg-sec__desc"><code>.btn</code> es una píldora de 48&nbsp;px (sm 40 · lg 56). <code>--primary</code>, <code>--accent</code>, <code>--outline</code>, <code>--ghost</code> y <code>--link</code> se adaptan al esquema; <code>--brand</code> e <code>--ink</code> son fijos.</p>
+    </div>
+    <div class="sg-panel scheme-light">
+      <div class="sg-cell"><p class="sg-label">Variantes · scheme-light</p>
+        <div class="sg-row">
+          <button class="btn btn--primary" type="button">Primary</button>
+          <button class="btn btn--accent" type="button">Accent</button>
+          <button class="btn btn--brand" type="button">{% render 'icon', name: 'bag' %} Agregar al carrito</button>
+          <button class="btn btn--ink" type="button">Comprar ahora</button>
+          <button class="btn btn--outline" type="button">Outline</button>
+          <button class="btn btn--ghost" type="button">Ghost</button>
+          <button class="btn btn--link" type="button">Ver todo</button>
+        </div>
+      </div>
+      <div class="sg-cell"><p class="sg-label">Tamaños · sm 40 / md 48 / lg 56 · íconos 40 / 44 / 52</p>
+        <div class="sg-row">
+          <button class="btn btn--brand btn--sm" type="button">Agregar</button>
+          <button class="btn btn--brand" type="button">Agregar</button>
+          <button class="btn btn--brand btn--lg" type="button">Agregar</button>
+          <button class="btn btn--icon btn--sm btn--outline" type="button" aria-label="Anterior">{% render 'icon', name: 'chevron-left' %}</button>
+          <button class="btn btn--icon btn--brand" type="button" aria-label="Agregar al carrito">{% render 'icon', name: 'bag-plus' %}</button>
+          <button class="btn btn--icon btn--lg" type="button" aria-label="Buscar">{% render 'icon', name: 'search' %}</button>
+        </div>
+      </div>
+      <div class="sg-cell"><p class="sg-label">Estados · disabled · aria-disabled · .is-loading</p>
+        <div class="sg-row">
+          <button class="btn btn--brand" type="button" disabled>Agotado</button>
+          <a class="btn btn--primary" aria-disabled="true">No disponible</a>
+          <button class="btn btn--brand is-loading" type="button" aria-busy="true">Agregando…</button>
+          <button class="btn btn--ink is-loading" type="button" aria-busy="true">Comprando…</button>
+        </div>
+      </div>
+      <div class="sg-cell" style="justify-items: stretch; max-width: 440px;"><p class="sg-label">.btn--block · .btn--lg</p>
+        <button class="btn btn--brand btn--lg btn--block" type="button">Finalizar pedido</button>
+        <button class="btn btn--link" type="button" style="justify-self: center;">Seguir comprando</button>
+      </div>
+    </div>
+    <div class="sg-cols sg-cols--3" style="margin-top: 16px;">
+      {%- for s in schemes offset: 1 -%}
+        <div class="sg-panel scheme-{{ s }}">
+          <p class="sg-label">scheme-{{ s }}</p>
+          <div class="sg-row">
+            <a class="btn btn--primary" href="#sg-botones">Primary</a>
+            <a class="btn btn--accent" href="#sg-botones">Accent</a>
+          </div>
+          <div class="sg-row">
+            <a class="btn btn--outline btn--sm" href="#sg-botones">Outline</a>
+            <a class="btn btn--ghost btn--sm" href="#sg-botones">Ghost</a>
+            <a class="btn btn--link" href="#sg-botones">Ver todo</a>
+          </div>
+          <div class="sg-row">
+            <button class="btn btn--primary btn--sm" type="button" disabled>Disabled</button>
+            <button class="btn btn--accent btn--sm is-loading" type="button" aria-busy="true">Cargando</button>
+            <button class="btn btn--icon btn--outline" type="button" aria-label="Siguiente">{% render 'icon', name: 'chevron-right' %}</button>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </section>
+
+  {%- comment -%} ============ 05 Formularios ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-forms" data-sg="formularios">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">05</span>
+      <h2 class="h2">Formularios</h2>
+      <p class="sg-sec__desc">Campos siempre blancos con texto tinta y 16&nbsp;px (sin zoom en iOS). Borde de 3:1 para que el campo se reconozca (WCAG 1.4.11). Los mensajes llevan su ícono por CSS.</p>
+    </div>
+    <div class="sg-cols sg-cols--2">
+      <div class="sg-stack">
+        <div class="field">
+          <label class="field__label" for="sg-email">Correo electrónico</label>
+          <input class="input" id="sg-email" type="email" placeholder="tu@correo.pe" autocomplete="email">
+          <p class="field__hint">Te avisamos cuando entre stock nuevo.</p>
+        </div>
+        <div class="field">
+          <label class="field__label" for="sg-phone">Teléfono</label>
+          <input class="input" id="sg-phone" type="tel" value="98765" aria-invalid="true" aria-describedby="sg-phone-error">
+          <p class="form-message form-message--error" id="sg-phone-error">Ingresa un número de 9 dígitos.</p>
+        </div>
+        <div class="field">
+          <label class="field__label" for="sg-sort">Ordenar por</label>
+          <div class="select"><select id="sg-sort"><option>Destacados</option><option>Precio: menor a mayor</option><option>Precio: mayor a menor</option></select></div>
+        </div>
+        <div class="field">
+          <label class="field__label" for="sg-msg">Mensaje</label>
+          <textarea class="textarea" id="sg-msg" rows="3" placeholder="Cuéntanos qué repuesto buscas"></textarea>
+        </div>
+      </div>
+      <div class="sg-stack">
+        <fieldset class="sg-stack" style="border: 0; margin: 0; padding: 0; gap: 12px;">
+          <legend class="field__label" style="margin-bottom: 10px;">Disponibilidad</legend>
+          <label class="checkbox"><input type="checkbox" checked> <span>Disponible (12)</span></label>
+          <label class="checkbox"><input type="checkbox"> <span>Agotado (3)</span></label>
+          <label class="checkbox"><input type="checkbox" disabled> <span>Preventa (0)</span></label>
+        </fieldset>
+        <fieldset class="sg-stack" style="border: 0; margin: 0; padding: 0; gap: 12px;">
+          <legend class="field__label" style="margin-bottom: 10px;">Envío</legend>
+          <label class="checkbox"><input type="radio" name="sg-ship" checked> <span>Lima Metropolitana</span></label>
+          <label class="checkbox"><input type="radio" name="sg-ship"> <span>Provincias</span></label>
+        </fieldset>
+        <div class="field">
+          <label class="field__label" for="sg-q">Búsqueda (.input--pill)</label>
+          <form class="sg-search" role="search" onsubmit="return false">
+            <input class="input input--pill" id="sg-q" type="search" placeholder="Busca por código, medida o nombre…">
+            <button class="btn btn--icon btn--brand" type="submit" aria-label="Buscar">{% render 'icon', name: 'search' %}</button>
+          </form>
+        </div>
+        <div class="field">
+          <label class="field__label" for="sg-news">Newsletter (input + botón)</label>
+          <div class="sg-inline"><input class="input input--pill" id="sg-news" type="email" placeholder="tu@correo.pe"><button class="btn btn--primary" type="button">Suscribirme</button></div>
+        </div>
+        <p class="form-message form-message--success">¡Listo! Te avisaremos cuando llegue stock.</p>
+        <p class="form-message form-message--error">No pudimos agregar este producto. Inténtalo de nuevo.</p>
+      </div>
+    </div>
+    <div class="sg-panel scheme-dark" style="margin-top: 16px;">
+      <p class="sg-label">Sobre scheme-dark</p>
+      <form class="sg-search" role="search" onsubmit="return false" style="max-width: 520px;">
+        <input class="input input--pill" type="search" placeholder="Ej.: llanta aro 26, luz trasera, piñón 9v…" aria-label="Buscar">
+        <button class="btn btn--icon btn--brand" type="submit" aria-label="Buscar">{% render 'icon', name: 'search' %}</button>
+      </form>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 06 Badges y chips ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-badges" data-sg="badges">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">06</span>
+      <h2 class="h2">Badges y chips</h2>
+      <p class="sg-sec__desc"><code>product-badges</code> muestra máximo 2 (prioridad: agotado › oferta › nuevo › más vendido) y nunca otras etiquetas. Chips de 36&nbsp;px: desplazables en móvil, envuelven desde 990&nbsp;px.</p>
+    </div>
+    <div class="sg-block">
+      <p class="sg-label">.badge--sale · --new · --soldout · --dark · --soft</p>
+      <div class="badges">
+        <span class="badge badge--sale">-31%</span>
+        <span class="badge badge--sale">Oferta</span>
+        <span class="badge badge--new">Nuevo</span>
+        <span class="badge badge--soldout">Agotado</span>
+        <span class="badge badge--dark">Más vendido</span>
+        <span class="badge badge--soft">{% render 'icon', name: 'truck', size: 14 %} Envío gratis</span>
+      </div>
+    </div>
+    <div class="sg-block">
+      <p class="sg-label">snippet product-badges (datos reales)</p>
+      <div class="sg-row">
+        <div class="badges">{% render 'product-badges', product: p_lentes %}</div>
+        <div class="badges">{% render 'product-badges', product: p_agotado %}</div>
+        <div class="badges">{% render 'product-badges', product: p_desde %}</div>
+        <div class="badges">{% render 'product-badges', product: p_lentes, sale_label: true %}</div>
+      </div>
+    </div>
+    <div class="sg-block">
+      <p class="sg-label">.chip-row · activo con aria-current / aria-pressed</p>
+      <div class="chip-row chip-row--bleed">
+        <a class="chip" href="#sg-badges" aria-current="page">Todos</a>
+        <a class="chip" href="#sg-badges">{% render 'icon', name: 'light' %} Luces</a>
+        <a class="chip" href="#sg-badges">{% render 'icon', name: 'tire' %} Llantas</a>
+        <a class="chip" href="#sg-badges">{% render 'icon', name: 'mirror' %} Espejos</a>
+        <a class="chip" href="#sg-badges">{% render 'icon', name: 'seat' %} Asientos</a>
+        <a class="chip" href="#sg-badges">{% render 'icon', name: 'pedal' %} Pedales</a>
+        <a class="chip" href="#sg-badges">{% render 'icon', name: 'gear' %} Piñones</a>
+        <button class="chip" type="button" aria-pressed="false">Rockbros</button>
+      </div>
+    </div>
+    <div class="sg-cols sg-cols--2" style="margin-top: 16px;">
+      <div class="sg-panel scheme-brand">
+        <p class="sg-label">scheme-brand</p>
+        <div class="chip-row"><a class="chip" href="#sg-badges" aria-current="page">luces</a><a class="chip" href="#sg-badges">llantas</a><a class="chip" href="#sg-badges">espejos</a><a class="chip" href="#sg-badges">asientos</a></div>
+      </div>
+      <div class="sg-panel scheme-dark">
+        <p class="sg-label">scheme-dark</p>
+        <div class="chip-row"><a class="chip" href="#sg-badges" aria-current="page">luces</a><a class="chip" href="#sg-badges">llantas</a><a class="chip" href="#sg-badges">espejos</a><a class="chip" href="#sg-badges">asientos</a></div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 07 Precios ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-precios" data-sg="precios">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">07</span>
+      <h2 class="h2">Precios y calificación</h2>
+      <p class="sg-sec__desc"><code>price</code> con datos del catálogo. Oferta: precio rojo + precio tachado + píldora «-NN%». «Desde» cuando el precio varía entre variantes. La calificación solo aparece si existe el metafield <code>reviews.rating</code> (aquí es un dato de prueba del preview; el tema nunca inventa reseñas).</p>
+    </div>
+    <div class="sg-prices">
+      <div class="sg-cell"><p class="sg-label">Regular · md</p>{% render 'price', product: p_casco, size: 'md' %}</div>
+      <div class="sg-cell"><p class="sg-label">Oferta · md</p>{% render 'price', product: p_lentes, size: 'md' %}</div>
+      <div class="sg-cell"><p class="sg-label">Desde · md</p>{% render 'price', product: p_desde, size: 'md' %}</div>
+      <div class="sg-cell"><p class="sg-label">Agotado · md</p>{% render 'price', product: p_agotado, size: 'md' %}</div>
+      <div class="sg-cell" style="grid-column: 1 / -1;"><p class="sg-label">Oferta · lg (ficha de producto)</p>{% render 'price', product: p_linterna, size: 'lg' %}</div>
+      <div class="sg-cell"><p class="sg-label">Oferta · sm</p>{% render 'price', product: p_tapa, size: 'sm' %}</div>
+      <div class="sg-cell"><p class="sg-label">sm · show_save: false (tarjeta)</p>{% render 'price', product: p_tapa, size: 'sm', show_save: false %}</div>
+      <div class="sg-cell"><p class="sg-label">Rating · sm</p>{% render 'rating', product: p_desde, size: 'sm' %}</div>
+      <div class="sg-cell"><p class="sg-label">Rating · md</p>{% render 'rating', product: p_desde, size: 'md' %}</div>
+    </div>
+    <div class="sg-cols sg-cols--2" style="margin-top: 24px;">
+      <div class="sg-panel scheme-brand"><p class="sg-label">scheme-brand</p>{% render 'price', product: p_lentes, size: 'md' %}{% render 'rating', product: p_desde %}</div>
+      <div class="sg-panel scheme-dark"><p class="sg-label">scheme-dark</p>{% render 'price', product: p_lentes, size: 'md' %}{% render 'rating', product: p_desde %}</div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 08 Colores de producto ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-swatches" data-sg="swatches">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">08</span>
+      <h2 class="h2">Colores de producto</h2>
+      <p class="sg-sec__desc"><code>color-swatch</code> traduce los nombres en español (sin importar mayúsculas ni tildes). Dos colores conocidos → división diagonal 50/50. Desconocido → neutro, y el nombre siempre se muestra como texto.</p>
+    </div>
+    <div class="sg-swatches">
+      {%- for name in swatch_names -%}
+        <div class="sg-swatch">{% render 'color-swatch', value: name, size: 'lg' %}<span>{{ name }}</span></div>
+      {%- endfor -%}
+    </div>
+    <div class="sg-block" style="margin-top: 28px;">
+      <p class="sg-label">Tamaños sm 16 · md 28 · lg 40 · valores reales de variantes</p>
+      <div class="sg-row" style="gap: 16px 32px;">
+        {%- for value in p_casco.options_with_values.first.values -%}
+          <span class="sg-row" style="gap: 8px;">{% render 'color-swatch', value: value, size: 'sm' %}{% render 'color-swatch', value: value, size: 'md' %}{% render 'color-swatch', value: value, size: 'lg' %}<span class="sg-code">{{ value }}</span></span>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 09 Cantidad ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-cantidad" data-sg="cantidad">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">09</span>
+      <h2 class="h2">Selector de cantidad</h2>
+      <p class="sg-sec__desc"><code>&lt;quantity-input&gt;</code>: md 44&nbsp;px (ficha) y sm 36&nbsp;px (líneas del carrito). En el mínimo/máximo el botón queda con <code>aria-disabled</code>.</p>
+    </div>
+    <div class="sg-row sg-row--top" style="gap: 28px;">
+      <div class="sg-cell"><p class="sg-label">md · en el mínimo</p>{% render 'quantity-input', id: 'SgQty1', value: 1, min: 1 %}</div>
+      <div class="sg-cell"><p class="sg-label">md · valor 2</p>{% render 'quantity-input', id: 'SgQty2', value: 2, min: 1 %}</div>
+      <div class="sg-cell"><p class="sg-label">md · en el máximo (5)</p>{% render 'quantity-input', id: 'SgQty3', value: 5, min: 1, max: 5 %}</div>
+      <div class="sg-cell"><p class="sg-label">sm · línea de carrito</p>{% render 'quantity-input', id: 'SgQty4', value: 3, min: 0, size: 'sm' %}</div>
+      <div class="sg-panel scheme-dark" style="padding: 16px;"><p class="sg-label">scheme-dark</p>{% render 'quantity-input', id: 'SgQty5', value: 2, min: 1 %}</div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 10 Envío gratis ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-envio" data-sg="envio">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">10</span>
+      <h2 class="h2">Barra de envío gratis</h2>
+      <p class="sg-sec__desc"><code>free-shipping-bar</code> con el umbral verificado (S/&nbsp;{{ settings.free_shipping_threshold }}). global.js la recalcula en cada <code>cart:updated</code>.</p>
+    </div>
+    <div class="sg-cols sg-cols--3">
+      <div class="sg-cell" style="justify-items: stretch;"><p class="sg-label">card · 0 %</p>{% render 'free-shipping-bar', total: 0, style: 'card' %}</div>
+      <div class="sg-cell" style="justify-items: stretch;"><p class="sg-label">card · 45 %</p>{% render 'free-shipping-bar', total: 9900, style: 'card' %}</div>
+      <div class="sg-cell" style="justify-items: stretch;"><p class="sg-label">card · completo</p>{% render 'free-shipping-bar', total: 23500, style: 'card' %}</div>
+    </div>
+    <div class="sg-cols sg-cols--2" style="margin-top: 20px;">
+      <div class="sg-cell" style="justify-items: stretch;"><p class="sg-label">inline · 45 % (ficha de producto)</p>{% render 'free-shipping-bar', total: 9900, style: 'inline' %}</div>
+      <div class="sg-panel scheme-dark"><p class="sg-label">inline · scheme-dark · 80 %</p>{% render 'free-shipping-bar', total: 17600, style: 'inline' %}</div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 11 Acordeón ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-acordeon" data-sg="acordeon">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">11</span>
+      <h2 class="h2">Acordeón</h2>
+      <p class="sg-sec__desc"><code>&lt;details class="accordion"&gt;</code> nativo (funciona sin JS). El chevron gira 180°; el ícono <code>plus</code> se convierte en ×.</p>
+    </div>
+    <div class="sg-cols sg-cols--2">
+      <div>
+        <details class="accordion" open>
+          <summary class="accordion__summary">¿Hacen envíos a provincias? {% render 'icon', name: 'chevron-down' %}</summary>
+          <div class="accordion__content rte"><p>Sí. Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde S/ 220.</p></div>
+        </details>
+        <details class="accordion">
+          <summary class="accordion__summary">¿Los productos son originales? {% render 'icon', name: 'chevron-down' %}</summary>
+          <div class="accordion__content rte"><p>Sí. Somos vendedor autorizado Rockbros.</p></div>
+        </details>
+        <details class="accordion">
+          <summary class="accordion__summary">¿Puedo cambiar un producto? {% render 'icon', name: 'plus' %}</summary>
+          <div class="accordion__content rte"><p>Sí, tienes 7 días para cambiarlo, siempre que el producto esté sin abrir.</p></div>
+        </details>
+      </div>
+      <div class="sg-panel scheme-soft">
+        <p class="sg-label">.accordion--card · scheme-soft</p>
+        <div>
+          <details class="accordion accordion--card" open>
+            <summary class="accordion__summary">Descripción {% render 'icon', name: 'plus' %}</summary>
+            <div class="accordion__content rte"><p>Luz delantera recargable con cinco modos y soporte de liberación rápida.</p></div>
+          </details>
+          <details class="accordion accordion--card">
+            <summary class="accordion__summary">Envíos y cambios {% render 'icon', name: 'plus' %}</summary>
+            <div class="accordion__content rte"><p>Cambios dentro de los 7 días (producto sin abrir).</p></div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 12 Encabezados de sección ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-heading" data-sg="encabezados">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">12</span>
+      <h2 class="h2">Encabezados de sección</h2>
+      <p class="sg-sec__desc"><code>section-heading</code>: título + punto rojo, subtítulo y enlace «Ver todo» a la derecha.</p>
+    </div>
+    <div class="sg-stack" style="gap: 28px;">
+      {% render 'section-heading', title: 'Destacados', subtitle: 'Lo más pedido esta semana en Lima y provincias.', link_url: routes.all_products_collection_url, tag: 'h3' %}
+      {% render 'section-heading', title: '¿Qué repuesto necesitas?', eyebrow: 'Búsqueda', subtitle: 'Busca por código, medida o nombre.', align: 'center', tag: 'h3' %}
+      <div class="sg-panel scheme-brand">
+        {% render 'section-heading', title: 'Rockbros original', eyebrow: 'Vendedor autorizado', link_url: '/collections/rockbros', link_label: 'Ver Rockbros', tag: 'h3' %}
+      </div>
+      <div class="sg-panel scheme-dark">
+        {% render 'section-heading', title: 'Luces para volver de noche', link_url: '/collections/luces', tag: 'h3' %}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 13 Tarjetas ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-tarjetas" data-sg="tarjetas">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">13</span>
+      <h2 class="h2">Tarjetas de producto</h2>
+      <p class="sg-sec__desc"><code>product-card</code> con productos del catálogo: oferta, multivariante con colores, agotado, precio «Desde», badges Nuevo / Más vendido. El botón amarillo agrega al carrito (1 variante) o lleva a elegir opciones (varias variantes).</p>
+    </div>
+    <div class="sg-block">
+      <p class="sg-label">carousel-slider · --per-view 2.15 → 3 → 4</p>
+      <carousel-slider class="carousel carousel--bleed sg-carousel" aria-label="Carrusel de ejemplo">
+        <ul class="carousel__track" role="list">
+          {%- for handle in carousel_handles -%}
+            <li class="carousel__slide">{% render 'product-card', product: all_products[handle], section_id: 'sg-carousel', lazy: false %}</li>
+          {%- endfor -%}
+        </ul>
+        <div class="carousel__controls">
+          <button type="button" class="btn btn--icon btn--outline carousel__prev" aria-label="{{ 'general.carousel.previous' | t }}">{% render 'icon', name: 'chevron-left' %}</button>
+          <div class="carousel__dots"></div>
+          <button type="button" class="btn btn--icon btn--outline carousel__next" aria-label="{{ 'general.carousel.next' | t }}">{% render 'icon', name: 'chevron-right' %}</button>
+        </div>
+      </carousel-slider>
+    </div>
+    <div class="sg-block">
+      <p class="sg-label">data-autoplay="6" data-loop · .carousel--arrows-overlay · botón de pausa automático (nunca con movimiento reducido)</p>
+      <carousel-slider class="carousel carousel--arrows-overlay" data-autoplay="6" data-loop aria-label="Carrusel automático de ejemplo" style="--per-view: 1; --gap: 0px;">
+        <ul class="carousel__track" role="list">
+          {%- assign slide_schemes = 'brand,dark,soft' | split: ',' -%}
+          {%- assign slide_titles = 'Que te vean de día y de noche|Llantas para bici y scooter|Tu casco, tu mejor accesorio' | split: '|' -%}
+          {%- for sc in slide_schemes -%}
+            <li class="carousel__slide">
+              <div class="sg-slide scheme-{{ sc }} has-watermark">
+                <p class="eyebrow">Diapositiva {{ forloop.index }} de 3</p>
+                <p class="h2 heading-dot">{{ slide_titles[forloop.index0] }}</p>
+                {%- if sc == 'dark' -%}{% render 'logo', variant: 'mark', tone: 'mono-light', label: '', class: 'mi-watermark' %}{%- else -%}{% render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'mi-watermark' %}{%- endif -%}
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+        <button type="button" class="btn btn--icon carousel__prev" aria-label="{{ 'general.carousel.previous' | t }}">{% render 'icon', name: 'chevron-left' %}</button>
+        <button type="button" class="btn btn--icon carousel__next" aria-label="{{ 'general.carousel.next' | t }}">{% render 'icon', name: 'chevron-right' %}</button>
+        <div class="carousel__controls"><div class="carousel__dots"></div></div>
+      </carousel-slider>
+    </div>
+    <div class="sg-block">
+      <p class="sg-label">.product-grid · 2 → 3 → 4 columnas</p>
+      <ul class="product-grid" role="list">
+        {%- for handle in grid_handles -%}
+          <li>{% render 'product-card', product: all_products[handle], section_id: 'sg-grid', lazy: false %}</li>
+        {%- endfor -%}
+      </ul>
+    </div>
+    <div class="sg-block">
+      <p class="sg-label">Tarjetas de onboarding (product: blank)</p>
+      <ul class="product-grid" role="list">
+        {%- for i in (1..4) -%}
+          <li>{% render 'product-card', product: blank, placeholder: i %}</li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 14 Cajones ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-drawer" data-sg="drawer">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">14</span>
+      <h2 class="h2">Cajones laterales</h2>
+      <p class="sg-sec__desc"><code>&lt;side-drawer&gt;</code>: atrapa el foco, cierra con Esc, con el fondo o con <code>[data-drawer-close]</code>, bloquea el scroll y devuelve el foco al botón que lo abrió.</p>
+    </div>
+    <div class="sg-row">
+      <button class="btn btn--primary" type="button" data-drawer-open="SgDrawerRight" aria-controls="SgDrawerRight" aria-expanded="false">{% render 'icon', name: 'bag' %} Cajón derecho</button>
+      <button class="btn btn--outline" type="button" data-drawer-open="SgDrawerLeft" aria-controls="SgDrawerLeft" aria-expanded="false">{% render 'icon', name: 'menu' %} Cajón izquierdo</button>
+      <button class="btn btn--outline" type="button" data-drawer-open="SgDrawerBottom" aria-controls="SgDrawerBottom" aria-expanded="false">{% render 'icon', name: 'filter' %} Hoja inferior</button>
+    </div>
+
+    <side-drawer id="SgDrawerRight" class="drawer">
+      <div class="drawer__overlay" data-drawer-close></div>
+      <div class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="SgDrawerRight-title" tabindex="-1">
+        <div class="drawer__header">
+          <h2 class="drawer__title" id="SgDrawerRight-title">Tu carrito</h2>
+          <button type="button" class="drawer__close" data-drawer-close aria-label="{{ 'general.close' | t }}">{% render 'icon', name: 'close' %}</button>
+        </div>
+        <div class="drawer__body sg-stack">
+          {% render 'free-shipping-bar', total: 9900, style: 'card' %}
+          <p class="text-muted">Contenido del cajón (el carrito real lo construye el área Cart).</p>
+        </div>
+        <div class="drawer__footer sg-stack" style="gap: 8px;">
+          <button class="btn btn--brand btn--lg btn--block" type="button">Finalizar pedido</button>
+          <button class="btn btn--link" type="button" data-drawer-close style="justify-self: center;">Seguir comprando</button>
+        </div>
+      </div>
+    </side-drawer>
+
+    <side-drawer id="SgDrawerLeft" class="drawer" data-side="left">
+      <div class="drawer__overlay" data-drawer-close></div>
+      <div class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="SgDrawerLeft-title" tabindex="-1">
+        <div class="drawer__header">
+          <h2 class="drawer__title" id="SgDrawerLeft-title">Menú</h2>
+          <button type="button" class="drawer__close" data-drawer-close aria-label="{{ 'general.close' | t }}">{% render 'icon', name: 'close' %}</button>
+        </div>
+        <div class="drawer__body">
+          <ul role="list" class="sg-stack" style="gap: 4px;">
+            {%- for pair in category_icons limit: 8 -%}
+              {%- assign c = pair | split: ':' -%}
+              <li><a class="sg-row" href="#sg-drawer" style="min-height: 48px; font: 700 var(--fs-md)/1.2 var(--font-heading); text-decoration: none;">{% render 'icon', name: c[0], size: 24 %} {{ c[1] }}</a></li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      </div>
+    </side-drawer>
+
+    <side-drawer id="SgDrawerBottom" class="drawer" data-side="bottom">
+      <div class="drawer__overlay" data-drawer-close></div>
+      <div class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="SgDrawerBottom-title" tabindex="-1">
+        <div class="drawer__header">
+          <h2 class="drawer__title" id="SgDrawerBottom-title">Filtrar</h2>
+          <button type="button" class="drawer__close" data-drawer-close aria-label="{{ 'general.close' | t }}">{% render 'icon', name: 'close' %}</button>
+        </div>
+        <div class="drawer__body sg-stack" style="gap: 12px;">
+          <label class="checkbox"><input type="checkbox" checked> <span>Disponible</span></label>
+          <label class="checkbox"><input type="checkbox"> <span>Rockbros</span></label>
+        </div>
+        <div class="drawer__footer sg-row" style="justify-content: space-between;">
+          <button class="btn btn--link" type="button">Limpiar</button>
+          <button class="btn btn--primary" type="button" data-drawer-close>Ver 12 productos</button>
+        </div>
+      </div>
+    </side-drawer>
+  </section>
+
+  {%- comment -%} ============ 15 WhatsApp ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-whatsapp" data-sg="whatsapp">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">15</span>
+      <h2 class="h2">WhatsApp</h2>
+      <p class="sg-sec__desc"><code>whatsapp-button</code> (float · button · link · card). El número de la tienda aún no está confirmado: con <code>whatsapp_number</code> vacío el snippet no imprime nada, en ninguna parte del tema.</p>
+    </div>
+    {%- capture wa_output -%}{% render 'whatsapp-button', style: 'button' %}{% render 'whatsapp-button', style: 'link' %}{% render 'whatsapp-button', style: 'card' %}{% render 'whatsapp-button', style: 'float' %}{%- endcapture -%}
+    {%- assign wa_output = wa_output | strip -%}
+    {%- if wa_digits == blank -%}
+      <div class="sg-note">
+        <strong>Oculto (correcto):</strong> <code>settings.whatsapp_number</code> está vacío → los cuatro estilos renderizan {{ wa_output | size }} caracteres y no aparece el botón flotante.
+        Para revisar el diseño con un número de prueba: <a href="?__settings=whatsapp_number:51900000000#sg-whatsapp">/_styleguide?__settings=whatsapp_number:51900000000</a>
+      </div>
+    {%- else -%}
+      <div class="sg-note" style="margin-bottom: 20px;"><strong>Número de prueba activo:</strong> {{ wa_digits }} (el botón flotante está abajo a la derecha).</div>
+      <div class="sg-cols sg-cols--2">
+        <div class="sg-stack">
+          <div class="sg-cell"><p class="sg-label">button</p>{% render 'whatsapp-button', style: 'button' %}</div>
+          <div class="sg-cell"><p class="sg-label">link</p>{% render 'whatsapp-button', style: 'link', label: 'Si no sabes cuál es, escríbenos con una foto.' %}</div>
+          <div class="sg-cell" style="justify-items: stretch;"><p class="sg-label">card</p>{% render 'whatsapp-button', style: 'card', label: '¿No lo encuentras?', text: 'Mándanos una foto y te ayudamos' %}</div>
+        </div>
+        <div class="sg-panel scheme-dark">
+          <p class="sg-label">scheme-dark</p>
+          {% render 'whatsapp-button', style: 'button' %}
+          {% render 'whatsapp-button', style: 'card' %}
+        </div>
+      </div>
+    {%- endif -%}
+  </section>
+
+  {%- comment -%} ============ 16 Íconos ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-iconos" data-sg="iconos">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">16</span>
+      <h2 class="h2">Íconos</h2>
+      <p class="sg-sec__desc"><code>{% raw %}{% render 'icon', name: 'cart' %}{% endraw %}</code> · retícula de 24&nbsp;px, trazo 1.75, puntas redondeadas. Las marcas sociales son rellenas.</p>
+    </div>
+    <div class="sg-block">
+      <p class="sg-label">Categorías (burbujas de 72 px como en «Compra por categoría»)</p>
+      <div class="sg-bubbles">
+        {%- for pair in category_icons -%}
+          {%- assign c = pair | split: ':' -%}
+          <div class="sg-bubble"><span>{% render 'icon', name: c[0] %}</span>{{ c[1] }}</div>
+        {%- endfor -%}
+      </div>
+    </div>
+    <div class="sg-block">
+      <p class="sg-label">Set completo · {{ icon_names.size }} íconos</p>
+      <div class="sg-icons">
+        {%- for name in icon_names -%}
+          <div class="sg-icon">{% render 'icon', name: name %}<span>{{ name }}</span></div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%} ============ 17 Otros ============ {%- endcomment -%}
+  <section class="sg-sec" id="sg-otros" data-sg="otros">
+    <div class="sg-sec__head">
+      <span class="sg-sec__num heading-dot">17</span>
+      <h2 class="h2">Navegación y pie</h2>
+      <p class="sg-sec__desc">Paginación, migas de pan, métodos de pago y redes sociales.</p>
+    </div>
+    <div class="sg-cols sg-cols--2">
+      <div class="sg-stack">
+        <div class="sg-cell"><p class="sg-label">pagination (collections.all de 4 en 4)</p>
+          {%- paginate collections.all.products by 4 -%}
+            {% render 'pagination', paginate: paginate %}
+          {%- endpaginate -%}
+        </div>
+        <div class="sg-cell"><p class="sg-label">breadcrumbs (marcado de ejemplo: el snippet depende de la página)</p>
+          <nav class="breadcrumbs" aria-label="{{ 'general.breadcrumbs' | t }}"><ol class="breadcrumbs__list"><li class="breadcrumbs__item"><a href="{{ routes.root_url }}">Inicio</a></li><li class="breadcrumbs__item"><a href="/collections/luces">Luces y seguridad</a></li><li class="breadcrumbs__item"><span aria-current="page">Linterna Táctica LED Ultra Potencia Rockbros M29</span></li></ol></nav>
+        </div>
+      </div>
+      <div class="sg-stack">
+        <div class="sg-cell"><p class="sg-label">payment-icons</p>{% render 'payment-icons' %}</div>
+        <div class="sg-cell"><p class="sg-label">social-icons</p>
+          {%- capture social_out -%}{% render 'social-icons' %}{%- endcapture -%}
+          {%- if social_out != blank -%}
+            {{ social_out }}
+          {%- else -%}
+            <p class="sg-note">Sin redes configuradas → no se imprime nada. <a href="?__settings=social_instagram:https://www.instagram.com/,social_facebook:https://www.facebook.com/,social_tiktok:https://www.tiktok.com/,social_youtube:https://www.youtube.com/#sg-otros">Ver con enlaces de prueba</a></p>
+          {%- endif -%}
+        </div>
+        <div class="sg-panel scheme-dark"><p class="sg-label">scheme-dark</p>{% render 'payment-icons' %}{{ social_out }}</div>
+      </div>
+    </div>
+  </section>
+</div>

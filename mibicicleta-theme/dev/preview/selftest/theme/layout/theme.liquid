@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@700;800&display=swap">
+    {{ content_for_header }}
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'fixture.js' | asset_url }}" defer></script>
+  </head>
+  <body class="t-{{ template.name }}" data-template="{{ template }}" data-page-type="{{ request.page_type }}">
+    {% sections 'header-group' %}
+    <main id="MainContent">{{ content_for_layout }}</main>
+    {% section 'cart-drawer' %}
+  </body>
+</html>

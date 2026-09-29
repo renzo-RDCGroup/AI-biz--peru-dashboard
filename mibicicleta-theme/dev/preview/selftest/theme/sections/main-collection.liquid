@@ -1,0 +1,13 @@
+{%- paginate collection.products by 2 -%}
+<button type="button" data-drawer-open="FilterDrawer">Filtrar</button><side-drawer id="FilterDrawer" class="drawer">Filtros</side-drawer>
+<div class="coll" data-count="{{ collection.products_count }}" data-all="{{ collection.all_products_count }}" data-sort="{{ collection.sort_by | default: collection.default_sort_by }}">
+  <ul class="products">{% for product in collection.products %}<li data-handle="{{ product.handle }}" data-price="{{ product.price }}">{{ product.vendor }}</li>{% endfor %}</ul>
+  <div class="pg" data-current="{{ paginate.current_page }}" data-pages="{{ paginate.pages }}" data-items="{{ paginate.items }}">{% for part in paginate.parts %}{% if part.is_link %}<a href="{{ part.url }}">{{ part.title }}</a>{% else %}<span>{{ part.title }}</span>{% endif %}{% endfor %}</div><div class="pg-current">{% for part in paginate.parts %}{% if part.title == paginate.current_page %}{{ part.title }}{% endif %}{% endfor %}</div>
+  <div class="next">{{ paginate.next.url }}</div>
+  <div class="snippet-sees">{% render 'count-products' %}</div>
+  <div class="active-link">{% for link in linklists.main-menu.links %}{% if link.active %}{{ link.title }}{% endif %}{% endfor %}</div>
+  <div class="filters">{% for filter in collection.filters %}<div class="f" data-param="{{ filter.param_name }}" data-type="{{ filter.type }}">{% for v in filter.values %}<span data-v="{{ v.value }}" data-count="{{ v.count }}" data-active="{{ v.active }}"{% if v.swatch.color %} data-swatch="{{ v.swatch.color }}"{% endif %}>{{ v.label }}</span>{% endfor %}{% if filter.type == 'price_range' %}<span class="max">{{ filter.range_max }}</span>{% endif %}</div>{% endfor %}</div>
+  <div class="default-pagination">{{ paginate | default_pagination }}</div>
+</div>
+{%- endpaginate -%}
+{% schema %}{ "name": "Colección", "settings": [] }{% endschema %}

@@ -1,0 +1,84 @@
+{%- comment -%}
+  Image with text (styles: assets/section-home-2.css). Image left/right in a rounded frame
+  over a yellow offset shape, with an optional round "mi" stamp (logo on yellow = a correct
+  application per the brand manual). Eyebrow, heading (red dot), rich text, button.
+{%- endcomment -%}
+{{ 'section-home-2.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign s = section.settings
+  case s.image_ratio
+    when 'square'
+      assign ratio = 1
+    when 'portrait'
+      assign ratio = 0.8
+    when 'wide'
+      assign ratio = 1.7778
+    else
+      assign ratio = 1.3333
+  endcase
+  assign h_last = s.heading | strip | slice: -1
+  assign h_dot = true
+  if h_last == '.' or h_last == '?' or h_last == '!' or h_last == ':' or h_last == '…'
+    assign h_dot = false
+  endif
+  assign title_id = 'IwtTitle-' | append: section.id
+-%}
+
+<section class="iwt section scheme-{{ s.scheme }}" style="--pad-top: {{ s.padding_top }}px; --pad-bottom: {{ s.padding_bottom }}px;"{% if s.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
+  <div class="page-width iwt__grid iwt__grid--img-{{ s.image_position }}">
+    <div class="iwt__visual" data-reveal>
+      <div class="iwt__media media" style="--ratio: {{ ratio }};">
+        {%- render 'image', image: s.image, widths: '360,540,720,900,1080,1296,1600', sizes: '(min-width: 990px) 46vw, 100vw', lazy: true, alt: s.image.alt, placeholder: 'lifestyle-2' -%}
+      </div>
+      {%- if s.show_stamp -%}
+        <span class="iwt__stamp" aria-hidden="true">{% render 'logo', variant: 'mark', tone: 'dark', label: '' %}</span>
+      {%- endif -%}
+    </div>
+
+    <div class="iwt__content" data-reveal style="--reveal-delay: 120ms;">
+      {%- if s.eyebrow != blank -%}
+        <p class="eyebrow eyebrow--dot">{{ s.eyebrow | escape }}</p>
+      {%- endif -%}
+      {%- if s.heading != blank -%}
+        <h2 class="h1 iwt__heading{% if h_dot %} heading-dot{% endif %}" id="{{ title_id }}">{{ s.heading | escape }}</h2>
+      {%- endif -%}
+      {%- if s.text != blank -%}
+        <div class="rte iwt__text">{{ s.text }}</div>
+      {%- endif -%}
+      {%- if s.button_label != blank and s.button_link != blank -%}
+        <div class="iwt__actions">
+          <a class="btn btn--{{ s.button_style }} btn--lg" href="{{ s.button_link }}">
+            {{- s.button_label | escape -}}
+            {%- render 'icon', name: 'arrow-right' -%}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Imagen con texto",
+  "tag": "div",
+  "class": "iwt-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "image_picker", "id": "image", "label": "Imagen"},
+    {"type": "select", "id": "image_position", "label": "Imagen a la", "options": [{"value": "left", "label": "Izquierda"}, {"value": "right", "label": "Derecha"}], "default": "left"},
+    {"type": "select", "id": "image_ratio", "label": "Formato de la imagen", "options": [{"value": "landscape", "label": "Horizontal (4:3)"}, {"value": "wide", "label": "Panorámica (16:9)"}, {"value": "square", "label": "Cuadrada"}, {"value": "portrait", "label": "Vertical (4:5)"}], "default": "landscape"},
+    {"type": "checkbox", "id": "show_stamp", "label": "Mostrar sello «mi» sobre la imagen", "default": true},
+    {"type": "text", "id": "eyebrow", "label": "Antetítulo", "default": "Sobre Mi Bicicleta"},
+    {"type": "text", "id": "heading", "label": "Título", "default": "Movilidad con personalidad"},
+    {"type": "richtext", "id": "text", "label": "Texto", "default": "<p>Seleccionamos accesorios y repuestos para que ruedes con seguridad, confort y estilo.</p>"},
+    {"type": "text", "id": "button_label", "label": "Botón", "default": "Ver todo el catálogo"},
+    {"type": "url", "id": "button_link", "label": "Enlace del botón", "default": "/collections/all"},
+    {"type": "select", "id": "button_style", "label": "Estilo del botón", "options": [{"value": "primary", "label": "Principal"}, {"value": "accent", "label": "Destacado"}, {"value": "outline", "label": "Contorno"}], "default": "primary"},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64}
+  ],
+  "presets": [{"name": "Imagen con texto"}]
+}
+{% endschema %}

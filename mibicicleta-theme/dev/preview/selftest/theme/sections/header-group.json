@@ -1,0 +1,12 @@
+/*
+ * auto-generated
+ */
+{
+  "type": "header",
+  "name": "Header group",
+  "sections": {
+    "announcement": { "type": "announcement", "settings": { "text": "Envío gratis" } },
+    "header": { "type": "test-header", "settings": {} }
+  },
+  "order": ["announcement", "header"]
+}

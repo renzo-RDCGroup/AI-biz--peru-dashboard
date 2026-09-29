@@ -1,0 +1,40 @@
+{%- comment -%}
+  Sort select ("Ordenar por").
+  {% render 'sort-by', results: collection | search, results_url: collection.url, section_id: section.id, terms: search.terms %}
+  Without JS it is a GET form that keeps the active filters (hidden inputs) and shows a submit
+  button; facets.js listens to [data-sort-select] changes and re-renders through AJAX.
+{%- endcomment -%}
+{%- liquid
+  assign sort_id = 'SortBy-' | append: section_id
+  assign current_sort = results.sort_by | default: results.default_sort_by
+-%}
+<form class="sort-by" action="{{ results_url }}" method="get" data-sort-form>
+  {%- if terms != blank -%}
+    <input type="hidden" name="q" value="{{ terms | escape }}">
+    <input type="hidden" name="options[prefix]" value="last">
+  {%- endif -%}
+  {%- for filter in results.filters -%}
+    {%- if filter.type == 'price_range' -%}
+      {%- if filter.min_value.value != nil -%}
+        <input type="hidden" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value | money_without_currency | remove: ',' }}">
+      {%- endif -%}
+      {%- if filter.max_value.value != nil -%}
+        <input type="hidden" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value | money_without_currency | remove: ',' }}">
+      {%- endif -%}
+    {%- else -%}
+      {%- for value in filter.active_values -%}
+        <input type="hidden" name="{{ value.param_name }}" value="{{ value.value | escape }}">
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+  <label class="sort-by__label" for="{{ sort_id }}">{{ 'filters.sort.label' | t }}</label>
+  <div class="select sort-by__select">
+    {%- render 'icon', name: 'sort' -%}
+    <select id="{{ sort_id }}" name="sort_by" data-sort-select data-default="{{ results.default_sort_by | escape }}">
+      {%- for option in results.sort_options -%}
+        <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>{{ option.name | escape }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <button type="submit" class="btn btn--sm btn--primary no-js-only">{{ 'filters.sort.submit' | t }}</button>
+</form>

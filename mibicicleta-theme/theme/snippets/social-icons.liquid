@@ -1,0 +1,41 @@
+{%- comment -%}
+  Social links from theme settings (social_instagram / _facebook / _tiktok / _youtube).
+  {% render 'social-icons', class: '' %} — renders nothing when all are blank.
+{%- endcomment -%}
+{%- liquid
+  assign networks = 'instagram,facebook,tiktok,youtube' | split: ','
+  assign has_social = false
+  for network in networks
+    assign setting_key = 'social_' | append: network
+    if settings[setting_key] != blank
+      assign has_social = true
+      break
+    endif
+  endfor
+-%}
+{%- if has_social -%}
+  <ul class="social-icons{% if class != blank %} {{ class }}{% endif %}" role="list">
+    {%- for network in networks -%}
+      {%- assign setting_key = 'social_' | append: network -%}
+      {%- if settings[setting_key] != blank -%}
+        {%- liquid
+          case network
+            when 'instagram'
+              assign network_name = 'Instagram'
+            when 'facebook'
+              assign network_name = 'Facebook'
+            when 'tiktok'
+              assign network_name = 'TikTok'
+            else
+              assign network_name = 'YouTube'
+          endcase
+        -%}
+        <li>
+          <a class="social-icons__link" href="{{ settings[setting_key] | escape }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow' | t: network: network_name }}">
+            {%- render 'icon', name: network -%}
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+{%- endif -%}

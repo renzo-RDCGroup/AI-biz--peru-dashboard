@@ -1,0 +1,50 @@
+{%- assign outer_secret = 'LEAK' -%}
+<div class="main-test" data-section="{{ section.id }}" data-index="{{ section.index }}">
+  <h1 class="title">{{ section.settings.title }}</h1>
+  <p class="subtitle">{{ section.settings.subtitle }}</p>
+  <p class="range">{{ section.settings.columns }}</p>
+  <p class="empty">[{{ section.settings.empty_text }}]{% if section.settings.empty_text == blank %}BLANK{% endif %}</p>
+  <p class="url">{{ section.settings.link }}</p>
+  <p class="img">{% if section.settings.image != blank %}{{ section.settings.image | image_url: width: 800 }}{% endif %}</p>
+  <p class="col">{{ section.settings.collection.title }}|{{ section.settings.collection.products_count }}</p>
+  <div class="blocks">{%- for block in section.blocks -%}<i class="block--{{ block.type }}" id="b-{{ block.id }}" {{ block.shopify_attributes }}>{{ block.settings.label }}</i>{%- endfor -%}</div>
+  <p class="render-params">{% render 'item', label: 'Hola', n: 3 %}</p>
+  <p class="render-with">{% render 'item' with 'W' as label %}</p>
+  <p class="render-for">{% render 'item' for section.settings.collection.products as product %}</p>
+  <p class="render-isolation">{% render 'isolation' %}</p>
+  <p class="money">{{ 3300 | money }}|{{ 3300 | money_with_currency }}|{{ 3300 | money_without_trailing_zeros }}|{{ 3350 | money_without_trailing_zeros }}|{{ 123456 | money_without_currency }}</p>
+  <p class="t1">{{ 'general.hello' | t: name: '<b>Ana</b>' }}</p>
+  <p class="t2">{{ 'general.hello_html' | t: name: '<b>Ana</b>' }}</p>
+  <p class="t3">{{ 'general.items' | t: count: 1 }}|{{ 'general.items' | t: count: 3 }}</p>
+  <p class="t4">{{ 'general.nope' | t }}</p>
+  <p class="div">{{ 7 | divided_by: 2 }}|{{ 7 | divided_by: 2.0 }}</p>
+  <p class="unknown">{{ 'x' | frobnicate }}</p>
+  <p class="json">{{ '<tag>' | json }}</p>
+  <p class="color">{{ settings.color_brand }}|{{ settings.color_brand | color_to_rgb }}|{{ settings.color_brand | color_modify: 'alpha', 0.5 }}|{{ settings.color_brand.red }}</p>
+  <p class="settings-img">{{ settings.hero_image.width }}x{{ settings.hero_image.height }}</p>
+  <p class="menu">{% for link in settings.menu.links %}{{ link.title }}({{ link.links.size }}){% unless forloop.last %},{% endunless %}{% endfor %}</p>
+  <p class="blank-sem">{% assign y = nil %}{% if y == blank %}G{% endif %}{% if nil == blank %}B{% endif %}{% if '' == blank %}C{% endif %}{% if 'a' == blank %}X{% endif %}{% if section.settings.empty_text == empty %}E{% endif %}{% if section.blocks != empty %}N{% endif %}{% if cart.empty? %}K{% endif %}{% if product %}P{% endif %}</p>
+  <p class="colls">{{ collections.all.products.size }}|{{ collections['luces'].title }}|{{ collections.size }}|{{ all_products['tapa-barro-tp-05'].title }}|{% for c in collections limit: 2 %}{{ c.handle }};{% endfor %}|{{ linklists.footer.links.first.title }}|{{ pages.contact.url }}|{{ images['mibi-ia-espejos-lima.png'].aspect_ratio }}</p>
+  <p class="magic">[{{ size }}][{{ first }}][{{ last }}]{% if size %}S{% endif %}|{% assign size = 2 %}{{ size }}</p>
+  <p class="fixtures">{{ all_products['sg-luz-delantera-agotada'].available }}|{{ all_products['sg-grips-ergonomicos-modelos'].metafields.reviews.rating.value.rating }}|{{ all_products['sg-grips-ergonomicos-modelos'].price_varies }}</p>
+  <p class="handle">{{ 'Piñones y Transmisión!' | handleize }}</p>
+  {% style %}.main-test { --cols: {{ section.settings.columns }}; }{% endstyle %}
+</div>
+{% schema %}
+{
+  "name": "Main test",
+  "class": "main-test-section",
+  "settings": [
+    { "type": "text", "id": "title", "label": "T", "default": "Default title" },
+    { "type": "text", "id": "subtitle", "label": "S", "default": "Default subtitle" },
+    { "type": "range", "id": "columns", "label": "C", "min": 1, "max": 6, "step": 1, "default": 4 },
+    { "type": "text", "id": "empty_text", "label": "E" },
+    { "type": "url", "id": "link", "label": "L" },
+    { "type": "image_picker", "id": "image", "label": "I" },
+    { "type": "collection", "id": "collection", "label": "Col" }
+  ],
+  "blocks": [
+    { "type": "note", "name": "Note", "settings": [ { "type": "text", "id": "label", "label": "L", "default": "Block default" } ] }
+  ]
+}
+{% endschema %}

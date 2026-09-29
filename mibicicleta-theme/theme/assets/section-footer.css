@@ -1,0 +1,199 @@
+/* ==========================================================================
+   Mi Bici 2026 — section-footer.css (sections/footer.liquid)
+   Mobile-first: brand block → accordion columns → big logo → bottom bar.
+   ≥750 columns sit side by side; ≥990 brand | columns in two tracks.
+   ========================================================================== */
+
+.footer {
+  --footer-accent: var(--scheme-fg);
+  font-size: var(--fs-sm);
+}
+.footer.scheme-dark { --footer-accent: var(--color-brand); }
+/* Keep the last row clear of the floating WhatsApp button at the end of the page. */
+.footer--float { padding-bottom: calc(var(--pad-bottom) * .75 + 72px); }
+@media (min-width: 750px) { .footer--float { padding-bottom: calc(var(--pad-bottom) + 72px); } }
+
+.footer__main {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  padding-bottom: 8px;
+}
+
+/* ---------- Brand block --------------------------------------------------- */
+.footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  max-width: 480px;
+}
+.footer__logo { display: block; width: 184px; }
+.footer__logo-img { display: block; width: 100%; height: auto; }
+
+.footer__heading {
+  font: var(--fw-display) clamp(2rem, 1.5rem + 2vw, 3rem)/1 var(--font-heading);
+  letter-spacing: -.02em;
+  text-wrap: balance;
+}
+.footer__text { color: var(--scheme-muted); font-size: var(--fs-base); }
+.footer__text--lead {
+  max-width: 24ch;
+  color: var(--scheme-fg);
+  font: 700 clamp(1.3125rem, 1.15rem + .7vw, 1.75rem)/1.25 var(--font-heading);
+  letter-spacing: -.01em;
+  text-wrap: balance;
+}
+.footer__text p + p { margin-top: .6em; }
+.footer__text a { text-decoration-color: var(--footer-accent); }
+
+.footer__social { margin-top: 2px; }
+.footer__wa { width: 100%; max-width: 420px; }
+
+/* ---------- Columns (accordions on phones) -------------------------------- */
+.footer__cols { display: block; border-top: 1px solid var(--scheme-border); }
+.footer__details { border-bottom: 1px solid var(--scheme-border); }
+
+.footer__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 60px;
+  list-style: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.footer__summary::-webkit-details-marker { display: none; }
+.footer__summary::marker { content: ""; }
+.footer__summary:focus-visible { outline-offset: -3px; border-radius: var(--radius-sm); }
+
+.footer__col-title {
+  color: var(--footer-accent);
+  font: 800 .8125rem/1.2 var(--font-heading);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.footer__chevron {
+  --icon-size: 20px;
+  color: var(--scheme-muted);
+  transition: transform var(--dur) var(--ease);
+}
+.footer__details[open] .footer__chevron { transform: rotate(180deg); }
+.footer__panel { padding: 0 0 16px; }
+
+.footer__links { display: grid; }
+.footer__link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--scheme-muted);
+  font-size: .9375rem;
+  line-height: 1.3;
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+.footer__link:hover,
+.footer__link[aria-current] { color: var(--scheme-fg); }
+.footer__link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--footer-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: .3em;
+}
+.footer__link--child { padding-left: 14px; font-size: var(--fs-sm); }
+
+.footer__rte { color: var(--scheme-muted); font-size: .9375rem; }
+
+.footer__contact { display: grid; gap: 4px; }
+.footer__contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-block: 8px;
+  color: var(--scheme-muted);
+  font-size: .9375rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.footer__contact-item > .icon { --icon-size: 18px; margin-top: 1px; color: var(--footer-accent); }
+.footer__contact-item a { color: var(--scheme-fg); text-decoration: none; }
+.footer__contact-item a:hover { text-decoration: underline; text-decoration-color: var(--footer-accent); text-underline-offset: .25em; }
+.footer__wa-link { color: var(--scheme-fg); text-decoration: none; }
+.footer__wa-link .icon { color: var(--color-whatsapp); }
+
+/* ---------- Big logo ------------------------------------------------------ */
+.footer__biglogo {
+  display: block;
+  margin: 44px 0 24px;
+  color: inherit;
+  border-radius: var(--radius-sm);
+}
+.footer__biglogo .logo,
+.footer__biglogo .footer__logo-img { width: 100%; min-width: 0; height: auto; }
+.footer__biglogo:focus-visible { outline-offset: 8px; }
+
+/* ---------- Bottom bar ---------------------------------------------------- */
+.footer__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--scheme-border);
+  color: var(--scheme-muted);
+  font-size: var(--fs-xs);
+}
+.footer__biglogo + .footer__bottom { margin-top: 0; }
+.footer__copy { font-weight: 600; }
+.footer__payment { order: -1; }
+.footer__policies { display: flex; flex-wrap: wrap; column-gap: 18px; }
+.footer__policies a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  text-decoration: none;
+}
+.footer__policies a:hover { color: var(--scheme-fg); text-decoration: underline; text-underline-offset: .25em; }
+
+/* ---------- ≥750: columns side by side ------------------------------------ */
+@media (min-width: 750px) {
+  .footer__cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 32px;
+    border-top: 0;
+  }
+  .footer__details { border-bottom: 0; }
+  .footer__summary {
+    min-height: 0;
+    margin-bottom: 14px;
+    cursor: default;
+    pointer-events: none;
+  }
+  .footer__chevron { display: none; }
+  .footer__panel { padding: 0; }
+  .footer__link { display: inline-flex; min-height: 0; padding-block: 6px; }
+  .footer__links li { line-height: 1; }
+  .footer__contact-item { padding-block: 6px; }
+  .footer__biglogo { margin: 64px 0 32px; }
+}
+
+/* ---------- ≥990: brand | columns ----------------------------------------- */
+@media (min-width: 990px) {
+  .footer__main {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 64px;
+  }
+  .footer__main--solo { grid-template-columns: minmax(0, 1fr); }
+  .footer__cols { padding-top: 6px; }
+  .footer__bottom {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 28px;
+  }
+  .footer__payment { order: 0; margin-left: auto; }
+  .footer__policies a { min-height: 0; }
+}

@@ -1,0 +1,169 @@
+{%- comment -%}
+  Product card (styles: assets/product-card.css).
+  {% render 'product-card',
+    product: p,                         blank/omitted → onboarding placeholder card
+    lazy: true,                         false for cards in the first viewport
+    sizes: '…',                         image sizes attr (default fits .product-grid columns)
+    heading_tag: 'h3',
+    show_vendor: settings.card_show_vendor,   default: that setting (hidden when vendor = shop name)
+    quick_add: settings.card_quick_add,       default: that setting
+    section_id: section.id,             optional, keeps quick-add form ids unique per section
+    placeholder: 1,                     placeholder image 1–6 for blank products
+    class: ''
+  %}
+  Quick add: single-variant available product → <product-form> AJAX add;
+  multi-variant → link "Elegir opciones"; sold out → nothing.
+  Sale: the image badge shows "-NN%" (best variant); the price row shows sale + struck compare price
+  without its own pill, so narrow 2-column cards never wrap the price onto two lines.
+{%- endcomment -%}
+{%- liquid
+  assign card_tag = heading_tag | default: 'h3'
+  assign card_sizes = sizes | default: '(min-width: 1200px) 300px, (min-width: 990px) calc((100vw - 136px) / 4), (min-width: 750px) calc((100vw - 96px) / 3), calc((100vw - 44px) / 2)'
+  assign card_widths = '180,240,300,360,480,600,720,900'
+  assign card_lazy = true
+  if lazy == false
+    assign card_lazy = false
+  endif
+  assign vendor_on = settings.card_show_vendor
+  if show_vendor == true
+    assign vendor_on = true
+  elsif show_vendor == false
+    assign vendor_on = false
+  endif
+  assign quick_on = settings.card_quick_add
+  if quick_add == true
+    assign quick_on = true
+  elsif quick_add == false
+    assign quick_on = false
+  endif
+-%}
+{%- if product != blank and product.id != blank -%}
+  {%- liquid
+    assign ratio = 1
+    case settings.card_image_ratio
+      when 'portrait'
+        assign ratio = 0.8
+      when 'natural'
+        assign ratio = product.featured_media.aspect_ratio | default: 1
+    endcase
+
+    assign media_class = 'product-card__media media'
+    if settings.card_blend_white
+      assign media_class = media_class | append: ' media--blend media--contain'
+    endif
+
+    assign has_secondary = false
+    if settings.card_secondary_image and product.media.size > 1
+      assign secondary_image = product.media[1].preview_image
+      if secondary_image != blank
+        assign has_secondary = true
+      endif
+    endif
+
+    assign primary_alt = product.featured_media.alt | default: product.title
+    assign form_id = 'QuickAdd-' | append: section_id | append: '-' | append: product.id
+  -%}
+  <article class="product-card{% if has_secondary %} product-card--has-secondary{% endif %}{% unless product.available %} product-card--soldout{% endunless %}{% if class != blank %} {{ class }}{% endif %}" data-product-id="{{ product.id }}">
+    <div class="{{ media_class }}" style="--ratio: {{ ratio }};">
+      <a class="product-card__link" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+        {%- if product.featured_media != blank -%}
+          {%- render 'image',
+            image: product.featured_media.preview_image,
+            widths: card_widths,
+            sizes: card_sizes,
+            lazy: card_lazy,
+            alt: primary_alt,
+            class: 'product-card__img product-card__img--primary'
+          -%}
+        {%- else -%}
+          <span class="product-card__noimg">{% render 'logo', variant: 'mark', tone: 'mono-dark', label: '' %}</span>
+        {%- endif -%}
+        {%- if has_secondary -%}
+          {%- render 'image',
+            image: secondary_image,
+            widths: card_widths,
+            sizes: card_sizes,
+            lazy: true,
+            alt: primary_alt,
+            class: 'product-card__img product-card__img--secondary'
+          -%}
+        {%- endif -%}
+      </a>
+
+      <div class="product-card__badges badges">
+        {%- render 'product-badges', product: product -%}
+      </div>
+
+      {%- if quick_on and product.available -%}
+        {%- if product.variants.size == 1 -%}
+          <product-form class="product-card__quick">
+            {%- form 'product', product, id: form_id, class: 'product-card__form', novalidate: 'novalidate' -%}
+              <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit" name="add" class="btn btn--icon btn--brand product-card__quick-btn" aria-label="{{ 'products.card.quick_add' | t: title: product.title }}">
+                {%- render 'icon', name: 'bag-plus' -%}
+                {%- render 'icon', name: 'check' -%}
+              </button>
+              <p class="form-message form-message--error" data-form-error role="alert" hidden></p>
+            {%- endform -%}
+          </product-form>
+        {%- else -%}
+          <div class="product-card__quick">
+            <a class="btn btn--icon btn--brand product-card__quick-link" href="{{ product.url }}" aria-label="{{ 'products.card.choose_options' | t: title: product.title }}">
+              {%- render 'icon', name: 'bag-plus' -%}
+            </a>
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+
+    <div class="product-card__info">
+      {%- if vendor_on -%}
+        {%- comment -%} Empty line when the vendor is the shop itself, so titles stay aligned across a grid row. {%- endcomment -%}
+        {%- if product.vendor != blank and product.vendor != shop.name -%}
+          <p class="product-card__vendor">{{ product.vendor | escape }}</p>
+        {%- else -%}
+          <p class="product-card__vendor" aria-hidden="true"></p>
+        {%- endif -%}
+      {%- endif -%}
+      <{{ card_tag }} class="product-card__title">
+        <a class="product-card__title-link" href="{{ product.url }}">{{ product.title | escape }}</a>
+      </{{ card_tag }}>
+      {%- render 'rating', product: product, size: 'sm' -%}
+      {%- render 'price', product: product, size: 'sm', show_save: false -%}
+      {%- if settings.card_show_swatches -%}
+        {%- for option in product.options_with_values -%}
+          {%- assign option_name = option.name | downcase | strip -%}
+          {%- if option_name == 'color' or option_name == 'colour' or option_name == 'color/colour' -%}
+            {%- if option.values.size > 1 -%}
+              <div class="product-card__swatches">
+                <span class="visually-hidden">{{ 'products.card.colors' | t: count: option.values.size }}: {{ option.values | join: ', ' }}</span>
+                {%- for value in option.values limit: 5 -%}
+                  {%- render 'color-swatch', value: value, size: 'sm' -%}
+                {%- endfor -%}
+                {%- if option.values.size > 5 -%}
+                  <span class="product-card__swatches-more" aria-hidden="true">+{{ option.values.size | minus: 5 }}</span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </article>
+{%- else -%}
+  {%- liquid
+    assign ph_index = placeholder | default: 1 | minus: 1 | modulo: 6 | plus: 1
+    assign ph_name = 'product-' | append: ph_index
+  -%}
+  <article class="product-card product-card--placeholder{% if class != blank %} {{ class }}{% endif %}">
+    <div class="product-card__media media" style="--ratio: 1;">
+      {{- ph_name | placeholder_svg_tag: 'placeholder-svg' -}}
+    </div>
+    <div class="product-card__info">
+      <{{ card_tag }} class="product-card__title">{{ 'products.card.placeholder_title' | t }}</{{ card_tag }}>
+      <div class="price price--sm"><span class="price__current">{{ 4990 | money }}</span></div>
+    </div>
+  </article>
+{%- endif -%}

@@ -1,0 +1,60 @@
+{%- comment -%}
+  Price block. Markup is mirrored by MiBici.priceHTML() / MiBici.updatePrice() in global.js.
+  {% render 'price',
+    product: p,
+    variant: v,          optional; without it: "Desde" + lowest price when prices vary,
+                         else product.selected_or_first_available_variant
+    size: 'sm'|'md'|'lg' default 'md'
+    show_save: true,     "-NN%" red pill when on sale
+    show_from: true,     "Desde" prefix when price varies and no variant is passed
+    class: ''
+  %}
+  Output: .price[.price--sale][.price--soldout] > .price__current (+ .price__from) · s.price__compare · .price__save
+{%- endcomment -%}
+{%- liquid
+  assign price_size = size | default: 'md'
+  assign is_from = false
+  if variant != blank
+    assign target = variant
+  elsif product.price_varies and show_from != false
+    assign target = product
+    assign is_from = true
+  else
+    assign target = product.selected_or_first_available_variant | default: product
+  endif
+
+  if is_from
+    assign price_now = product.price_min
+    assign price_was = product.compare_at_price_min | default: 0
+  else
+    assign price_now = target.price | default: 0
+    assign price_was = target.compare_at_price | default: 0
+  endif
+
+  assign on_sale = false
+  if price_was > price_now
+    assign on_sale = true
+    assign save_pct = price_was | minus: price_now | times: 100.0 | divided_by: price_was | round
+  endif
+
+  assign sold_out = false
+  if target.available == false
+    assign sold_out = true
+  endif
+-%}
+<div class="price price--{{ price_size }}{% if on_sale %} price--sale{% endif %}{% if sold_out %} price--soldout{% endif %}{% if class != blank %} {{ class }}{% endif %}" data-price{% if show_save == false %} data-show-save="false"{% endif %}>
+  {%- if on_sale -%}
+    <span class="visually-hidden">{{ 'products.price.sale' | t }}</span>
+  {%- endif -%}
+  <span class="price__current">
+    {%- if is_from -%}<span class="price__from">{{ 'products.price.from' | t }}</span> {% endif -%}
+    {{- price_now | money -}}
+  </span>
+  {%- if on_sale -%}
+    <span class="visually-hidden">{{ 'products.price.regular' | t }}</span>
+    <s class="price__compare">{{ price_was | money }}</s>
+    {%- if show_save != false -%}
+      <span class="price__save">-{{ save_pct }}%</span>
+    {%- endif -%}
+  {%- endif -%}
+</div>

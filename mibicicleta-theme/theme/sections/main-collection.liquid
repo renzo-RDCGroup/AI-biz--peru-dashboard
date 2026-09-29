@@ -1,0 +1,140 @@
+{%- comment -%}
+  Collection product grid with storefront filters.
+  Sticky toolbar (mobile: "Filtrar" + sort pills · ≥750: results count · ≥990 sidebar head),
+  desktop sidebar filters (≥990, layout "sidebar"), left filter drawer (mobile / layout "drawer"),
+  active chips, product-card grid, "Cargar más" (numbered pagination without JS) and empty states.
+  facets.js (<facet-results>) swaps every [data-swap] zone and the filter groups from the
+  Section Rendering API response (?section_id=) and keeps the URL in sync (replaceState).
+{%- endcomment -%}
+{{ 'section-collection.css' | asset_url | stylesheet_tag }}
+{{ 'section-collection-facets.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'facets.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign ps = section.settings
+  assign per_page = ps.products_per_page | default: 24
+  assign layout = ps.filter_layout | default: 'sidebar'
+  assign cols = ps.columns_desktop | default: '4'
+  assign grid_class = 'product-grid results-grid'
+  if ps.columns_mobile == '1'
+    assign grid_class = grid_class | append: ' results-grid--mobile-1'
+  endif
+  if layout == 'sidebar'
+    assign card_sizes = '(min-width: 1200px) 250px, (min-width: 990px) calc((100vw - 340px) / 3), (min-width: 750px) calc((100vw - 96px) / 3), calc((100vw - 44px) / 2)'
+    if cols == '3'
+      assign card_sizes = '(min-width: 1200px) 330px, (min-width: 990px) calc((100vw - 340px) / 3), (min-width: 750px) calc((100vw - 96px) / 3), calc((100vw - 44px) / 2)'
+    endif
+  else
+    assign card_sizes = '(min-width: 1200px) 320px, (min-width: 990px) calc((100vw - 136px) / 4), (min-width: 750px) calc((100vw - 96px) / 3), calc((100vw - 44px) / 2)'
+  endif
+-%}
+
+{%- paginate collection.products by per_page -%}
+  {%- liquid
+    assign has_filters = false
+    if ps.enable_filtering and collection.filters.size > 0
+      assign has_filters = true
+    endif
+    assign active_count = 0
+    for filter in collection.filters
+      if filter.type == 'price_range'
+        if filter.min_value.value != nil or filter.max_value.value != nil
+          assign active_count = active_count | plus: 1
+        endif
+      else
+        assign active_count = active_count | plus: filter.active_values.size
+      endif
+    endfor
+    assign clear_url = collection.url
+    if collection.sort_by != blank
+      assign clear_url = clear_url | append: '?sort_by=' | append: collection.sort_by
+    endif
+    assign results_count = collection.products_count
+    assign shown = paginate.current_offset | plus: collection.products.size
+  -%}
+  <facet-results
+    class="section results scheme-{{ ps.scheme }} results--{{ layout }}{% if has_filters %} results--has-filters{% endif %} results--cols-{{ cols }}"
+    id="Results-{{ section.id }}"
+    data-section-id="{{ section.id }}"
+    style="--pad-top: {{ ps.padding_top }}px; --pad-bottom: {{ ps.padding_bottom }}px;"
+  >
+    {%- if ps.enable_sorting or has_filters -%}
+      {%- assign count_label = 'collections.product_count' | t: count: results_count -%}
+      {%- render 'facets', context: 'toolbar', results: collection, results_url: collection.url, section_id: section.id, layout: layout, has_filters: has_filters, sorting: ps.enable_sorting, count_label: count_label, active_count: active_count, clear_url: clear_url -%}
+    {%- endif -%}
+
+    <div class="page-width results__layout">
+      {%- if has_filters -%}
+        <aside class="results__sidebar{% if layout != 'sidebar' %} no-js-only{% endif %}" aria-label="{{ 'filters.heading' | t }}">
+          {%- render 'facets', results: collection, results_url: collection.url, section_id: section.id, context: 'sidebar', clear_url: clear_url -%}
+        </aside>
+      {%- endif -%}
+
+      <div class="results__main">
+        <h2 class="visually-hidden">{{ 'collections.toolbar.grid_heading' | t: title: collection.title }}</h2>
+        <div class="results__head" data-swap="active">
+          <p class="results__count-sm">{{ 'collections.product_count' | t: count: results_count }}</p>
+          {%- render 'facets-active', results: collection, clear_url: clear_url -%}
+        </div>
+
+        <div class="results__body" data-swap="results">
+          {%- if collection.products.size > 0 -%}
+            <ul class="{{ grid_class }}" role="list" id="ProductGrid-{{ section.id }}" data-results-grid>
+              {%- for product in collection.products -%}
+                {%- liquid
+                  assign lazy = true
+                  if paginate.current_page == 1 and forloop.index <= 4
+                    assign lazy = false
+                  endif
+                -%}
+                <li class="results-grid__item" data-reveal>
+                  {%- render 'product-card', product: product, lazy: lazy, sizes: card_sizes, heading_tag: 'h3', section_id: section.id -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            {%- render 'facets', context: 'more', paginate: paginate, paging: ps.paging, shown: shown, section_id: section.id -%}
+          {%- else -%}
+            <div class="results-empty">
+              <span class="results-empty__icon beacon" aria-hidden="true">{% render 'icon', name: 'filter' %}</span>
+              {%- if active_count > 0 -%}
+                <h3 class="results-empty__title">{{ 'filters.empty.title' | t }}</h3>
+                <p class="results-empty__text">{{ 'filters.empty.text' | t }}</p>
+                <a class="btn btn--primary" href="{{ clear_url }}" data-facet-link>{{ 'filters.clear_filters' | t }}</a>
+              {%- else -%}
+                <h3 class="results-empty__title">{{ 'collections.empty.title' | t }}</h3>
+                <p class="results-empty__text">{{ 'collections.empty.text' | t }}</p>
+                <a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">{{ 'collections.empty.cta' | t }}</a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+
+    {%- if has_filters -%}
+      {%- render 'facets', results: collection, results_url: collection.url, section_id: section.id, context: 'drawer', active_count: active_count, results_count: results_count, clear_url: clear_url -%}
+    {%- endif -%}
+  </facet-results>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Productos de colección",
+  "class": "main-collection-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "range", "id": "products_per_page", "label": "Productos por página", "min": 8, "max": 48, "step": 4, "default": 24},
+    {"type": "select", "id": "columns_desktop", "label": "Columnas en escritorio", "options": [{"value": "3", "label": "3"}, {"value": "4", "label": "4"}], "default": "4"},
+    {"type": "select", "id": "columns_mobile", "label": "Columnas en móvil", "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}], "default": "2"},
+    {"type": "select", "id": "paging", "label": "Paginación", "options": [{"value": "load_more", "label": "Botón «Cargar más»"}, {"value": "pages", "label": "Páginas numeradas"}], "default": "load_more"},
+    {"type": "header", "content": "Filtros y orden"},
+    {"type": "checkbox", "id": "enable_filtering", "label": "Mostrar filtros", "info": "Los filtros se configuran en la app Search & Discovery de Shopify.", "default": true},
+    {"type": "select", "id": "filter_layout", "label": "Filtros en escritorio", "options": [{"value": "sidebar", "label": "Barra lateral"}, {"value": "drawer", "label": "Panel desplegable"}], "default": "sidebar"},
+    {"type": "checkbox", "id": "enable_sorting", "label": "Mostrar «Ordenar por»", "default": true},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64}
+  ]
+}
+{% endschema %}

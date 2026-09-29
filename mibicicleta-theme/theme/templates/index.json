@@ -1,0 +1,276 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-slideshow",
+      "blocks": {
+        "slide_luces": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/mibi-ia-luces-lima-anochecer.png",
+            "layout": "split",
+            "panel_scheme": "brand",
+            "image_position": "right",
+            "eyebrow": "Luces y seguridad",
+            "heading": "Que te vean de día y de noche",
+            "text": "Luces delanteras, posteriores y linternas para cada ruta.",
+            "button_label": "Ver luces",
+            "button_link": "shopify://collections/luces",
+            "button2_label": "",
+            "button2_link": ""
+          }
+        },
+        "slide_llantas": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/mibi-ia-llantas-scooter-lima.png",
+            "layout": "split",
+            "panel_scheme": "dark",
+            "image_position": "right",
+            "eyebrow": "Llantas y cámaras",
+            "heading": "Llantas para bici y scooter",
+            "text": "Macizas, antipinchazos y todo terreno. Encuentra tu medida.",
+            "button_label": "Ver llantas",
+            "button_link": "shopify://collections/llantas-y-camaras",
+            "button2_label": "",
+            "button2_link": ""
+          }
+        },
+        "slide_cascos": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/mibi-ia-cascos-lima.png",
+            "layout": "split",
+            "panel_scheme": "brand",
+            "image_position": "right",
+            "eyebrow": "Cascos y protección",
+            "heading": "Tu casco, tu mejor accesorio",
+            "text": "Cascos urbanos y MTB para rodar seguro.",
+            "button_label": "Ver cascos",
+            "button_link": "shopify://collections/cascos",
+            "button2_label": "",
+            "button2_link": ""
+          }
+        }
+      },
+      "block_order": ["slide_luces", "slide_llantas", "slide_cascos"],
+      "settings": {
+        "autoplay": true,
+        "autoplay_speed": 6,
+        "height": "md",
+        "page_heading": true,
+        "padding_top": 0,
+        "padding_bottom": 0
+      }
+    },
+    "search": {
+      "type": "search-hero",
+      "blocks": {
+        "chip_luces": {"type": "chip", "settings": {"term": "luces", "label": ""}},
+        "chip_llantas": {"type": "chip", "settings": {"term": "llantas", "label": ""}},
+        "chip_espejos": {"type": "chip", "settings": {"term": "espejos", "label": ""}},
+        "chip_asientos": {"type": "chip", "settings": {"term": "asientos", "label": ""}},
+        "chip_pedales": {"type": "chip", "settings": {"term": "pedales", "label": ""}},
+        "chip_pinones": {"type": "chip", "settings": {"term": "piñones", "label": ""}}
+      },
+      "block_order": ["chip_luces", "chip_llantas", "chip_espejos", "chip_asientos", "chip_pedales", "chip_pinones"],
+      "settings": {
+        "scheme": "dark",
+        "heading": "¿Qué repuesto necesitas?",
+        "text": "Busca por código, medida o nombre.",
+        "placeholder": "Ej.: llanta aro 26, luz trasera, piñón 9v…",
+        "chips_label": "Prueba con:",
+        "show_whatsapp": true,
+        "whatsapp_text": "Si no sabes cuál es, escríbenos con una foto.",
+        "whatsapp_message": "Hola Mi Bicicleta, estoy buscando un repuesto. Te envío una foto.",
+        "padding_top": 48,
+        "padding_bottom": 52
+      }
+    },
+    "categories": {
+      "type": "category-grid",
+      "blocks": {
+        "cat_luces": {"type": "category", "settings": {"collection": "luces", "title": "", "icon": "light"}},
+        "cat_llantas": {"type": "category", "settings": {"collection": "llantas-y-camaras", "title": "", "icon": "tire"}},
+        "cat_pinones": {"type": "category", "settings": {"collection": "pinones-y-transmision", "title": "", "icon": "gear"}},
+        "cat_espejos": {"type": "category", "settings": {"collection": "espejos", "title": "", "icon": "mirror"}},
+        "cat_asientos": {"type": "category", "settings": {"collection": "asientos", "title": "", "icon": "seat"}},
+        "cat_pedales": {"type": "category", "settings": {"collection": "pedales", "title": "", "icon": "pedal"}},
+        "cat_grips": {"type": "category", "settings": {"collection": "grips", "title": "", "icon": "grip"}},
+        "cat_tapabarros": {"type": "category", "settings": {"collection": "tapabarros", "title": "", "icon": "mudguard"}},
+        "cat_cascos": {"type": "category", "settings": {"collection": "cascos", "title": "", "icon": "helmet"}},
+        "cat_accesorios": {"type": "category", "settings": {"collection": "accesorios", "title": "", "icon": "bag"}}
+      },
+      "block_order": ["cat_luces", "cat_llantas", "cat_pinones", "cat_espejos", "cat_asientos", "cat_pedales", "cat_grips", "cat_tapabarros", "cat_cascos", "cat_accesorios"],
+      "settings": {
+        "scheme": "light",
+        "heading": "Compra por categoría",
+        "subtitle": "",
+        "show_view_all": true,
+        "use_collection_image": false,
+        "show_count": false,
+        "padding_top": 56,
+        "padding_bottom": 48
+      }
+    },
+    "usp": {
+      "type": "usp-strip",
+      "blocks": {
+        "usp_originales": {"type": "item", "settings": {"icon": "medal", "title": "Productos originales", "text": "Vendedor autorizado Rockbros", "link": "", "link_whatsapp": false}},
+        "usp_envios": {"type": "item", "settings": {"icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde S/ 220", "link": "", "link_whatsapp": false}},
+        "usp_whatsapp": {"type": "item", "settings": {"icon": "whatsapp", "title": "Atención por WhatsApp", "text": "Consultas y pedidos por chat", "link": "", "link_whatsapp": true}},
+        "usp_cambios": {"type": "item", "settings": {"icon": "return", "title": "Cambios y garantía", "text": "7 días para cambiar, sin abrir", "link": "", "link_whatsapp": false}}
+      },
+      "block_order": ["usp_originales", "usp_envios", "usp_whatsapp", "usp_cambios"],
+      "settings": {
+        "scheme": "soft",
+        "heading": "",
+        "heading_align": "left",
+        "padding_top": 40,
+        "padding_bottom": 40
+      }
+    },
+    "featured": {
+      "type": "featured-collection",
+      "blocks": {
+        "tab_destacados": {"type": "tab", "settings": {"label": "Destacados", "collection": "destacados"}},
+        "tab_luces": {"type": "tab", "settings": {"label": "Luces", "collection": "luces"}},
+        "tab_llantas": {"type": "tab", "settings": {"label": "Llantas", "collection": "llantas-y-camaras"}},
+        "tab_pedales": {"type": "tab", "settings": {"label": "Pedales", "collection": "pedales"}}
+      },
+      "block_order": ["tab_destacados", "tab_luces", "tab_llantas", "tab_pedales"],
+      "settings": {
+        "scheme": "light",
+        "heading": "Destacados",
+        "subtitle": "",
+        "products_to_show": 10,
+        "per_row": "5",
+        "show_view_all": true,
+        "padding_top": 64,
+        "padding_bottom": 40
+      }
+    },
+    "promos": {
+      "type": "promo-banners",
+      "blocks": {
+        "promo_rockbros": {
+          "type": "banner",
+          "settings": {
+            "scheme": "dark",
+            "image_style": "contain-right",
+            "icon": "medal",
+            "eyebrow": "Vendedor autorizado",
+            "heading": "Rockbros original",
+            "text": "Luces, pedales y accesorios con respaldo de marca.",
+            "button_label": "Ver Rockbros",
+            "button_link": "shopify://collections/rockbros"
+          }
+        },
+        "promo_espejos": {
+          "type": "banner",
+          "settings": {
+            "scheme": "brand",
+            "image": "shopify://shop_images/mibi-ia-espejos-lima.png",
+            "image_style": "contain-right",
+            "icon": "none",
+            "eyebrow": "Para tu manubrio",
+            "heading": "Mira atrás sin girar el cuerpo",
+            "text": "Espejos para bici y scooter.",
+            "button_label": "Ver espejos",
+            "button_link": "shopify://collections/espejos"
+          }
+        }
+      },
+      "block_order": ["promo_rockbros", "promo_espejos"],
+      "settings": {
+        "scheme": "light",
+        "heading": "",
+        "padding_top": 24,
+        "padding_bottom": 64
+      }
+    },
+    "featured_luces": {
+      "type": "featured-collection",
+      "settings": {
+        "scheme": "soft",
+        "heading": "Luces para volver de noche",
+        "subtitle": "",
+        "collection": "luces",
+        "products_to_show": 10,
+        "per_row": "5",
+        "show_view_all": true,
+        "padding_top": 64,
+        "padding_bottom": 64
+      }
+    },
+    "brands": {
+      "type": "brand-marquee",
+      "blocks": {
+        "brand_rockbros": {"type": "brand", "settings": {"name": "Rockbros", "link": "shopify://collections/rockbros"}},
+        "brand_neco": {"type": "brand", "settings": {"name": "Neco", "link": "shopify://collections/neco"}},
+        "brand_wellgo": {"type": "brand", "settings": {"name": "Wellgo", "link": ""}},
+        "brand_cigna": {"type": "brand", "settings": {"name": "CIGNA", "link": ""}},
+        "brand_nedong": {"type": "brand", "settings": {"name": "Nedong", "link": ""}}
+      },
+      "block_order": ["brand_rockbros", "brand_neco", "brand_wellgo", "brand_cigna", "brand_nedong"],
+      "settings": {
+        "scheme": "dark",
+        "heading": "Marcas que trabajamos",
+        "speed": 40,
+        "padding_top": 40,
+        "padding_bottom": 44
+      }
+    },
+    "about": {
+      "type": "image-with-text",
+      "settings": {
+        "scheme": "light",
+        "image": "shopify://shop_images/mibi-ia-asientos-lima.png",
+        "image_position": "left",
+        "image_ratio": "landscape",
+        "show_stamp": true,
+        "eyebrow": "Sobre Mi Bicicleta",
+        "heading": "Movilidad con personalidad",
+        "text": "<p>Seleccionamos accesorios y repuestos —desde cascos, luces y grips hasta asientos, pedales y tapabarros— que te den seguridad, confort y estilo en cada trayecto. Para ciclistas y para quienes se mueven en scooter por la ciudad.</p>",
+        "button_label": "Ver todo el catálogo",
+        "button_link": "/collections/all",
+        "button_style": "primary",
+        "padding_top": 72,
+        "padding_bottom": 72
+      }
+    },
+    "faq": {
+      "type": "faq",
+      "blocks": {
+        "faq_envios": {"type": "question", "settings": {"question": "¿Hacen envíos a provincias?", "answer": "<p>Sí. Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde S/ 220.</p>"}},
+        "faq_originales": {"type": "question", "settings": {"question": "¿Los productos son originales?", "answer": "<p>Sí. Somos vendedor autorizado Rockbros.</p>"}},
+        "faq_cambios": {"type": "question", "settings": {"question": "¿Puedo cambiar un producto?", "answer": "<p>Sí, tienes 7 días para cambiarlo, siempre que el producto esté sin abrir.</p>"}},
+        "faq_repuesto": {"type": "question", "settings": {"question": "No sé qué repuesto le queda a mi bici o scooter", "answer": "<p>Escríbenos con una foto de la pieza o del modelo y te ayudamos a encontrar el repuesto correcto.</p>"}}
+      },
+      "block_order": ["faq_envios", "faq_originales", "faq_cambios", "faq_repuesto"],
+      "settings": {
+        "scheme": "soft",
+        "heading": "Preguntas frecuentes",
+        "text": "",
+        "open_first": true,
+        "schema_markup": true,
+        "show_whatsapp": true,
+        "whatsapp_label": "¿Tienes otra consulta?",
+        "whatsapp_text": "Escríbenos por WhatsApp",
+        "padding_top": 72,
+        "padding_bottom": 72
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "scheme": "brand",
+        "heading": "Entérate de lo que llega",
+        "text": "Déjanos tu correo y te avisamos cuando entre stock nuevo o haya una oferta. Sin spam.",
+        "show_note": true,
+        "padding_top": 72,
+        "padding_bottom": 72
+      }
+    }
+  },
+  "order": ["hero", "search", "categories", "usp", "featured", "promos", "featured_luces", "brands", "about", "faq", "newsletter"]
+}

@@ -1,0 +1,69 @@
+{%- comment -%}
+  WhatsApp entry points → https://wa.me/<digits>?text=<message> (new tab).
+  {% render 'whatsapp-button',
+    style: 'float'|'button'|'link'|'card',  default 'button'
+    label: '…',        visible text (default: general.whatsapp.label)
+    text: '…',         secondary line for style 'card' (default: general.whatsapp.card_text)
+    message: '…',      prefilled chat text (default: settings.whatsapp_message)
+    class: ''          extra classes (e.g. 'btn--block btn--sm' for style 'button')
+  %}
+  Renders NOTHING when settings.whatsapp_number is blank; 'float' also needs settings.whatsapp_float.
+  The number is never invented — it only comes from theme settings.
+{%- endcomment -%}
+{%- liquid
+  assign wa_style = style | default: 'button'
+  assign wa_digits = settings.whatsapp_number | strip | remove: ' ' | remove: '+' | remove: '-' | remove: '(' | remove: ')' | remove: '.'
+  assign wa_show = true
+  if wa_digits == blank
+    assign wa_show = false
+  endif
+  if wa_style == 'float' and settings.whatsapp_float == false
+    assign wa_show = false
+  endif
+-%}
+{%- if wa_show -%}
+  {%- liquid
+    assign wa_message = message | default: settings.whatsapp_message
+    assign wa_url = 'https://wa.me/' | append: wa_digits
+    if wa_message != blank
+      assign wa_text_param = wa_message | url_encode
+      assign wa_url = wa_url | append: '?text=' | append: wa_text_param
+    endif
+    assign wa_label = label | default: ''
+    if wa_label == ''
+      assign wa_label = 'general.whatsapp.label' | t
+    endif
+    assign wa_new_tab = 'accessibility.new_window' | t
+    assign wa_sub = text | default: ''
+    if wa_sub == ''
+      assign wa_sub = 'general.whatsapp.card_text' | t
+    endif
+  -%}
+  {%- case wa_style -%}
+    {%- when 'float' -%}
+      <a class="whatsapp-float{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}" target="_blank" rel="noopener" aria-label="{{ 'general.whatsapp.float_label' | t }} ({{ wa_new_tab }})">
+        {%- render 'icon', name: 'whatsapp' -%}
+        <span class="whatsapp-float__label" aria-hidden="true">{{ 'general.whatsapp.float_text' | t }}</span>
+      </a>
+    {%- when 'link' -%}
+      <a class="whatsapp-link{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}" target="_blank" rel="noopener">
+        {%- render 'icon', name: 'whatsapp' -%}
+        <span>{{ wa_label }}</span><span class="visually-hidden"> ({{ wa_new_tab }})</span>
+      </a>
+    {%- when 'card' -%}
+      <a class="whatsapp-card{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}" target="_blank" rel="noopener">
+        <span class="whatsapp-card__icon">{% render 'icon', name: 'whatsapp' %}</span>
+        <span class="whatsapp-card__body">
+          <strong>{{ wa_label }}</strong>
+          <span>{{ wa_sub }}</span>
+        </span>
+        {%- render 'icon', name: 'arrow-right' -%}
+        <span class="visually-hidden">({{ wa_new_tab }})</span>
+      </a>
+    {%- else -%}
+      <a class="btn btn--whatsapp{% if class != blank %} {{ class }}{% endif %}" href="{{ wa_url }}" target="_blank" rel="noopener">
+        {%- render 'icon', name: 'whatsapp' -%}
+        <span>{{ wa_label }}</span><span class="visually-hidden"> ({{ wa_new_tab }})</span>
+      </a>
+  {%- endcase -%}
+{%- endif -%}

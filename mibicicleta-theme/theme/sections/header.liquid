@@ -1,0 +1,209 @@
+{%- comment -%}
+  Header (header group).
+  Mobile (<990): [menu] [logo, centered] [cart] + a full-width pill search row.
+  Desktop (≥990): [logo] [pill search] [help · account · cart], then the nav row with dropdowns.
+  sticky: always | on-scroll-up (hides going down, comes back going up; on mobile the search
+  row folds into a search icon while scrolled) | none.
+  --header-height: in "always" mode global-ui.js measures [data-header] (the <header>). In the
+  other modes [data-header] is a 0px sentinel and header.js sets the variable (0 while hidden),
+  so other sticky elements and anchor offsets follow the visible header.
+{%- endcomment -%}
+{{ 'section-header.css' | asset_url | stylesheet_tag }}
+{%- if section.settings.show_search_bar -%}
+  {{ 'section-predictive-search.css' | asset_url | stylesheet_tag }}
+  {%- if settings.predictive_search -%}
+    <script src="{{ 'predictive-search.js' | asset_url }}" defer></script>
+  {%- endif -%}
+{%- endif -%}
+<script src="{{ 'header.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign scheme = section.settings.scheme | default: 'light'
+  assign sticky = section.settings.sticky | default: 'always'
+  assign menu = section.settings.menu
+  assign logo_tone = 'dark'
+  if scheme == 'dark'
+    assign logo_tone = 'light'
+  endif
+
+  assign show_account = false
+  if section.settings.show_account and shop.customer_accounts_enabled
+    assign show_account = true
+  endif
+
+  assign count = cart.item_count
+  assign label_zero = 'header.cart' | t
+  assign label_one = 'header.cart_count' | t: count: 1
+  assign label_other = 'header.cart_count' | t: count: 0 | replace: '0', '[count]'
+  if count == 0
+    assign cart_label = label_zero
+  else
+    assign cart_label = 'header.cart_count' | t: count: count
+  endif
+-%}
+
+{%- if sticky != 'none' -%}
+  {%- style -%}
+    #shopify-section-{{ section.id }} { position: sticky; top: 0; }
+  {%- endstyle -%}
+{%- endif -%}
+
+<site-header class="site-header" data-sticky="{{ sticky }}">
+  {%- if sticky != 'always' -%}
+    <div class="site-header__sentinel" data-header></div>
+  {%- endif -%}
+  <header class="header scheme-{{ scheme }}"{% if sticky == 'always' %} data-header{% endif %} data-header-bar>
+    <div class="header__inner page-width">
+      <div class="header__start">
+        <button type="button" class="header__icon header__menu" data-drawer-open="MenuDrawer" aria-controls="MenuDrawer" aria-expanded="false" aria-label="{{ 'header.open_menu' | t }}">
+          {%- render 'icon', name: 'menu' -%}
+        </button>
+      </div>
+
+      <a class="header__logo" href="{{ routes.root_url }}">
+        {%- if settings.logo != blank -%}
+          {%- liquid
+            assign logo_alt = settings.logo.alt | default: shop.name
+            assign logo_sizes = '(min-width: 990px) ' | append: settings.logo_width | append: 'px, ' | append: settings.logo_width_mobile | append: 'px'
+          -%}
+          {{ settings.logo | image_url: width: 600 | image_tag: class: 'header__logo-img', alt: logo_alt, widths: '150, 200, 300, 400, 600', sizes: logo_sizes, loading: 'eager' }}
+        {%- else -%}
+          {%- render 'logo', variant: 'lockup', tone: logo_tone -%}
+        {%- endif -%}
+      </a>
+
+      {%- if section.settings.show_search_bar -%}
+        <div class="header__search" id="HeaderSearchRow">
+          {%- render 'header-search', id: 'HeaderSearch', placeholder: section.settings.search_placeholder -%}
+        </div>
+      {%- endif -%}
+
+      <div class="header__actions">
+        {%- if section.settings.help_label != blank -%}
+          {%- render 'whatsapp-button', style: 'link', label: section.settings.help_label, class: 'header__help' -%}
+        {%- endif -%}
+        {%- if sticky == 'on-scroll-up' and section.settings.show_search_bar -%}
+          <button type="button" class="header__icon header__search-toggle" data-search-toggle aria-controls="HeaderSearchRow" aria-expanded="false" aria-label="{{ 'header.open_search' | t }}">
+            {%- render 'icon', name: 'search' -%}
+          </button>
+        {%- endif -%}
+        {%- if show_account -%}
+          <a class="header__icon header__account" href="{{ routes.account_url }}" aria-label="{{ 'header.account' | t }}">
+            {%- render 'icon', name: 'user' -%}
+          </a>
+        {%- endif -%}
+        <a
+          class="header__icon header__cart"
+          href="{{ routes.cart_url }}"
+          data-cart-open
+          data-cart-link
+          aria-label="{{ cart_label | escape }}"
+          data-label-zero="{{ label_zero | escape }}"
+          data-label-one="{{ label_one | escape }}"
+          data-label-other="{{ label_other | escape }}"
+        >
+          {%- render 'icon', name: 'cart' -%}
+          <span class="cart-count" data-cart-count aria-hidden="true"{% if count == 0 %} hidden{% endif %}>
+            {%- if count > 99 %}99+{% else %}{{ count }}{% endif -%}
+          </span>
+        </a>
+      </div>
+
+      {%- if menu.links.size > 0 -%}
+        <div class="header__nav">
+          {%- render 'header-nav', menu: menu -%}
+          {%- if section.settings.show_shipping_note and settings.free_shipping_threshold > 0 -%}
+            {%- assign fs_amount = settings.free_shipping_threshold | times: 100 | money_without_trailing_zeros -%}
+            <p class="header__note">
+              {%- render 'icon', name: 'truck' -%}
+              <span>{{ 'header.free_shipping_note' | t: amount: fs_amount }}</span>
+            </p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </header>
+
+  {%- render 'menu-drawer', menu: menu, show_account: show_account -%}
+</site-header>
+
+{% schema %}
+{
+  "name": "Encabezado",
+  "class": "header-section",
+  "enabled_on": { "groups": ["header"] },
+  "settings": [
+    {
+      "type": "select",
+      "id": "scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "light", "label": "Claro" },
+        { "value": "soft", "label": "Gris suave" },
+        { "value": "brand", "label": "Amarillo" },
+        { "value": "dark", "label": "Negro" }
+      ],
+      "default": "light"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menú",
+      "default": "main-menu",
+      "info": "Los elementos con submenús abren un panel. Con un tercer nivel, el panel se muestra en columnas."
+    },
+    {
+      "type": "select",
+      "id": "sticky",
+      "label": "Encabezado fijo",
+      "options": [
+        { "value": "always", "label": "Siempre visible" },
+        { "value": "on-scroll-up", "label": "Aparece al subir" },
+        { "value": "none", "label": "No fijo" }
+      ],
+      "default": "always"
+    },
+    {
+      "type": "header",
+      "content": "Búsqueda"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search_bar",
+      "label": "Mostrar barra de búsqueda",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Texto de ejemplo en la búsqueda",
+      "default": "Busca por código, medida o nombre…"
+    },
+    {
+      "type": "header",
+      "content": "Íconos y enlaces"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Mostrar ícono de cuenta",
+      "default": true,
+      "info": "Solo aparece si las cuentas de cliente están activadas."
+    },
+    {
+      "type": "text",
+      "id": "help_label",
+      "label": "Texto del enlace de ayuda",
+      "default": "Ayuda",
+      "info": "Abre WhatsApp. Solo se muestra si hay un número en Configuración del tema › Contacto."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shipping_note",
+      "label": "Mostrar \"Envío gratis desde…\" junto al menú",
+      "default": true,
+      "info": "Usa el monto de Configuración del tema › Carrito. Se oculta si el monto es 0."
+    }
+  ]
+}
+{% endschema %}

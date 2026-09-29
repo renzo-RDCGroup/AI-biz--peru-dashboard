@@ -1,0 +1,106 @@
+/* Mi Bici 2026 — section-announcement.css
+   Announcement bar (sections/announcement-bar.liquid, assets/announcement-bar.js).
+   Marquee: seamless ticker, pauses on hover/focus/button, static under reduced motion.
+   Rotate: one message at a time. */
+
+.announcement { font: 500 .8125rem/1.3 var(--font-body); }
+.announcement__inner { display: flex; align-items: center; min-height: 36px; }
+.announcement__viewport { flex: 1; min-width: 0; overflow: hidden; }
+.announcement__track { display: flex; width: max-content; }
+.announcement__list { display: flex; flex: none; align-items: center; margin: 0; padding: 0; list-style: none; }
+.announcement__item { display: inline-flex; align-items: center; gap: 10px; min-height: 36px; padding-left: 44px; white-space: nowrap; }
+.announcement--dots .announcement__item { padding-left: 24px; }
+.announcement--dots .announcement__item::after {
+  content: "";
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-left: 14px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.announcement__link { text-decoration: none; }
+.announcement__link:hover { text-decoration: underline; }
+
+/* Discount code chip: dashed pill, copies on click. Both labels share one grid cell so the
+   width never changes (keeps the marquee loop seamless). */
+.announcement__code {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 2px 10px;
+  border: 1.5px dashed currentColor;
+  border-radius: var(--radius-pill);
+  font: 800 .75rem/1 var(--font-heading);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: copy;
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.scheme-dark .announcement__code { color: var(--color-brand); }
+.announcement__code .icon { --icon-size: 13px; }
+.announcement__code-text { display: grid; }
+.announcement__code-text > * { grid-area: 1 / 1; text-align: center; }
+.announcement__code [data-copied],
+.announcement__code.is-copied [data-code] { visibility: hidden; }
+.announcement__code.is-copied [data-copied] { visibility: visible; }
+.announcement__code.is-copied { border-style: solid; border-color: var(--color-brand); background: var(--color-brand); color: #000; }
+
+.announcement__pause,
+.announcement__arrow {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 36px;
+  color: inherit;
+  opacity: .75;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.announcement__pause:hover,
+.announcement__arrow:hover { opacity: 1; }
+.announcement__pause .icon { --icon-size: 14px; }
+.announcement__arrow .icon { --icon-size: 18px; }
+.announcement__pause .icon--play,
+.announcement--marquee.is-paused .announcement__pause .icon--pause { display: none; }
+.announcement--marquee.is-paused .announcement__pause .icon--play { display: inline-block; }
+
+/* Marquee: the track holds N identical lists and slides by exactly one list width
+   (--marquee-shift, px from announcement-bar.js; 50% = one of the two server-rendered lists). */
+.announcement--marquee .announcement__viewport {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .announcement--marquee .announcement__track { animation: mibi-marquee var(--marquee-duration, 40s) linear infinite; }
+  .announcement--marquee:is(:hover, :focus-within, .is-paused) .announcement__track { animation-play-state: paused; }
+}
+@keyframes mibi-marquee { to { transform: translate3d(calc(-1 * var(--marquee-shift, 50%)), 0, 0); } }
+/* Reduced motion: one static list, swipeable when it doesn't fit. */
+@media (prefers-reduced-motion: reduce) {
+  .announcement__list[data-clone] { display: none; }
+  .announcement--marquee .announcement__viewport { overflow-x: auto; scrollbar-width: none; -webkit-mask-image: none; mask-image: none; }
+  .announcement--marquee .announcement__viewport::-webkit-scrollbar { display: none; }
+  .announcement--marquee .announcement__track { margin-inline: auto; padding-right: 24px; }
+  .announcement__pause { display: none; }
+}
+
+/* Rotate: all messages share one grid cell; only .is-active shows. */
+.announcement--rotate { max-width: calc(880px + var(--gutter) * 2); margin-inline: auto; }
+.announcement--rotate .announcement__track,
+.announcement--rotate .announcement__list { display: grid; width: 100%; }
+.announcement--rotate .announcement__item {
+  grid-area: 1 / 1;
+  justify-content: center;
+  padding: 6px 8px;
+  white-space: normal;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .35s var(--ease), visibility 0s linear .35s;
+}
+.announcement--rotate .announcement__item::after { display: none; }
+.announcement--rotate .announcement__item.is-active,
+.announcement--rotate:not(.is-ready) .announcement__item:first-child { opacity: 1; visibility: visible; transition-delay: 0s; }
+

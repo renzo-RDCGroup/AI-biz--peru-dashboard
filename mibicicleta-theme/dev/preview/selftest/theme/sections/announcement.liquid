@@ -1,0 +1,4 @@
+<div class="announcement">{{ section.settings.text }} · {{ section.location }} · {{ section.index }}</div>
+{% schema %}
+{ "name": "Anuncio", "settings": [ { "type": "text", "id": "text", "label": "Texto", "default": "Default ann" } ], "enabled_on": { "groups": ["header"] } }
+{% endschema %}

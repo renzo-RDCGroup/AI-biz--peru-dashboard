@@ -1,0 +1,105 @@
+{%- comment -%}
+  Brand ribbon (styles: assets/section-home-2.css · pause toggle: assets/home.js).
+  Two identical groups scroll by -50% for a seamless loop; each group repeats the brands so it
+  is wider than any screen. Only the very first copy is exposed to assistive tech and keyboard.
+  Pauses on hover/focus and with the pause button; static, wrapped list under reduced motion.
+{%- endcomment -%}
+{{ 'section-home-2.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'home.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign count = section.blocks.size
+  assign reps = 12 | divided_by: count | at_least: 2 | at_most: 12
+  assign title_id = 'MarqueeTitle-' | append: section.id
+-%}
+
+{%- if count > 0 -%}
+  <section class="brand-marquee section scheme-{{ section.settings.scheme }}" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px; --marquee-dur: {{ section.settings.speed }}s;"{% if section.settings.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
+    <marquee-toggle class="brand-marquee__wrap" data-pause-label="{{ 'home.marquee.pause' | t | escape }}" data-play-label="{{ 'home.marquee.play' | t | escape }}">
+      <div class="page-width brand-marquee__head">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="brand-marquee__heading" id="{{ title_id }}">{{ section.settings.heading | escape }}</h2>
+        {%- endif -%}
+        <button type="button" class="btn btn--icon btn--sm btn--outline brand-marquee__toggle js-only" aria-label="{{ 'home.marquee.pause' | t | escape }}" data-marquee-toggle>
+          {%- render 'icon', name: 'pause' -%}
+          {%- render 'icon', name: 'play' -%}
+        </button>
+      </div>
+
+      <div class="brand-marquee__viewport">
+        <div class="brand-marquee__track">
+          {%- for copy in (1..2) -%}
+            <ul class="brand-marquee__group" role="list"{% if copy == 2 %} aria-hidden="true"{% endif %}>
+              {%- for rep in (1..reps) -%}
+                {%- for block in section.blocks -%}
+                  {%- liquid
+                    assign primary = false
+                    if copy == 1 and rep == 1
+                      assign primary = true
+                    endif
+                    assign name = block.settings.name | strip
+                    assign logo = block.settings.logo
+                  -%}
+                  <li class="brand-marquee__item{% unless primary %} brand-marquee__item--dup{% endunless %}{% if primary and forloop.last %} brand-marquee__item--last{% endif %}"{% if primary %} {{ block.shopify_attributes }}{% elsif copy == 1 %} aria-hidden="true"{% endif %}>
+                    {%- if block.settings.link != blank -%}
+                      <a class="brand-marquee__link" href="{{ block.settings.link }}"{% unless primary %} tabindex="-1"{% endunless %}>
+                    {%- endif -%}
+                    {%- if logo != blank -%}
+                      {{- logo | image_url: height: 96 | image_tag: height: 48, loading: 'lazy', alt: name, class: 'brand-marquee__logo' -}}
+                    {%- else -%}
+                      <span class="brand-marquee__name">{{ name | escape }}</span>
+                    {%- endif -%}
+                    {%- if block.settings.link != blank -%}
+                      </a>
+                    {%- endif -%}
+                    <span class="brand-marquee__dot" aria-hidden="true"></span>
+                  </li>
+                {%- endfor -%}
+              {%- endfor -%}
+            </ul>
+          {%- endfor -%}
+        </div>
+      </div>
+    </marquee-toggle>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cinta de marcas",
+  "tag": "div",
+  "class": "brand-marquee-section",
+  "max_blocks": 16,
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "dark", "label": "Oscuro"}, {"value": "brand", "label": "Amarillo"}, {"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}], "default": "dark"},
+    {"type": "text", "id": "heading", "label": "Título (opcional)", "default": "Marcas que trabajamos"},
+    {"type": "range", "id": "speed", "label": "Duración de una vuelta", "min": 20, "max": 120, "step": 5, "unit": "s", "default": 40},
+    {"type": "paragraph", "content": "La cinta se detiene al pasar el mouse, con el botón de pausa y cuando el visitante prefiere reducir el movimiento."},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 44}
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Marca",
+      "settings": [
+        {"type": "text", "id": "name", "label": "Nombre", "default": "Rockbros"},
+        {"type": "image_picker", "id": "logo", "label": "Logo (opcional)", "info": "Reemplaza el nombre. PNG/SVG claro sobre transparente."},
+        {"type": "url", "id": "link", "label": "Enlace (opcional)"}
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cinta de marcas",
+      "blocks": [
+        {"type": "brand"},
+        {"type": "brand", "settings": {"name": "Neco"}},
+        {"type": "brand", "settings": {"name": "Wellgo"}},
+        {"type": "brand", "settings": {"name": "CIGNA"}}
+      ]
+    }
+  ]
+}
+{% endschema %}

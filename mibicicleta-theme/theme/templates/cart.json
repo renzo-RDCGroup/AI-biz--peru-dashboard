@@ -1,0 +1,20 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-cart",
+      "settings": {
+        "scheme": "light",
+        "show_trust": true,
+        "show_payment_icons": true,
+        "show_upsell": true,
+        "upsell_limit": 8,
+        "empty_menu": "main-menu",
+        "padding_top": 32,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

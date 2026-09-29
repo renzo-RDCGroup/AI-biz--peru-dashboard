@@ -1,0 +1,111 @@
+{%- comment -%}
+  404 page. Brand-yellow band: giant "404." (manual-style numeral with the red dot),
+  h1 "Esta ruta no existe", search form, category chips (menu setting), CTAs and an optional
+  WhatsApp line (renders nothing without a number). "mi" watermark bleeds off the corner.
+{%- endcomment -%}
+{{ 'section-pages.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign ss = section.settings
+  assign wm_tone = 'mono-dark'
+  if ss.scheme == 'dark'
+    assign wm_tone = 'mono-light'
+  endif
+  assign search_id = 'NotFoundSearch-' | append: section.id
+  assign title_id = 'NotFoundTitle-' | append: section.id
+  assign icon_map = 'luz:light,luces:light,llanta:tire,camara:tire,pinon:gear,transmision:gear,espejo:mirror,asiento:seat,pedal:pedal,grip:grip,tapabarro:mudguard,casco:helmet,accesorio:bag,componente:wrench,rockbros:medal,neco:medal,scooter:scooter' | split: ','
+  assign cta2_url = ss.button2_link | default: routes.all_products_collection_url
+-%}
+
+<section class="section not-found scheme-{{ ss.scheme }} has-watermark" style="--pad-top: {{ ss.padding_top }}px; --pad-bottom: {{ ss.padding_bottom }}px;" aria-labelledby="{{ title_id }}">
+  <div class="page-width not-found__inner">
+    <p class="not-found__code" aria-hidden="true">404<span class="not-found__dot"></span></p>
+
+    <div class="not-found__body">
+      <p class="eyebrow eyebrow--dot hide-mobile">{{ 'not_found.eyebrow' | t }}</p>
+      <h1 class="not-found__title" id="{{ title_id }}">{{ ss.heading | escape }}</h1>
+      {%- if ss.text != blank -%}
+        <div class="not-found__text">{{ ss.text }}</div>
+      {%- endif -%}
+
+      {%- if ss.show_search -%}
+        <form class="pill-search" action="{{ routes.search_url }}" method="get" role="search">
+          <label class="visually-hidden" for="{{ search_id }}">{{ 'not_found.search_label' | t }}</label>
+          <span class="pill-search__icon" aria-hidden="true">{% render 'icon', name: 'search' %}</span>
+          <input class="pill-search__input" type="search" id="{{ search_id }}" name="q" placeholder="{{ ss.search_placeholder | escape }}" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+          <input type="hidden" name="options[prefix]" value="last">
+          <button class="btn btn--primary pill-search__btn" type="submit">{{ 'not_found.search_submit' | t }}</button>
+        </form>
+      {%- endif -%}
+
+      {%- if ss.menu != blank and ss.menu.links.size > 0 -%}
+        <nav class="not-found__cats" aria-label="{{ 'not_found.categories' | t }}">
+          {%- if ss.categories_heading != blank -%}
+            <p class="not-found__cats-title">{{ ss.categories_heading | escape }}</p>
+          {%- endif -%}
+          <ul class="chip-row chip-row--bleed not-found__chips" role="list">
+            {%- for link in ss.menu.links -%}
+              {%- liquid
+                assign chip_icon = ''
+                assign link_key = link.title | handleize
+                for pair in icon_map
+                  assign kv = pair | split: ':'
+                  if link_key contains kv[0]
+                    assign chip_icon = kv[1]
+                    break
+                  endif
+                endfor
+              -%}
+              <li>
+                <a class="chip not-found__chip" href="{{ link.url }}">
+                  {%- if chip_icon != '' %}{% render 'icon', name: chip_icon %}{% endif -%}
+                  {{- link.title | escape -}}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+
+      <div class="not-found__actions">
+        {%- if ss.button_label != blank -%}
+          <a class="btn btn--primary btn--lg" href="{{ routes.root_url }}">{% render 'icon', name: 'arrow-left' %}{{ ss.button_label | escape }}</a>
+        {%- endif -%}
+        {%- if ss.button2_label != blank -%}
+          <a class="btn btn--outline btn--lg" href="{{ cta2_url }}">{{ ss.button2_label | escape }}</a>
+        {%- endif -%}
+      </div>
+
+      {%- if ss.whatsapp_label != blank -%}
+        {%- render 'whatsapp-button', style: 'link', label: ss.whatsapp_label, class: 'not-found__wa' -%}
+      {%- endif -%}
+    </div>
+  </div>
+  {%- render 'logo', variant: 'mark', tone: wm_tone, label: '', class: 'mi-watermark not-found__wm' -%}
+</section>
+
+{% schema %}
+{
+  "name": "Página 404",
+  "class": "not-found-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "brand"},
+    {"type": "text", "id": "heading", "label": "Título", "default": "Esta ruta no existe"},
+    {"type": "richtext", "id": "text", "label": "Texto", "default": "<p>Puede que el enlace esté mal escrito o que la página ya no exista. Busca lo que necesitas o explora una categoría.</p>"},
+    {"type": "header", "content": "Búsqueda"},
+    {"type": "checkbox", "id": "show_search", "label": "Mostrar buscador", "default": true},
+    {"type": "text", "id": "search_placeholder", "label": "Texto de ejemplo del buscador", "default": "¿Qué repuesto buscas?"},
+    {"type": "header", "content": "Categorías"},
+    {"type": "link_list", "id": "menu", "label": "Menú de categorías", "default": "main-menu"},
+    {"type": "text", "id": "categories_heading", "label": "Título de categorías", "default": "O explora una categoría"},
+    {"type": "header", "content": "Botones"},
+    {"type": "text", "id": "button_label", "label": "Botón al inicio", "default": "Volver al inicio"},
+    {"type": "text", "id": "button2_label", "label": "Segundo botón", "default": "Ver todo el catálogo"},
+    {"type": "url", "id": "button2_link", "label": "Enlace del segundo botón", "info": "Vacío = todo el catálogo."},
+    {"type": "text", "id": "whatsapp_label", "label": "Texto de WhatsApp", "info": "Solo aparece si hay un número de WhatsApp en Configuración del tema › Contacto.", "default": "Si no sabes cuál es, escríbenos con una foto."},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 72}
+  ]
+}
+{% endschema %}

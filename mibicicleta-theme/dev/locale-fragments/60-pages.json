@@ -1,0 +1,113 @@
+{
+  "footer": {
+    "copyright": "© {{ year }} {{ shop }}",
+    "policies": "Políticas de la tienda",
+    "contact": {
+      "email": "Correo",
+      "phone": "Teléfono",
+      "address": "Dirección",
+      "hours": "Horario"
+    }
+  },
+  "pages": {
+    "share": {
+      "label": "Compartir",
+      "copy": "Copiar enlace",
+      "copied": "¡Enlace copiado!",
+      "facebook": "Compartir en Facebook"
+    },
+    "reading_time": {
+      "one": "{{ count }} min de lectura",
+      "other": "{{ count }} min de lectura"
+    }
+  },
+  "contact": {
+    "form": {
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "message": "Mensaje",
+      "optional": "opcional",
+      "send": "Enviar mensaje",
+      "error_heading": "Revisa estos datos antes de enviar:",
+      "success_title": "¡Mensaje enviado!",
+      "success_text": "Gracias por escribirnos. Te responderemos al correo que nos dejaste.",
+      "success_cta": "Seguir comprando",
+      "message_placeholder": "Cuéntanos qué necesitas: producto, medida o modelo de tu bici o scooter."
+    },
+    "details": {
+      "email": "Correo",
+      "phone": "Teléfono",
+      "address": "Dirección",
+      "hours": "Horario"
+    }
+  },
+  "blog": {
+    "empty_title": "Aún no hay artículos",
+    "empty_text": "Estamos preparando guías y novedades. Mientras tanto, date una vuelta por el catálogo.",
+    "empty_cta": "Ver productos",
+    "read_more": "Leer artículo",
+    "by": "Por {{ author }}",
+    "all": "Todos",
+    "topics": "Temas",
+    "back": "Volver a {{ blog }}",
+    "more_articles": "Más artículos",
+    "comments": {
+      "count": {
+        "one": "{{ count }} comentario",
+        "other": "{{ count }} comentarios"
+      },
+      "title": "Deja un comentario",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "body": "Comentario",
+      "post": "Publicar comentario",
+      "moderated": "Los comentarios se revisan antes de publicarse. Tu correo no se muestra.",
+      "success": "¡Gracias! Tu comentario ya está publicado.",
+      "success_moderated": "¡Gracias! Publicaremos tu comentario cuando lo revisemos.",
+      "error_heading": "Revisa estos datos antes de publicar:"
+    }
+  },
+  "password": {
+    "newsletter": {
+      "label": "Correo electrónico",
+      "placeholder": "tu@correo.com",
+      "submit": "Avísame",
+      "success": "¡Listo! Te escribiremos cuando abramos.",
+      "error_heading": "Revisa tu correo:"
+    },
+    "login": {
+      "summary": "Ingresar con contraseña",
+      "summary_short": "Ingresar",
+      "label": "Contraseña de la tienda",
+      "submit": "Entrar",
+      "error": "La contraseña no es correcta. Inténtalo de nuevo."
+    },
+    "admin_link_html": "¿Eres el propietario de la tienda? <a href=\"/admin\">Inicia sesión aquí</a>"
+  },
+  "gift_card": {
+    "title": "Tarjeta de regalo de {{ value }} · {{ shop }}",
+    "label": "Tarjeta de regalo",
+    "balance": "Saldo disponible",
+    "initial": "Valor inicial: {{ value }}",
+    "code": "Código",
+    "copy": "Copiar código",
+    "copied": "¡Copiado!",
+    "expires_on": "Vence el {{ date }}",
+    "expired": "Venció el {{ date }}",
+    "disabled": "Esta tarjeta está desactivada",
+    "how_to": "Ingresa este código en el checkout para pagar con tu saldo.",
+    "qr_alt": "Código QR de la tarjeta de regalo",
+    "qr_help": "Muestra este código QR en caja",
+    "apple_wallet": "Agregar a Apple Wallet",
+    "message": "Mensaje",
+    "shop_cta": "Ir a la tienda",
+    "print": "Imprimir"
+  },
+  "not_found": {
+    "eyebrow": "Error 404",
+    "search_label": "Buscar en la tienda",
+    "search_submit": "Buscar",
+    "categories": "Categorías"
+  }
+}

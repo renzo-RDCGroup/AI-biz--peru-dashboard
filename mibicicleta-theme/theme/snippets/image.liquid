@@ -1,0 +1,35 @@
+{%- comment -%}
+  Responsive image (image_url + image_tag with srcset).
+  {% render 'image',
+    image: img,                        image object (blank → placeholder SVG)
+    widths: '360,540,720,900,1080,1296,1512,1728,2048',
+    sizes: '(min-width: 990px) 50vw, 100vw',
+    lazy: true,                        false → loading="eager"
+    priority: false,                   true → eager + fetchpriority="high" + preload (LCP image only)
+    class: '',
+    alt: '',                           default: image.alt
+    placeholder: 'image'               placeholder_svg_tag name: image | product-1…6 | collection-1…6 | lifestyle-1…2
+  %}
+{%- endcomment -%}
+{%- liquid
+  assign img_widths = widths | default: '360,540,720,900,1080,1296,1512,1728,2048'
+  assign img_sizes = sizes | default: '100vw'
+  assign img_alt = alt | default: image.alt | default: ''
+  assign img_loading = 'lazy'
+  if lazy == false
+    assign img_loading = 'eager'
+  endif
+-%}
+{%- if image != blank -%}
+  {%- if priority -%}
+    {{- image | image_url: width: 2048 | image_tag: widths: img_widths, sizes: img_sizes, loading: 'eager', fetchpriority: 'high', preload: true, class: class, alt: img_alt -}}
+  {%- else -%}
+    {{- image | image_url: width: 2048 | image_tag: widths: img_widths, sizes: img_sizes, loading: img_loading, class: class, alt: img_alt -}}
+  {%- endif -%}
+{%- else -%}
+  {%- liquid
+    assign ph_name = placeholder | default: 'image'
+    assign ph_class = 'placeholder-svg ' | append: class | strip
+  -%}
+  {{- ph_name | placeholder_svg_tag: ph_class -}}
+{%- endif -%}

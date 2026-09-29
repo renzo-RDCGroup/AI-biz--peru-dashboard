@@ -1,0 +1,77 @@
+{%- comment -%}
+  Delivery estimate (block "delivery_estimate"). Driven ONLY by theme settings
+  (Configuración del tema › Plazos de entrega — ⚠️ confirm the windows before publishing).
+  {% render 'delivery-estimate', heading: block.settings.heading %}
+  Server output: "1 a 3 días hábiles" per zone (works without JS). <delivery-estimate> in
+  product.js turns each [data-range="min-max"] into dates (skipping Sundays when set) and, when
+  delivery_cutoff_hour > 0, shows a countdown until the dispatch cut-off.
+  Renders nothing when every value is 0.
+{%- endcomment -%}
+{%- liquid
+  assign lima_min = settings.delivery_lima_min | default: 0
+  assign lima_max = settings.delivery_lima_max | default: 0
+  assign prov_min = settings.delivery_prov_min | default: 0
+  assign prov_max = settings.delivery_prov_max | default: 0
+  if lima_max < lima_min
+    assign lima_max = lima_min
+  endif
+  if prov_max < prov_min
+    assign prov_max = prov_min
+  endif
+  assign cutoff = settings.delivery_cutoff_hour | default: 0
+  assign de_heading = heading | default: ''
+  if de_heading == ''
+    assign de_heading = 'products.product.delivery.heading' | t
+  endif
+-%}
+{%- if lima_max > 0 or prov_max > 0 -%}
+  <delivery-estimate
+    class="delivery"
+    data-cutoff="{{ cutoff }}"
+    data-skip-sunday="{{ settings.delivery_skip_sunday }}"
+    data-days="{{ 'products.product.delivery.days_short' | t }}"
+    data-months="{{ 'products.product.delivery.months_short' | t }}"
+    data-today="{{ 'products.product.delivery.today' | t }}"
+    data-time="{{ 'products.product.delivery.time' | t }}"
+    data-minutes="{{ 'products.product.delivery.minutes' | t }}"
+  >
+    <p class="delivery__title">
+      <span class="delivery__icon">{% render 'icon', name: 'truck' %}</span>
+      {{- de_heading | escape -}}
+    </p>
+    <ul class="delivery__list" role="list">
+      {%- for zone in (1..2) -%}
+        {%- liquid
+          if zone == 1
+            assign z_min = lima_min
+            assign z_max = lima_max
+            assign z_label = 'products.product.delivery.lima' | t
+          else
+            assign z_min = prov_min
+            assign z_max = prov_max
+            assign z_label = 'products.product.delivery.provinces' | t
+          endif
+        -%}
+        {%- if z_max > 0 -%}
+          <li class="delivery__row">
+            <span class="delivery__zone">{{ z_label }}</span>
+            <span class="delivery__date" data-range="{{ z_min }}-{{ z_max }}">
+              {%- if z_min == z_max -%}
+                {{- 'products.product.delivery.days' | t: count: z_max -}}
+              {%- else -%}
+                {{- 'products.product.delivery.range' | t: min: z_min, max: z_max -}}
+              {%- endif -%}
+            </span>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+    {%- if cutoff > 0 -%}
+      <p class="delivery__countdown" data-countdown data-template="{{ 'products.product.delivery.countdown' | t }}" hidden>
+        {%- render 'icon', name: 'clock' -%}
+        <span data-countdown-text></span>
+      </p>
+    {%- endif -%}
+    <p class="delivery__note">{{ 'products.product.delivery.note' | t }}</p>
+  </delivery-estimate>
+{%- endif -%}

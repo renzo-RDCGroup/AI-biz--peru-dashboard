@@ -1,0 +1,57 @@
+{
+  "cart": {
+    "title": "Tu carrito",
+    "label": "Carrito de compras",
+    "items_label": "Productos en tu carrito",
+    "continue": "Seguir comprando",
+    "update": "Actualizar carrito",
+    "columns": {
+      "product": "Producto",
+      "quantity": "Cantidad",
+      "total": "Total"
+    },
+    "count": {
+      "one": "{{ count }} producto",
+      "other": "{{ count }} productos"
+    },
+    "empty": {
+      "title": "Tu carrito está vacío",
+      "text": "Luces, llantas, cascos y repuestos para tu bici o scooter te están esperando.",
+      "cta": "Explorar productos",
+      "categories": "Explora por categoría",
+      "suggestions": "Te puede interesar",
+      "free_shipping": "Envío gratis a {{ zone }} desde {{ amount }}"
+    },
+    "line": {
+      "remove": "Eliminar",
+      "remove_label": "Eliminar {{ title }} del carrito",
+      "quantity_label": "Cantidad de {{ title }}",
+      "line_total": "Total del producto",
+      "stock_limit": "Solo hay [quantity] disponibles de este producto."
+    },
+    "totals": {
+      "summary": "Resumen del pedido",
+      "subtotal": "Subtotal",
+      "discounts": "Descuentos",
+      "savings_html": "Ahorras <strong>{{ amount }}</strong>",
+      "checkout": "Finalizar pedido",
+      "note_toggle": "Agregar una nota a tu pedido",
+      "note_label": "Nota para tu pedido",
+      "note_placeholder": "¿Algo que debamos saber sobre tu pedido?"
+    },
+    "upsell": {
+      "add": "Agregar",
+      "add_label": "Agregar al carrito: {{ title }}",
+      "options": "Ver opciones",
+      "options_label": "Ver opciones: {{ title }}"
+    },
+    "trust": {
+      "original_title": "Productos originales",
+      "original_text": "Vendedor autorizado Rockbros",
+      "shipping_title": "Envíos a {{ zone }}",
+      "shipping_text": "Gratis desde {{ amount }}",
+      "returns_title": "Cambios y garantía",
+      "returns_text": "7 días para cambiar, sin abrir"
+    }
+  }
+}

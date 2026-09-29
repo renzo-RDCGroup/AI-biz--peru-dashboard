@@ -1,0 +1,62 @@
+{%- comment -%}
+  Color swatch dot (decorative, aria-hidden — always show the value name as text nearby).
+  {% render 'color-swatch', value: option_value, size: 'sm'|'md'|'lg', class: '' %}
+    value: product_option_value (uses native value.swatch.color / .image when set) or a string.
+  Fallback: Spanish/English color words (case- and accent-insensitive). Two known colors in
+  one value ("Rojo Negro", "NEGRO BRILLO / BLANCO") → 50/50 diagonal split.
+  "transparente" → checkerboard · "tornasolado"/"multicolor" → rainbow · unknown → neutral
+  (.swatch--unknown; style it or show the text label).
+
+  Which options are color options? Callers use:
+    assign option_name = option.name | downcase | strip
+    if option_name == 'color' or option_name == 'colour' or option_name == 'color/colour'
+{%- endcomment -%}
+{%- liquid
+  assign sw_size = size | default: 'md'
+  assign sw_name = value.name | default: value | append: ''
+  assign sw_style = ''
+  assign sw_mod = ''
+
+  if value.swatch.image
+    assign sw_img = value.swatch.image | image_url: width: 80
+    assign sw_style = '--swatch: url(' | append: sw_img | append: ') center / cover'
+  elsif value.swatch.color
+    assign sw_style = '--swatch: ' | append: value.swatch.color
+  else
+    assign sw_key = sw_name | downcase | replace: 'á', 'a' | replace: 'é', 'e' | replace: 'í', 'i' | replace: 'ó', 'o' | replace: 'ú', 'u' | replace: '/', ' ' | replace: '-', ' ' | replace: ',', ' ' | replace: '+', ' ' | replace: '&', ' '
+    if sw_key contains 'transparent'
+      assign sw_mod = ' swatch--transparent'
+    elsif sw_key contains 'tornasol' or sw_key contains 'multicolor' or sw_key contains 'arcoiris'
+      assign sw_mod = ' swatch--iridescent'
+    else
+      assign sw_map = 'amarill:#FFD219,yellow:#FFD219,blanc:#FFFFFF,white:#FFFFFF,negr:#111111,black:#111111,roj:#D10000,red:#D10000,azul:#1F5BD8,blue:#1F5BD8,celeste:#7CC6F2,verde:#2E9E4F,green:#2E9E4F,fucsia:#E0218A,rosa:#F28DB2,pink:#F28DB2,naranja:#FF7A00,orange:#FF7A00,morad:#7B3FB5,purple:#7B3FB5,lila:#B79CE0,gris:#9A9A9A,gray:#9A9A9A,grey:#9A9A9A,platead:#C9C9C9,plata:#C9C9C9,silver:#C9C9C9,dorad:#C9A13B,gold:#C9A13B,marron:#7A4B2A,cafe:#7A4B2A,brown:#7A4B2A,beige:#E6D5B8' | split: ','
+      assign sw_words = sw_key | split: ' '
+      assign sw_c1 = ''
+      assign sw_c2 = ''
+      for word in sw_words
+        for pair in sw_map
+          assign pair_parts = pair | split: ':'
+          if word contains pair_parts[0]
+            if sw_c1 == ''
+              assign sw_c1 = pair_parts[1]
+            elsif sw_c2 == '' and pair_parts[1] != sw_c1
+              assign sw_c2 = pair_parts[1]
+            endif
+            break
+          endif
+        endfor
+        if sw_c2 != ''
+          break
+        endif
+      endfor
+      if sw_c2 != ''
+        assign sw_style = '--swatch: linear-gradient(135deg, ' | append: sw_c1 | append: ' 50%, ' | append: sw_c2 | append: ' 50%)'
+      elsif sw_c1 != ''
+        assign sw_style = '--swatch: ' | append: sw_c1
+      else
+        assign sw_mod = ' swatch--unknown'
+      endif
+    endif
+  endif
+-%}
+<span class="swatch swatch--{{ sw_size }}{{ sw_mod }}{% if class != blank %} {{ class }}{% endif %}"{% if sw_style != '' %} style="{{ sw_style }}"{% endif %} aria-hidden="true"></span>

@@ -1,0 +1,39 @@
+{%- comment -%}
+  Sticky add-to-cart bar (mobile + desktop). <sticky-atc> in product.js shows it once the main
+  buy buttons (#target) have scrolled above the viewport, and sets --bottom-offset so the
+  WhatsApp float moves up. The button submits the main product form via form="…".
+  {% render 'sticky-atc', product: product, variant: current, form_id: product_form_id, target: buy_id %}
+{%- endcomment -%}
+{%- liquid
+  assign sa_variant = variant | default: product.selected_or_first_available_variant
+  assign sa_image = sa_variant.featured_media.preview_image | default: product.featured_media.preview_image
+  assign sa_label = 'products.product.add_short' | t
+-%}
+<sticky-atc class="sticky-atc" data-target="{{ target }}" aria-hidden="true" inert>
+  <div class="sticky-atc__inner page-width">
+    <div class="sticky-atc__media media media--contain{% if settings.card_blend_white %} media--blend{% endif %}" data-sticky-media>
+      {%- if sa_image != blank -%}
+        {{- sa_image | image_url: width: 160 | image_tag: loading: 'lazy', widths: '80,160', sizes: '56px', alt: '' -}}
+      {%- else -%}
+        <span class="sticky-atc__noimg">{% render 'logo', variant: 'mark', tone: 'mono-dark', label: '' %}</span>
+      {%- endif -%}
+    </div>
+    <div class="sticky-atc__info">
+      <p class="sticky-atc__title">{{ product.title | escape }}</p>
+      <p class="sticky-atc__variant" data-sticky-variant{% if product.has_only_default_variant %} hidden{% endif %}>{{ sa_variant.title | escape }}</p>
+      {%- render 'price', product: product, variant: sa_variant, size: 'sm', show_save: false, class: 'sticky-atc__price' -%}
+    </div>
+    <button
+      type="submit"
+      name="add"
+      form="{{ form_id }}"
+      class="btn btn--brand sticky-atc__btn"
+      data-add-button
+      data-label-add="{{ sa_label }}"
+      {% unless sa_variant.available %}disabled{% endunless %}
+    >
+      {%- render 'icon', name: 'bag-plus' -%}
+      <span data-add-label>{% if sa_variant.available %}{{ sa_label }}{% else %}{{ 'cart.general.sold_out' | t }}{% endif %}</span>
+    </button>
+  </div>
+</sticky-atc>

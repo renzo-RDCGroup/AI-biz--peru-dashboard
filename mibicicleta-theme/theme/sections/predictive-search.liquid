@@ -1,0 +1,133 @@
+{%- comment -%}
+  Predictive search results, fetched by predictive-search.js from
+  routes.predictive_search_url?q=…&resources[type]=product,collection,query&section_id=predictive-search
+  Listbox semantics: groups (role=group) of options (the <a> elements, role=option).
+  Ids start with "ps-" and are prefixed per search box by the JS (unique ids on the page).
+  Desktop: [Sugerencias + Categorías] | [Productos + "Ver todos"]. Mobile: one column.
+{%- endcomment -%}
+{%- liquid
+  assign ps = predictive_search
+  assign terms = ps.terms | strip
+  assign products = ps.resources.products
+  assign collections = ps.resources.collections
+  assign queries = ps.resources.queries
+  assign terms_down = terms | downcase
+  assign encoded = terms | url_encode
+  assign search_url = routes.search_url | append: '?q=' | append: encoded | append: '&options%5Bprefix%5D=last'
+  assign opt = 0
+-%}
+{%- if ps.performed and terms != blank -%}
+  <div class="psearch{% if products.size == 0 %} psearch--empty{% endif %}" data-predictive-results>
+    {%- if products.size == 0 -%}
+      <div class="psearch__empty">
+        <p class="psearch__empty-title">{{ 'search.predictive.no_results' | t: terms: terms }}</p>
+        <p class="psearch__empty-hint">{{ 'search.predictive.no_results_hint' | t }}</p>
+        {%- liquid
+          assign wa_label = 'search.predictive.whatsapp_hint' | t
+          assign wa_message = terms
+          if settings.whatsapp_message != blank
+            assign wa_message = settings.whatsapp_message | append: ' — ' | append: terms
+          endif
+        -%}
+        {%- render 'whatsapp-button', style: 'link', label: wa_label, message: wa_message, class: 'psearch__whatsapp' -%}
+      </div>
+    {%- endif -%}
+
+    <div class="psearch__grid" id="ps-listbox" role="listbox" aria-label="{{ 'search.predictive.results_label' | t }}">
+      <div class="psearch__col psearch__col--aside" role="none">
+        <div class="psearch__group" role="group" aria-labelledby="ps-h-queries">
+          <p class="psearch__heading" id="ps-h-queries" aria-hidden="true">{{ 'search.predictive.suggestions' | t }}</p>
+          <ul class="psearch__list" role="none">
+            {%- assign opt = opt | plus: 1 -%}
+            <li role="none">
+              <a class="psearch__query psearch__query--search" id="ps-opt-{{ opt }}" role="option" aria-selected="false" tabindex="-1" href="{{ search_url }}">
+                {%- render 'icon', name: 'search' -%}
+                <span>{{ 'search.predictive.search_for' | t: terms: terms }}</span>
+              </a>
+            </li>
+            {%- for query in queries limit: 4 -%}
+              {%- assign query_down = query.text | downcase | strip -%}
+              {%- unless query_down == terms_down -%}
+                {%- assign opt = opt | plus: 1 -%}
+                <li role="none">
+                  <a class="psearch__query" id="ps-opt-{{ opt }}" role="option" aria-selected="false" tabindex="-1" href="{{ query.url }}">
+                    {%- render 'icon', name: 'arrow-right' -%}
+                    <span>{{ query.styled_text }}</span>
+                  </a>
+                </li>
+              {%- endunless -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+
+        {%- if collections.size > 0 -%}
+          <div class="psearch__group" role="group" aria-labelledby="ps-h-collections">
+            <p class="psearch__heading" id="ps-h-collections" aria-hidden="true">{{ 'search.predictive.collections' | t }}</p>
+            <ul class="psearch__list" role="none">
+              {%- for collection in collections limit: 4 -%}
+                {%- assign opt = opt | plus: 1 -%}
+                <li role="none">
+                  <a class="psearch__collection" id="ps-opt-{{ opt }}" role="option" aria-selected="false" tabindex="-1" href="{{ collection.url }}">
+                    <span class="psearch__collection-icon">{% render 'icon', name: 'grid' %}</span>
+                    <span>{{ collection.title | escape }}</span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if products.size > 0 -%}
+        <div class="psearch__col psearch__col--main" role="none">
+          <div class="psearch__group" role="group" aria-labelledby="ps-h-products">
+            <p class="psearch__heading" id="ps-h-products" aria-hidden="true">{{ 'search.predictive.products' | t }}</p>
+            <ul class="psearch__list psearch__products" role="none">
+              {%- for product in products limit: 6 -%}
+                {%- liquid
+                  assign opt = opt | plus: 1
+                  assign img = product.featured_image
+                  assign img_alt = img.alt | default: product.title
+                -%}
+                <li role="none">
+                  <a class="psearch__product" id="ps-opt-{{ opt }}" role="option" aria-selected="false" tabindex="-1" href="{{ product.url }}">
+                    <span class="psearch__thumb">
+                      {%- if img != blank -%}
+                        {{ img | image_url: width: 160 | image_tag: loading: 'lazy', widths: '80, 160', sizes: '64px', alt: img_alt }}
+                      {%- else -%}
+                        {%- render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'psearch__noimg' -%}
+                      {%- endif -%}
+                    </span>
+                    <span class="psearch__info">
+                      <span class="psearch__title">{{ product.title | escape }}</span>
+                      <span class="psearch__meta">
+                        {%- render 'price', product: product, size: 'sm', show_save: false -%}
+                        <span class="psearch__badges">{% render 'product-badges', product: product, limit: 1 %}</span>
+                      </span>
+                    </span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+          {%- assign opt = opt | plus: 1 -%}
+          <a class="psearch__all" id="ps-opt-{{ opt }}" role="option" aria-selected="false" tabindex="-1" href="{{ search_url }}">
+            {%- if products.size < 6 -%}
+              {{- 'search.predictive.view_all_count' | t: count: products.size -}}
+            {%- else -%}
+              {{- 'search.predictive.view_all' | t -}}
+            {%- endif -%}
+            {%- render 'icon', name: 'arrow-right' -%}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Búsqueda predictiva",
+  "settings": []
+}
+{% endschema %}

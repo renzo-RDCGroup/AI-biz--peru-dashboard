@@ -1,0 +1,169 @@
+{%- layout none -%}
+{%- comment -%}
+  Gift card page (standalone, no theme layout). Brand-yellow card with the balance, the
+  formatted code (copy button), expiry/status, QR code (Shopify's vendor/qrcode.js),
+  "Agregar a Apple Wallet" when gift_card.pass_url exists, print + back-to-shop actions.
+{%- endcomment -%}
+{%- liquid
+  assign initial_value = gift_card.initial_value | money
+  assign balance = gift_card.balance | money
+  assign code = gift_card.code | format_code
+  assign gc_title = 'gift_card.title' | t: value: initial_value, shop: shop.name
+  assign expires = gift_card.expires_on | date: '%d/%m/%Y'
+  assign is_inactive = false
+  if gift_card.enabled == false or gift_card.expired
+    assign is_inactive = true
+  endif
+-%}
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="{{ settings.color_brand | default: '#FFD219' }}">
+    <title>{{ gc_title }}</title>
+    <meta name="description" content="{{ 'gift_card.how_to' | t | escape }}">
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 64, height: 64 }}">
+    {%- else -%}
+      <link rel="icon" type="image/svg+xml" href="{{ 'favicon.svg' | asset_url }}">
+    {%- endif -%}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Urbanist:wght@700;800;900&display=swap">
+    {% render 'css-variables' %}
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    {{ 'components.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'vendor/qrcode.js' | shopify_asset_url }}" defer></script>
+    {{ content_for_header }}
+    <style>
+      body.gift-card-page { background: var(--color-surface); }
+      .gc-top { display: grid; place-items: center; padding: 18px var(--gutter); background: var(--color-brand); }
+      .gc-top a { display: block; width: 150px; }
+      .gc { width: 100%; max-width: calc(560px + var(--gutter) * 2); margin: 0 auto; padding: 32px var(--gutter) 56px; }
+      .gc__title { margin-bottom: 20px; font-size: var(--fs-2xl); text-align: center; }
+      .gc-card { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 24px; aspect-ratio: 1.586; min-height: 210px; padding: 22px 24px; border-radius: var(--radius-lg); background: var(--color-brand); color: #000; box-shadow: var(--shadow-md); }
+      .gc-card.is-inactive { filter: grayscale(1); opacity: .75; }
+      .gc-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+      .gc-card__logo { width: 120px; }
+      .gc-card__label { font: 800 var(--fs-xs)/1.2 var(--font-heading); letter-spacing: .08em; text-transform: uppercase; text-align: right; }
+      .gc-card__balance-label { font-size: var(--fs-sm); font-weight: 600; }
+      .gc-card__balance { font: var(--fw-display) clamp(2.25rem, 1.6rem + 3vw, 3.25rem)/1 var(--font-heading); letter-spacing: -.02em; }
+      .gc-card__initial { margin-top: 6px; font-size: var(--fs-sm); color: rgba(0, 0, 0, .72); }
+      .gc-card .mi-watermark { width: 62%; right: -12%; bottom: -24%; }
+      .gc-panel { display: grid; gap: 20px; margin-top: 20px; padding: 24px 20px; border-radius: var(--radius-lg); background: #fff; }
+      .gc-status { justify-self: start; }
+      .gc-code__label { margin-bottom: 8px; font: 800 var(--fs-xs)/1.2 var(--font-heading); letter-spacing: .08em; text-transform: uppercase; color: var(--color-muted); }
+      .gc-code__row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+      .gc-code__value { flex: 1 1 auto; padding: 12px 16px; border: 2px dashed var(--color-ink); border-radius: var(--radius-sm); background: var(--color-brand-soft); font: 800 clamp(1.05rem, .9rem + 1vw, 1.375rem)/1.2 var(--font-heading); letter-spacing: .08em; text-align: center; word-break: break-all; }
+      .gc-help { color: var(--color-muted); font-size: var(--fs-sm); }
+      .gc-qr { display: flex; align-items: center; gap: 16px; padding-top: 20px; border-top: 1px solid var(--color-border); }
+      .gc-qr__code { flex: none; width: 128px; height: 128px; }
+      .gc-qr__code img, .gc-qr__code canvas { width: 128px; height: 128px; }
+      .gc-message { padding: 16px 18px; border-left: 4px solid var(--color-brand); background: var(--color-surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+      .gc-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+      .gc-actions .btn { flex: 1 1 200px; }
+      .gc-wallet img { display: block; width: 120px; height: 40px; }
+      @media print {
+        body.gift-card-page { background: #fff; }
+        .gc-top, .gc-actions, .gc-copy, .gc-wallet { display: none !important; }
+        .gc-card { box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      }
+    </style>
+  </head>
+
+  <body class="gift-card-page{% if settings.heading_dot %} has-heading-dot{% endif %}">
+    <header class="gc-top">
+      <a href="{{ shop.url }}">{% render 'logo' %}</a>
+    </header>
+
+    <main class="gc" id="MainContent">
+      <h1 class="gc__title heading-dot">{{ 'gift_card.label' | t }}</h1>
+
+      <div class="gc-card has-watermark{% if is_inactive %} is-inactive{% endif %}">
+        <div class="gc-card__head">
+          <span class="gc-card__logo">{% render 'logo', label: '' %}</span>
+          <span class="gc-card__label">{{ 'gift_card.label' | t }}</span>
+        </div>
+        <div>
+          <p class="gc-card__balance-label">{{ 'gift_card.balance' | t }}</p>
+          <p class="gc-card__balance">{{ balance }}</p>
+          {%- if gift_card.balance != gift_card.initial_value -%}
+            <p class="gc-card__initial">{{ 'gift_card.initial' | t: value: initial_value }}</p>
+          {%- endif -%}
+        </div>
+        {%- render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'mi-watermark' -%}
+      </div>
+
+      <div class="gc-panel">
+        {%- if gift_card.enabled == false -%}
+          <span class="badge badge--dark gc-status">{{ 'gift_card.disabled' | t }}</span>
+        {%- elsif gift_card.expired and gift_card.expires_on -%}
+          <span class="badge badge--dark gc-status">{{ 'gift_card.expired' | t: date: expires }}</span>
+        {%- elsif gift_card.expires_on -%}
+          <span class="badge badge--soft gc-status">{{ 'gift_card.expires_on' | t: date: expires }}</span>
+        {%- endif -%}
+
+        <div class="gc-code">
+          <p class="gc-code__label" id="GiftCardCodeLabel">{{ 'gift_card.code' | t }}</p>
+          <div class="gc-code__row">
+            <p class="gc-code__value" aria-labelledby="GiftCardCodeLabel" data-gift-code>{{ code }}</p>
+            <button type="button" class="btn btn--outline gc-copy" data-copy-code hidden>
+              {%- render 'icon', name: 'copy' -%}
+              <span data-copy-label>{{ 'gift_card.copy' | t }}</span>
+            </button>
+          </div>
+        </div>
+        <p class="gc-help">{{ 'gift_card.how_to' | t }}</p>
+
+        {%- if gift_card.message != blank -%}
+          <div class="gc-message">
+            <p class="gc-code__label">{{ 'gift_card.message' | t }}</p>
+            <p>{{ gift_card.message | escape }}</p>
+          </div>
+        {%- endif -%}
+
+        <div class="gc-qr">
+          <div class="gc-qr__code" id="GiftCardQR" data-identifier="{{ gift_card.qr_identifier }}"></div>
+          <div class="gc-help">
+            <p>{{ 'gift_card.qr_help' | t }}</p>
+            {%- if gift_card.pass_url -%}
+              <a class="gc-wallet" href="{{ gift_card.pass_url }}">
+                <img src="{{ 'gift-card/add-to-apple-wallet.svg' | shopify_asset_url }}" width="120" height="40" alt="{{ 'gift_card.apple_wallet' | t }}" loading="lazy">
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+
+        <div class="gc-actions">
+          <a class="btn btn--brand btn--lg" href="{{ shop.url }}">{{ 'gift_card.shop_cta' | t }}{% render 'icon', name: 'arrow-right' %}</a>
+          <button type="button" class="btn btn--outline btn--lg" onclick="window.print();">{{ 'gift_card.print' | t }}</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        var qr = document.getElementById('GiftCardQR');
+        if (qr && window.QRCode && qr.dataset.identifier) {
+          new QRCode(qr, { text: qr.dataset.identifier, width: 128, height: 128, imageAltText: {{ 'gift_card.qr_alt' | t | json }} });
+        }
+        var btn = document.querySelector('[data-copy-code]');
+        var codeEl = document.querySelector('[data-gift-code]');
+        if (!btn || !codeEl || !navigator.clipboard) return;
+        btn.hidden = false;
+        var label = btn.querySelector('[data-copy-label]');
+        var original = label ? label.textContent : '';
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(codeEl.textContent.replace(/\s+/g, '')).then(function () {
+            if (!label) return;
+            label.textContent = {{ 'gift_card.copied' | t | json }};
+            setTimeout(function () { label.textContent = original; }, 2000);
+          }).catch(function () {});
+        });
+      });
+    </script>
+  </body>
+</html>

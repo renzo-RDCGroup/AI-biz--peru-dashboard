@@ -1,0 +1,13 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ * ------------------------------------------------------------
+ */
+{
+  "current": {
+    "hero_image": "shopify://shop_images/mibi-ia-luces-lima-anochecer.png",
+    "sections": {
+      "cart-drawer": { "type": "cart-drawer", "settings": { "heading": "Tu carrito (data)" } }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{%- comment -%}
+  Quantity stepper → <quantity-input> (assets/global-ui.js): ± buttons clamp to min/max and fire
+  a bubbling `change` event on the input.
+  {% render 'quantity-input',
+    id: qty_id,                        input id (a visually-hidden <label> is added); build it with
+                                       assign qty_id = 'Quantity-' | append: section.id
+    name: 'quantity',
+    value: 1, min: 1, max: '',         max blank = unlimited (cart lines: min 0)
+    label: 'Cantidad',                 default: accessibility.quantity
+    line: '',                          cart line index → data-line on the input
+    key: '',                           cart line key → data-key on the input
+    form: '',                          form attribute (input outside its <form>)
+    size: 'sm'|'md'
+  %}
+{%- endcomment -%}
+{%- liquid
+  assign q_value = value | default: 1
+  assign q_min = min | default: 1
+  if min == 0
+    assign q_min = 0
+  endif
+  assign q_size = size | default: 'md'
+  assign q_label = label | default: ''
+  if q_label == ''
+    assign q_label = 'accessibility.quantity' | t
+  endif
+-%}
+<quantity-input class="qty qty--{{ q_size }}">
+  {%- if id != blank -%}
+    <label class="visually-hidden" for="{{ id }}">{{ q_label }}</label>
+  {%- endif -%}
+  <button type="button" class="qty__btn" data-qty="minus" aria-label="{{ 'accessibility.decrease' | t }}">
+    {%- render 'icon', name: 'minus' -%}
+  </button>
+  <input
+    class="qty__input"
+    type="number"
+    inputmode="numeric"
+    {% if id != blank %}id="{{ id }}"{% else %}aria-label="{{ q_label }}"{% endif %}
+    name="{{ name | default: 'quantity' }}"
+    value="{{ q_value }}"
+    min="{{ q_min }}"
+    {% if max != blank %}max="{{ max }}"{% endif %}
+    step="1"
+    {% if line != blank %}data-line="{{ line }}"{% endif %}
+    {% if key != blank %}data-key="{{ key }}"{% endif %}
+    {% if form != blank %}form="{{ form }}"{% endif %}
+  >
+  <button type="button" class="qty__btn" data-qty="plus" aria-label="{{ 'accessibility.increase' | t }}">
+    {%- render 'icon', name: 'plus' -%}
+  </button>
+</quantity-input>

@@ -1,0 +1,2 @@
+<div class="cartpage" data-count="{{ cart.item_count }}" data-empty="{{ cart.empty? }}">{% for item in cart.items %}<span class="k">{{ item.key }}</span>{% endfor %}{% form 'cart', cart %}<button name="checkout">Pagar</button>{% endform %}</div>
+{% schema %}{ "name": "Carrito", "settings": [] }{% endschema %}

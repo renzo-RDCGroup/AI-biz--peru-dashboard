@@ -1,0 +1,265 @@
+{%- comment -%}
+  Search results: soft-yellow head (breadcrumbs, h1, big pill search form, "N resultados para «q»"),
+  then the same toolbar / filters / grid as main-collection for product results (pages and
+  articles listed compactly below). No results / no query: suggestion chips (setting),
+  category pills, WhatsApp card (only when a number is set) and suggested products. Filtering, sort and "Cargar más": facets.js.
+{%- endcomment -%}
+{{ 'section-collection.css' | asset_url | stylesheet_tag }}
+{{ 'section-collection-facets.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'facets.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign ps = section.settings
+  assign per_page = ps.products_per_page | default: 24
+  assign layout = ps.filter_layout | default: 'sidebar'
+  assign cols = ps.columns_desktop | default: '4'
+  assign terms = search.terms
+  assign input_id = 'SearchPage-' | append: section.id
+  assign card_sizes = '(min-width: 1200px) 250px, (min-width: 990px) calc((100vw - 340px) / 3), (min-width: 750px) calc((100vw - 96px) / 3), calc((100vw - 44px) / 2)'
+  if layout != 'sidebar'
+    assign card_sizes = '(min-width: 1200px) 320px, (min-width: 990px) calc((100vw - 136px) / 4), (min-width: 750px) calc((100vw - 96px) / 3), calc((100vw - 44px) / 2)'
+  endif
+  assign suggestions = ps.suggestions | split: ','
+-%}
+
+{%- capture suggestion_chips -%}
+  {%- for term in suggestions -%}
+    {%- assign term_clean = term | strip -%}
+    {%- if term_clean != blank -%}
+      <li><a class="chip" href="{{ routes.search_url }}?q={{ term_clean | url_encode }}&amp;options%5Bprefix%5D=last">{{ term_clean | escape }}</a></li>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- paginate search.results by per_page -%}
+  {%- liquid
+    assign has_filters = false
+    if ps.enable_filtering and search.performed and search.filters.size > 0
+      assign has_filters = true
+    endif
+    assign active_count = 0
+    for filter in search.filters
+      if filter.type == 'price_range'
+        if filter.min_value.value != nil or filter.max_value.value != nil
+          assign active_count = active_count | plus: 1
+        endif
+      else
+        assign active_count = active_count | plus: filter.active_values.size
+      endif
+    endfor
+    assign encoded_terms = terms | url_encode
+    assign clear_url = routes.search_url | append: '?q=' | append: encoded_terms | append: '&options%5Bprefix%5D=last'
+    if search.sort_by != blank
+      assign clear_url = clear_url | append: '&sort_by=' | append: search.sort_by
+    endif
+    assign results_count = search.results_count
+    assign product_count = 0
+    for item in search.results
+      if item.object_type == 'product'
+        assign product_count = product_count | plus: 1
+      endif
+    endfor
+    assign shown = paginate.current_offset | plus: search.results.size
+    assign show_results = false
+    if search.performed and results_count > 0
+      assign show_results = true
+    elsif search.performed and active_count > 0
+      assign show_results = true
+    endif
+  -%}
+  <facet-results
+    class="section results search-page scheme-{{ ps.scheme }} results--{{ layout }}{% if has_filters %} results--has-filters{% endif %} results--cols-{{ cols }}"
+    id="Results-{{ section.id }}"
+    data-section-id="{{ section.id }}"
+    style="--pad-top: 0px; --pad-bottom: {{ ps.padding_bottom }}px;"
+  >
+    <div class="search-head scheme-cream has-watermark">
+      {%- render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'mi-watermark search-head__watermark' -%}
+      <div class="page-width search-head__inner">
+        {%- render 'breadcrumbs', class: 'search-head__crumbs' -%}
+        <h1 class="search-head__title{% unless search.performed %} heading-dot{% endunless %}">
+          {%- if search.performed == false -%}
+            {{- 'search.results.title' | t -}}
+          {%- elsif show_results -%}
+            <span data-swap="search-title">{{ 'search.results.title_count' | t: count: results_count, terms: terms }}</span>
+          {%- else -%}
+            {{- 'search.results.empty_title' | t: terms: terms -}}
+          {%- endif -%}
+        </h1>
+        <form class="search-form" action="{{ routes.search_url }}" method="get" role="search">
+          <label class="visually-hidden" for="{{ input_id }}">{{ 'search.results.label' | t }}</label>
+          {%- render 'icon', name: 'search', class: 'search-form__icon' -%}
+          <input class="search-form__input" type="search" id="{{ input_id }}" name="q" value="{{ terms | escape }}" placeholder="{{ ps.placeholder | escape }}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+          <input type="hidden" name="options[prefix]" value="last">
+          <button type="submit" class="btn btn--brand search-form__submit">
+            {%- render 'icon', name: 'search', class: 'search-form__submit-icon' -%}
+            <span class="search-form__submit-label">{{ 'search.results.submit' | t }}</span>
+          </button>
+        </form>
+        {%- if search.performed and show_results == false -%}
+          <p class="search-head__text">{{ 'search.results.empty_text' | t }}</p>
+        {%- elsif search.performed == false -%}
+          <p class="search-head__text">{{ 'search.results.intro' | t }}</p>
+        {%- endif -%}
+        {%- if show_results == false and suggestion_chips != blank -%}
+          <div class="search-head__suggest">
+            <p class="search-head__suggest-label">{{ 'search.results.suggestions' | t }}</p>
+            <ul class="chip-row chip-row--bleed" role="list">{{ suggestion_chips }}</ul>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if show_results -%}
+      {%- assign count_label = 'search.results.count' | t: count: results_count -%}
+      {%- render 'facets', context: 'toolbar', results: search, results_url: routes.search_url, section_id: section.id, terms: terms, layout: layout, has_filters: has_filters, sorting: ps.enable_sorting, count_label: count_label, active_count: active_count, clear_url: clear_url -%}
+
+      <div class="page-width results__layout">
+        {%- if has_filters -%}
+          <aside class="results__sidebar{% if layout != 'sidebar' %} no-js-only{% endif %}" aria-label="{{ 'filters.heading' | t }}">
+            {%- render 'facets', results: search, results_url: routes.search_url, section_id: section.id, context: 'sidebar', terms: terms, clear_url: clear_url -%}
+          </aside>
+        {%- endif -%}
+
+        <div class="results__main">
+          <h2 class="visually-hidden">{{ 'search.results.title_terms' | t: terms: terms }}</h2>
+          <div class="results__head" data-swap="active">
+            {%- render 'facets-active', results: search, clear_url: clear_url -%}
+          </div>
+
+          <div class="results__body" data-swap="results">
+            {%- if results_count > 0 -%}
+              <ul class="product-grid results-grid{% if ps.columns_mobile == '1' %} results-grid--mobile-1{% endif %}" role="list" id="ProductGrid-{{ section.id }}" data-results-grid{% if product_count == 0 %} hidden{% endif %}>
+                {%- for item in search.results -%}
+                  {%- if item.object_type == 'product' -%}
+                    {%- liquid
+                      assign lazy = true
+                      if paginate.current_page == 1 and forloop.index <= 4
+                        assign lazy = false
+                      endif
+                    -%}
+                    <li class="results-grid__item" data-reveal>
+                      {%- render 'product-card', product: item, lazy: lazy, sizes: card_sizes, heading_tag: 'h3', section_id: section.id -%}
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+
+              {%- assign other_count = search.results.size | minus: product_count -%}
+              <div class="search-other"{% if other_count == 0 %} hidden{% endif %}>
+                <h3 class="search-other__title">{{ 'search.results.other' | t }}</h3>
+                <ul class="search-other__list" role="list" data-append-list="other">
+                  {%- for item in search.results -%}
+                    {%- unless item.object_type == 'product' -%}
+                      <li>
+                        <a class="search-other__item" href="{{ item.url }}">
+                          <span class="search-other__type">{% if item.object_type == 'article' %}{{ 'search.results.article' | t }}{% else %}{{ 'search.results.page' | t }}{% endif %}</span>
+                          <span class="search-other__name">{{ item.title | escape }}</span>
+                          <span class="search-other__excerpt">{{ item.content | strip_html | truncatewords: 18 }}</span>
+                        </a>
+                      </li>
+                    {%- endunless -%}
+                  {%- endfor -%}
+                </ul>
+              </div>
+
+              {%- render 'facets', context: 'more', paginate: paginate, paging: ps.paging, shown: shown, section_id: section.id -%}
+            {%- else -%}
+              <div class="results-empty">
+                <span class="results-empty__icon beacon" aria-hidden="true">{% render 'icon', name: 'filter' %}</span>
+                <h3 class="results-empty__title">{{ 'filters.empty.title' | t }}</h3>
+                <p class="results-empty__text">{{ 'filters.empty.text' | t }}</p>
+                <a class="btn btn--primary" href="{{ clear_url }}" data-facet-link>{{ 'filters.clear_filters' | t }}</a>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+
+      {%- if has_filters -%}
+        {%- render 'facets', results: search, results_url: routes.search_url, section_id: section.id, context: 'drawer', terms: terms, active_count: active_count, results_count: results_count, clear_url: clear_url -%}
+      {%- endif -%}
+    {%- else -%}
+      {%- liquid
+        assign empty_menu = ps.empty_menu
+        assign empty_col = ps.empty_collection | default: collections['destacados']
+        assign icon_map = 'luces:light,luz:light,llanta:tire,camara:tire,pinon:gear,transmision:gear,espejo:mirror,asiento:seat,pedal:pedal,grip:grip,tapabarro:mudguard,casco:helmet,accesorio:bag,componente:wrench,rockbros:medal,neco:medal' | split: ','
+      -%}
+      <div class="page-width search-empty">
+        {%- if empty_menu.links.size > 0 -%}
+          <div class="search-empty__block">
+            <h2 class="search-empty__title">{{ 'search.results.categories' | t }}</h2>
+            <ul class="chip-row chip-row--bleed search-cats" role="list">
+              {%- for link in empty_menu.links -%}
+                {%- liquid
+                  assign cat_icon = 'bike'
+                  for pair in icon_map
+                    assign kv = pair | split: ':'
+                    if link.url contains kv[0]
+                      assign cat_icon = kv[1]
+                      break
+                    endif
+                  endfor
+                -%}
+                <li>
+                  <a class="search-cat" href="{{ link.url }}">
+                    <span class="search-cat__icon beacon" aria-hidden="true">{% render 'icon', name: cat_icon %}</span>
+                    {{- link.title | escape -}}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+        {%- if ps.show_whatsapp -%}
+          {%- render 'whatsapp-button', style: 'card', label: ps.whatsapp_label, text: ps.whatsapp_text, class: 'search-empty__wa' -%}
+        {%- endif -%}
+        {%- if empty_col != blank and empty_col.products.size > 0 -%}
+          <div class="search-empty__block search-empty__products">
+            {%- assign catalog_label = 'search.results.catalog' | t -%}
+            {%- render 'section-heading', title: ps.empty_heading, link_url: routes.all_products_collection_url, link_label: catalog_label, tag: 'h2' -%}
+            <ul class="product-grid" role="list">
+              {%- for product in empty_col.products limit: 4 -%}
+                <li>{% render 'product-card', product: product, sizes: card_sizes, section_id: section.id %}</li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- else -%}
+          <a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">
+            {{- 'search.results.catalog' | t -}}
+            {%- render 'icon', name: 'arrow-right' -%}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </facet-results>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Resultados de búsqueda",
+  "class": "main-search-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "text", "id": "placeholder", "label": "Texto de ejemplo del buscador", "default": "Busca por código, medida o nombre…"},
+    {"type": "text", "id": "suggestions", "label": "Sugerencias de búsqueda", "info": "Separadas por comas. Se muestran cuando no hay resultados.", "default": "luces, llantas, espejos, asientos, pedales, piñones"},
+    {"type": "range", "id": "products_per_page", "label": "Productos por página", "min": 8, "max": 48, "step": 4, "default": 24},
+    {"type": "select", "id": "columns_desktop", "label": "Columnas en escritorio", "options": [{"value": "3", "label": "3"}, {"value": "4", "label": "4"}], "default": "4"},
+    {"type": "select", "id": "columns_mobile", "label": "Columnas en móvil", "options": [{"value": "1", "label": "1"}, {"value": "2", "label": "2"}], "default": "2"},
+    {"type": "select", "id": "paging", "label": "Paginación", "options": [{"value": "load_more", "label": "Botón «Cargar más»"}, {"value": "pages", "label": "Páginas numeradas"}], "default": "load_more"},
+    {"type": "header", "content": "Filtros y orden"},
+    {"type": "checkbox", "id": "enable_filtering", "label": "Mostrar filtros", "info": "Los filtros se configuran en la app Search & Discovery de Shopify.", "default": true},
+    {"type": "select", "id": "filter_layout", "label": "Filtros en escritorio", "options": [{"value": "sidebar", "label": "Barra lateral"}, {"value": "drawer", "label": "Panel desplegable"}], "default": "sidebar"},
+    {"type": "checkbox", "id": "enable_sorting", "label": "Mostrar «Ordenar por»", "default": true},
+    {"type": "header", "content": "Sin resultados"},
+    {"type": "checkbox", "id": "show_whatsapp", "label": "Mostrar tarjeta de WhatsApp", "info": "Solo aparece si configuraste el número en Configuración del tema › Contacto.", "default": true},
+    {"type": "text", "id": "whatsapp_label", "label": "Título de la tarjeta", "default": "¿No lo encuentras? Mándanos una foto"},
+    {"type": "text", "id": "whatsapp_text", "label": "Texto de la tarjeta", "default": "Escríbenos con una foto de la pieza o del modelo."},
+    {"type": "link_list", "id": "empty_menu", "label": "Categorías sugeridas", "default": "main-menu"},
+    {"type": "text", "id": "empty_heading", "label": "Título de productos sugeridos", "default": "Te puede interesar"},
+    {"type": "collection", "id": "empty_collection", "label": "Productos sugeridos", "info": "Vacío = colección «destacados»."},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64}
+  ]
+}
+{% endschema %}

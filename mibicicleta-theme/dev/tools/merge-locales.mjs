@@ -12,4 +12,6 @@ function merge(dst, src, trail, file) {
 }
 for (const f of fs.readdirSync(fragDir).filter((f) => f.endsWith('.json')).sort()) merge(merged, JSON.parse(fs.readFileSync(path.join(fragDir, f), 'utf8')), '', f);
 if (conflicts.length) { console.error('Locale conflicts:\n' + conflicts.join('\n')); process.exit(1); }
-fs.writeFileSync(out, JSON.stringify(merged, null, 2) + '\n'); console.log('wrote', out, fs.statSync(out).size, 'bytes');
+// Compact output keeps the merged file under the 16 KiB per-file patch budget.
+fs.writeFileSync(out, JSON.stringify(merged) + '\n');
+console.log('wrote', out, fs.statSync(out).size, 'bytes');

@@ -1,0 +1,73 @@
+{%- comment -%}
+  Active filter chips ("Rockbros ×", "S/ 10 – S/ 50 ×") + "Limpiar todo".
+  {% render 'facets-active', results: collection | search, clear_url: '' %}
+  Chips are plain links (url_to_remove) so they work without JS; facets.js intercepts
+  [data-facet-link] clicks and updates the results through the Section Rendering API.
+  Renders nothing when no filter is active.
+{%- endcomment -%}
+{%- capture chips -%}
+  {%- for filter in results.filters -%}
+    {%- if filter.type == 'price_range' -%}
+      {%- if filter.min_value.value != nil or filter.max_value.value != nil -%}
+        {%- liquid
+          assign min_money = filter.min_value.value | money_without_trailing_zeros
+          assign max_money = filter.max_value.value | money_without_trailing_zeros
+          if filter.min_value.value != nil and filter.max_value.value != nil
+            assign price_label = 'filters.price.range' | t: min: min_money, max: max_money
+          elsif filter.min_value.value != nil
+            assign price_label = 'filters.price.from_value' | t: price: min_money
+          else
+            assign price_label = 'filters.price.up_to' | t: price: max_money
+          endif
+        -%}
+        <li>
+          <a class="chip facets-active__chip" href="{{ filter.url_to_remove }}" data-facet-link aria-label="{{ 'filters.remove' | t: label: price_label }}">
+            <span>{{ price_label }}</span>
+            {%- render 'icon', name: 'close' -%}
+          </a>
+        </li>
+      {%- endif -%}
+    {%- else -%}
+      {%- liquid
+        assign label_down = filter.label | downcase
+        assign is_color = false
+        if filter.presentation == 'swatch' or label_down == 'color' or label_down == 'colour'
+          assign is_color = true
+        endif
+      -%}
+      {%- for value in filter.active_values -%}
+        {%- liquid
+          assign chip_label = value.label
+          if is_color
+            assign chip_label = value.label | capitalize
+          endif
+          assign remove_label = filter.label | append: ': ' | append: chip_label
+        -%}
+        <li>
+          <a class="chip facets-active__chip" href="{{ value.url_to_remove }}" data-facet-link aria-label="{{ 'filters.remove' | t: label: remove_label }}">
+            {%- if is_color -%}
+              {%- if value.swatch.color -%}
+                <span class="swatch swatch--sm" style="--swatch: {{ value.swatch.color }};" aria-hidden="true"></span>
+              {%- else -%}
+                {%- render 'color-swatch', value: value.label, size: 'sm' -%}
+              {%- endif -%}
+            {%- endif -%}
+            <span>{{ chip_label | escape }}</span>
+            {%- render 'icon', name: 'close' -%}
+          </a>
+        </li>
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- if chips != blank -%}
+  <div class="facets-active">
+    <h2 class="visually-hidden">{{ 'filters.applied' | t }}</h2>
+    <ul class="facets-active__list" role="list">
+      {{- chips -}}
+      <li>
+        <a class="facets-active__clear" href="{{ clear_url }}" data-facet-link>{{ 'filters.clear_all' | t }}</a>
+      </li>
+    </ul>
+  </div>
+{%- endif -%}

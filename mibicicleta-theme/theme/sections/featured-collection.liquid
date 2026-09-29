@@ -1,0 +1,162 @@
+{%- comment -%}
+  Featured collection carousel (styles: assets/section-home.css · tabs: assets/home.js).
+  No "tab" blocks → one carousel of section.settings.collection. ≥2 tabs → a chip tablist;
+  every panel is server-rendered and <featured-tabs> switches them (and the "Ver todo" link).
+  Without JS only the first panel shows (the tablist is hidden) and every link still works.
+  Onboarding placeholder cards render while no collection is selected.
+{%- endcomment -%}
+{{ 'section-home.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'home.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign limit = section.settings.products_to_show
+  assign tabs = section.blocks | where: 'type', 'tab'
+  assign use_tabs = false
+  if tabs.size > 1
+    assign use_tabs = true
+  endif
+  assign panel_count = 1
+  if tabs.size > 0
+    assign panel_count = tabs.size
+    assign first_col = tabs.first.settings.collection
+  else
+    assign first_col = section.settings.collection
+  endif
+  assign view_all_url = ''
+  if section.settings.show_view_all and first_col != blank
+    assign view_all_url = first_col.url
+  endif
+  assign title_id = 'FeaturedTitle-' | append: section.id
+  assign card_sizes = '(min-width: 1200px) 256px, (min-width: 990px) 23vw, (min-width: 750px) 31vw, 44vw'
+-%}
+
+<section class="featured featured--{{ section.settings.per_row }} section scheme-{{ section.settings.scheme }}" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;"{% if section.settings.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
+  <div class="page-width">
+    {%- render 'section-heading',
+      title: section.settings.heading,
+      subtitle: section.settings.subtitle,
+      link_url: view_all_url,
+      id: title_id,
+      class: 'featured__heading'
+    -%}
+
+    <featured-tabs class="featured__body{% if use_tabs %} featured__body--tabs{% endif %}" data-section-id="{{ section.id }}">
+      {%- if use_tabs -%}
+        <div class="chip-row chip-row--bleed featured__tabs js-only" role="tablist" aria-label="{{ 'home.featured.tabs_label' | t }}">
+          {%- for tab in tabs -%}
+            {%- liquid
+              assign tab_col = tab.settings.collection
+              assign tab_label = tab.settings.label | strip
+              if tab_label == blank
+                assign tab_label = tab_col.title | default: '—'
+              endif
+            -%}
+            <button
+              type="button"
+              class="chip featured__tab"
+              role="tab"
+              id="FeaturedTab-{{ section.id }}-{{ forloop.index }}"
+              aria-controls="FeaturedPanel-{{ section.id }}-{{ forloop.index }}"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+              tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+              data-url="{{ tab_col.url }}"
+              {{ tab.shopify_attributes }}
+            >
+              {{- tab_label | escape -}}
+            </button>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- for i in (1..panel_count) -%}
+        {%- liquid
+          if tabs.size > 0
+            assign idx = i | minus: 1
+            assign col = tabs[idx].settings.collection
+            assign panel_label = tabs[idx].settings.label | default: col.title
+          else
+            assign col = section.settings.collection
+            assign panel_label = col.title | default: section.settings.heading
+          endif
+          assign panel_uid = section.id | append: '-' | append: i
+        -%}
+        <div
+          class="featured__panel"
+          id="FeaturedPanel-{{ section.id }}-{{ i }}"
+          {% if use_tabs %}role="tabpanel" aria-labelledby="FeaturedTab-{{ section.id }}-{{ i }}"{% endif %}
+          {% unless i == 1 %}hidden{% endunless %}
+        >
+          {%- if col != blank and col.products_count == 0 -%}
+            <p class="featured__empty">{{ 'home.featured.empty' | t }}</p>
+          {%- else -%}
+            <carousel-slider class="carousel carousel--bleed carousel--arrows-overlay featured__carousel" aria-label="{{ panel_label | escape }}">
+              <ul class="carousel__track" role="list">
+                {%- if col != blank -%}
+                  {%- for item in col.products limit: limit -%}
+                    <li class="carousel__slide">
+                      {%- render 'product-card', product: item, sizes: card_sizes, section_id: panel_uid, lazy: true -%}
+                    </li>
+                  {%- endfor -%}
+                {%- else -%}
+                  {%- for n in (1..5) -%}
+                    <li class="carousel__slide">{%- render 'product-card', product: blank, placeholder: n -%}</li>
+                  {%- endfor -%}
+                {%- endif -%}
+              </ul>
+              <div class="carousel__controls featured__controls">
+                <button type="button" class="btn btn--icon btn--outline carousel__prev" aria-label="{{ 'general.carousel.previous' | t }}">
+                  {%- render 'icon', name: 'chevron-left' -%}
+                </button>
+                <div class="carousel__dots"></div>
+                <button type="button" class="btn btn--icon btn--outline carousel__next" aria-label="{{ 'general.carousel.next' | t }}">
+                  {%- render 'icon', name: 'chevron-right' -%}
+                </button>
+              </div>
+            </carousel-slider>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </featured-tabs>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Colección destacada",
+  "tag": "div",
+  "class": "featured-section",
+  "max_blocks": 6,
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "text", "id": "heading", "label": "Título", "default": "Destacados"},
+    {"type": "text", "id": "subtitle", "label": "Subtítulo"},
+    {"type": "collection", "id": "collection", "label": "Colección", "info": "Se usa cuando no hay pestañas. Con pestañas, cada pestaña elige su colección."},
+    {"type": "range", "id": "products_to_show", "label": "Productos por colección", "min": 4, "max": 16, "step": 1, "default": 10},
+    {"type": "select", "id": "per_row", "label": "Productos visibles en escritorio", "options": [{"value": "4", "label": "4"}, {"value": "5", "label": "5"}], "default": "5"},
+    {"type": "checkbox", "id": "show_view_all", "label": "Mostrar enlace «Ver todo»", "default": true},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56}
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Pestaña",
+      "settings": [
+        {"type": "text", "id": "label", "label": "Nombre de la pestaña", "info": "Vacío = nombre de la colección."},
+        {"type": "collection", "id": "collection", "label": "Colección"}
+      ]
+    }
+  ],
+  "presets": [
+    {"name": "Colección destacada"},
+    {
+      "name": "Colección con pestañas",
+      "blocks": [
+        {"type": "tab", "settings": {"label": "Destacados"}},
+        {"type": "tab", "settings": {"label": "Luces"}}
+      ]
+    }
+  ]
+}
+{% endschema %}

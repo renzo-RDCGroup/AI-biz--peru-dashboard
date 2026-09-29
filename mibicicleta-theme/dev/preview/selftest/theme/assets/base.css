@@ -1,0 +1,5 @@
+body { margin: 0; font-family: sans-serif; overflow-wrap: anywhere; }
+img, svg { max-width: 100%; height: auto; }
+side-drawer { display: none; }
+side-drawer[open] { display: block; padding: 16px; background: #fff6cf; }
+cart-drawer { display: block; }

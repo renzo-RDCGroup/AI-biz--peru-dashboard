@@ -1,0 +1,124 @@
+{%- comment -%}
+  "Compra por categoría" bubbles (styles: assets/section-home.css).
+  Mobile: horizontal snap row (~4 visible). ≥750: 5 columns. ≥990: one row of up to 10.
+  Each bubble shows the block's image (or the collection image when enabled) in a circle,
+  otherwise a yellow circle with the black category icon.
+{%- endcomment -%}
+{{ 'section-home.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign cols = section.blocks.size | at_most: 10 | at_least: 1
+  assign title_id = 'CategoryGridTitle-' | append: section.id
+  assign view_all_url = ''
+  if section.settings.show_view_all
+    assign view_all_url = routes.collections_url
+  endif
+-%}
+
+<section class="category-grid section scheme-{{ section.settings.scheme }}" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;"{% if section.settings.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
+  <div class="page-width">
+    {%- render 'section-heading',
+      title: section.settings.heading,
+      subtitle: section.settings.subtitle,
+      link_url: view_all_url,
+      id: title_id
+    -%}
+
+    <ul class="category-grid__list" role="list" style="--cat-cols: {{ cols }};" data-reveal>
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign col = block.settings.collection
+          assign cat_title = block.settings.title | strip
+          if cat_title == blank
+            assign cat_title = col.title | default: ''
+          endif
+          if cat_title == blank
+            assign cat_title = 'home.category_grid.placeholder' | t
+          endif
+          assign cat_url = col.url | default: routes.collections_url
+          assign cat_img = block.settings.image
+          if cat_img == blank and section.settings.use_collection_image and col.image != blank
+            assign cat_img = col.image
+          endif
+          assign cat_icon = block.settings.icon | default: 'bike'
+        -%}
+        <li class="category-grid__item" {{ block.shopify_attributes }}>
+          <a class="category-card" href="{{ cat_url }}">
+            <span class="category-card__circle{% if cat_img != blank %} category-card__circle--image{% endif %}" aria-hidden="true">
+              {%- if cat_img != blank -%}
+                {{- cat_img | image_url: width: 480 | image_tag: widths: '120,160,240,360,480', sizes: '(min-width: 990px) 120px, (min-width: 750px) 112px, 76px', loading: 'lazy', alt: '', class: 'category-card__img' -}}
+              {%- else -%}
+                {%- render 'icon', name: cat_icon, class: 'category-card__icon' -%}
+              {%- endif -%}
+            </span>
+            <span class="category-card__title">{{ cat_title | escape }}</span>
+            {%- if section.settings.show_count and col != blank -%}
+              <span class="category-card__count">{{ 'home.category_grid.count' | t: count: col.products_count }}</span>
+            {%- endif -%}
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Categorías",
+  "tag": "div",
+  "class": "category-grid-section",
+  "max_blocks": 20,
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "text", "id": "heading", "label": "Título", "default": "Compra por categoría"},
+    {"type": "text", "id": "subtitle", "label": "Subtítulo"},
+    {"type": "checkbox", "id": "show_view_all", "label": "Mostrar enlace «Ver todo»", "info": "Lleva a la lista de todas las colecciones.", "default": true},
+    {"type": "checkbox", "id": "use_collection_image", "label": "Usar la imagen de la colección", "info": "Desactivado: círculo amarillo con el ícono (más uniforme). Una imagen propia del bloque siempre tiene prioridad.", "default": false},
+    {"type": "checkbox", "id": "show_count", "label": "Mostrar cantidad de productos", "default": false},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48}
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Categoría",
+      "settings": [
+        {"type": "collection", "id": "collection", "label": "Colección"},
+        {"type": "text", "id": "title", "label": "Título (opcional)", "info": "Vacío = nombre de la colección."},
+        {"type": "select", "id": "icon", "label": "Ícono", "options": [
+          {"value": "light", "label": "Luz"},
+          {"value": "tire", "label": "Llanta"},
+          {"value": "gear", "label": "Piñón"},
+          {"value": "mirror", "label": "Espejo"},
+          {"value": "seat", "label": "Asiento"},
+          {"value": "pedal", "label": "Pedal"},
+          {"value": "grip", "label": "Grip"},
+          {"value": "mudguard", "label": "Tapabarro"},
+          {"value": "helmet", "label": "Casco"},
+          {"value": "glasses", "label": "Lentes"},
+          {"value": "bag", "label": "Bolso / accesorios"},
+          {"value": "scooter", "label": "Scooter"},
+          {"value": "bike", "label": "Bicicleta"},
+          {"value": "wrench", "label": "Herramienta"},
+          {"value": "medal", "label": "Marca / original"},
+          {"value": "tag", "label": "Oferta"}
+        ], "default": "bike"},
+        {"type": "image_picker", "id": "image", "label": "Imagen (opcional)", "info": "Reemplaza el ícono. Cuadrada, se recorta en círculo."}
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Categorías",
+      "blocks": [
+        {"type": "category", "settings": {"icon": "light"}},
+        {"type": "category", "settings": {"icon": "tire"}},
+        {"type": "category", "settings": {"icon": "helmet"}},
+        {"type": "category", "settings": {"icon": "seat"}},
+        {"type": "category", "settings": {"icon": "bag"}}
+      ]
+    }
+  ]
+}
+{% endschema %}

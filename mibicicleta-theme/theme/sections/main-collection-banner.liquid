@@ -1,0 +1,131 @@
+{%- comment -%}
+  Collection header band: breadcrumbs, h1 + red dot, product count, description (3 lines +
+  "Leer más"), and the collection image in a rounded frame — or, without an image, the category
+  icon in a yellow circle (red "beacon" dot) with the "mi" watermark. Chips row: children of the
+  matching main-menu parent (sub-collections / siblings), else every top-level menu link.
+  Default scheme "cream" = the brand-soft yellow band (foundation .scheme-cream).
+{%- endcomment -%}
+{{ 'section-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'facets.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign ps = section.settings
+  assign scheme = ps.scheme | default: 'cream'
+  assign has_image = false
+  if ps.show_image and collection.image != blank
+    assign has_image = true
+  endif
+  assign mark_tone = 'mono-dark'
+  if scheme == 'dark'
+    assign mark_tone = 'mono-light'
+  endif
+
+  # Category icon from the handle (first keyword match wins).
+  assign icon_name = 'bike'
+  assign icon_map = 'luces:light,luz:light,linterna:light,llanta:tire,camara:tire,pinon:gear,transmision:gear,cadena:gear,espejo:mirror,asiento:seat,sillin:seat,pedal:pedal,grip:grip,puno:grip,tapabarro:mudguard,casco:helmet,proteccion:helmet,lente:glasses,scooter:scooter,rockbros:medal,neco:medal,accesorio:bag,componente:wrench,herramienta:wrench,destacado:star,oferta:tag' | split: ','
+  for pair in icon_map
+    assign kv = pair | split: ':'
+    if collection.handle contains kv[0]
+      assign icon_name = kv[1]
+      break
+    endif
+  endfor
+  if collection.handle == 'all'
+    assign icon_name = 'grid'
+  endif
+
+  # Chips: sub-collections / siblings from the menu, else the top-level links.
+  assign chip_parent = nil
+  assign menu = ps.chips_menu
+  for link in menu.links
+    if link.url == collection.url and link.links.size > 0
+      assign chip_parent = link
+      break
+    endif
+    for child in link.links
+      if child.url == collection.url
+        assign chip_parent = link
+      endif
+    endfor
+    if chip_parent != nil
+      break
+    endif
+  endfor
+-%}
+
+<div
+  class="section collection-banner scheme-{{ scheme }}{% unless has_image %} has-watermark collection-banner--icon{% endunless %}"
+  style="--pad-top: {{ ps.padding_top }}px; --pad-bottom: {{ ps.padding_bottom }}px;"
+>
+  {%- unless has_image -%}
+    {%- render 'logo', variant: 'mark', tone: mark_tone, label: '', class: 'mi-watermark collection-banner__watermark' -%}
+  {%- endunless -%}
+  <div class="page-width collection-banner__inner">
+    {%- if ps.show_breadcrumbs -%}
+      {%- render 'breadcrumbs', class: 'collection-banner__crumbs' -%}
+    {%- endif -%}
+    <div class="collection-banner__text">
+      <h1 class="collection-banner__title heading-dot">{{ collection.title | escape }}</h1>
+      {%- if ps.show_count -%}
+        <p class="collection-banner__count">{{ 'collections.product_count' | t: count: collection.all_products_count }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if ps.show_description and collection.description != blank -%}
+      <div class="collection-banner__desc-wrap">
+        <div class="collection-banner__desc rte" id="CollectionDesc-{{ section.id }}">{{ collection.description }}</div>
+        <button type="button" class="collection-banner__more btn--link" data-readmore="CollectionDesc-{{ section.id }}" aria-controls="CollectionDesc-{{ section.id }}" aria-expanded="false" data-label-less="{{ 'collections.banner.read_less' | t | escape }}" hidden>
+          {{- 'collections.banner.read_more' | t -}}
+        </button>
+      </div>
+    {%- endif -%}
+
+    <div class="collection-banner__visual" aria-hidden="true">
+      {%- if has_image -%}
+        <div class="collection-banner__media media">
+          {%- render 'image', image: collection.image, widths: '160,240,360,480,640,800,960', sizes: '(min-width: 990px) 480px, (min-width: 750px) 280px, 96px', lazy: false, priority: true, alt: '' -%}
+        </div>
+      {%- else -%}
+        <span class="collection-banner__icon beacon">{% render 'icon', name: icon_name %}</span>
+      {%- endif -%}
+    </div>
+
+    {%- if ps.show_chips and menu.links.size > 0 -%}
+      <nav class="collection-banner__nav" aria-label="{{ 'collections.banner.chips_label' | t }}">
+        <ul class="chip-row chip-row--bleed collection-banner__chips" role="list" data-chip-row>
+          {%- if chip_parent != nil -%}
+            <li><a class="chip" href="{{ chip_parent.url }}"{% if chip_parent.url == collection.url %} aria-current="page"{% endif %}>{{ 'collections.banner.all_in' | t: title: chip_parent.title }}</a></li>
+            {%- for child in chip_parent.links -%}
+              <li><a class="chip" href="{{ child.url }}"{% if child.url == collection.url %} aria-current="page"{% endif %}>{{ child.title | escape }}</a></li>
+            {%- endfor -%}
+          {%- else -%}
+            <li><a class="chip" href="{{ routes.all_products_collection_url }}"{% if collection.handle == 'all' %} aria-current="page"{% endif %}>{{ 'collections.banner.all' | t }}</a></li>
+            {%- for link in menu.links -%}
+              <li><a class="chip" href="{{ link.url }}"{% if link.url == collection.url %} aria-current="page"{% endif %}>{{ link.title | escape }}</a></li>
+            {%- endfor -%}
+          {%- endif -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Encabezado de colección",
+  "class": "collection-banner-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "cream", "label": "Amarillo suave"}, {"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "cream"},
+    {"type": "checkbox", "id": "show_breadcrumbs", "label": "Mostrar ruta de navegación", "default": true},
+    {"type": "checkbox", "id": "show_count", "label": "Mostrar cantidad de productos", "default": true},
+    {"type": "checkbox", "id": "show_description", "label": "Mostrar descripción", "default": true},
+    {"type": "checkbox", "id": "show_image", "label": "Mostrar imagen de la colección", "info": "Sin imagen se muestra el ícono de la categoría con la marca «mi».", "default": true},
+    {"type": "header", "content": "Categorías"},
+    {"type": "checkbox", "id": "show_chips", "label": "Mostrar categorías relacionadas", "default": true},
+    {"type": "link_list", "id": "chips_menu", "label": "Menú de categorías", "info": "Muestra las subcategorías del menú; si la colección no tiene, muestra las categorías principales.", "default": "main-menu"},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 28}
+  ]
+}
+{% endschema %}

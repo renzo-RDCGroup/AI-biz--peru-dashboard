@@ -1,0 +1,202 @@
+{%- comment -%}
+  One block of the main-product info column (called by sections/main-product.liquid, which wraps
+  the output in .product__block and skips blocks that render nothing).
+  {% render 'product-info-block', block: block, product: product, variant: current,
+     section_id: section.id, form_id: product_form_id, buy_id: buy_id, has_description: true %}
+  Hooks for assets/product.js: [data-price] [data-save] [data-badge] [data-stock] [data-sku]
+  [data-add-button] [data-buy-now] [data-read-more] <pickup-availability> <share-button>.
+{%- endcomment -%}
+{%- liquid
+  assign current = variant | default: product.selected_or_first_available_variant
+  assign bs = block.settings
+  assign on_sale = false
+  if current.compare_at_price > current.price
+    assign on_sale = true
+  endif
+-%}
+{%- case block.type -%}
+  {%- when 'breadcrumbs' -%}
+    {%- render 'breadcrumbs', class: 'product__breadcrumbs' -%}
+
+  {%- when 'vendor' -%}
+    {%- if product.vendor != blank and product.vendor != shop.name -%}
+      <p class="product__vendor eyebrow eyebrow--dot"><a href="{{ product.vendor | url_for_vendor }}">{{ product.vendor | escape }}</a></p>
+    {%- endif -%}
+
+  {%- when 'title' -%}
+    <h1 class="product__title">{{ product.title | escape }}</h1>
+    {%- if bs.show_sku -%}
+      <p class="product__sku"{% if current.sku == blank %} hidden{% endif %}>{{ 'products.product.sku' | t }} <span data-sku>{{ current.sku | escape }}</span></p>
+    {%- endif -%}
+
+  {%- when 'rating' -%}
+    {%- render 'rating', product: product, size: 'md' -%}
+
+  {%- when 'badges' -%}
+    {%- assign tags_lower = product.tags | join: '|' | downcase | split: '|' -%}
+    <div class="badges product__badges">
+      <span class="badge badge--soldout" data-badge="soldout"{% if current.available %} hidden{% endif %}>{{ 'products.badges.sold_out' | t }}</span>
+      <span class="badge badge--sale" data-badge="sale"{% unless on_sale %} hidden{% endunless %}>{{ 'products.badges.sale' | t }}</span>
+      {%- if tags_lower contains 'nuevo' -%}
+        <span class="badge badge--new">{{ 'products.badges.new' | t }}</span>
+      {%- endif -%}
+      {%- if tags_lower contains 'mas-vendido' or tags_lower contains 'más-vendido' -%}
+        <span class="badge badge--dark">{{ 'products.badges.best_seller' | t }}</span>
+      {%- endif -%}
+    </div>
+
+  {%- when 'price' -%}
+    {%- assign save = current.compare_at_price | default: 0 | minus: current.price -%}
+    <div class="product__price">
+      {%- render 'price', product: product, variant: current, size: 'lg' -%}
+      {%- if bs.show_save -%}
+        <p class="product__save" data-save{% unless save > 0 %} hidden{% endunless %}>
+          {{- 'products.product.you_save' | t }} <strong data-save-amount>{{ save | money }}</strong>
+        </p>
+      {%- endif -%}
+      {%- if bs.show_tax and cart.taxes_included -%}
+        <p class="product__tax">{{ 'products.product.tax_included' | t }}</p>
+      {%- endif -%}
+    </div>
+
+  {%- when 'stock' -%}
+    {%- liquid
+      assign threshold = bs.low_stock_threshold | default: 5
+      assign qty = current.inventory_quantity | default: 0
+      assign stock_state = 'in'
+      assign stock_text = 'products.product.stock.in_stock' | t
+      if current.available == false
+        assign stock_state = 'out'
+        assign stock_text = 'products.product.stock.sold_out' | t
+      elsif current.inventory_management == 'shopify' and current.inventory_policy == 'deny' and qty > 0 and qty <= threshold
+        assign stock_state = 'low'
+        if qty == 1
+          assign stock_text = 'products.product.stock.low_stock_one' | t
+        else
+          assign stock_text = 'products.product.stock.low_stock_template' | t | replace: '[count]', qty
+        endif
+      endif
+    -%}
+    <p
+      class="stock stock--{{ stock_state }}"
+      data-stock
+      data-threshold="{{ threshold }}"
+      data-in="{{ 'products.product.stock.in_stock' | t }}"
+      data-low="{{ 'products.product.stock.low_stock_template' | t }}"
+      data-low-one="{{ 'products.product.stock.low_stock_one' | t }}"
+      data-out="{{ 'products.product.stock.sold_out' | t }}"
+      data-na="{{ 'products.product.stock.unavailable' | t }}"
+    >
+      <span class="stock__dot" aria-hidden="true"></span><span data-stock-text>{{ stock_text }}</span>
+    </p>
+
+  {%- when 'short_description' -%}
+    {%- liquid
+      assign excerpt_len = bs.length | default: 160
+      assign plain = product.description | replace: '<', ' <' | strip_html | strip_newlines | split: ' ' | join: ' ' | strip
+    -%}
+    {%- if plain != blank -%}
+      <p class="product__excerpt">
+        {{- plain | truncate: excerpt_len -}}
+        {%- if plain.size > excerpt_len and has_description %} <a class="product__more" href="#Description-{{ section_id }}" data-read-more>{{ 'products.product.read_more' | t }}</a>{% endif -%}
+      </p>
+    {%- endif -%}
+
+  {%- when 'variant_picker' -%}
+    {%- render 'variant-picker', product: product, block: block, section_id: section_id -%}
+
+  {%- when 'buy_buttons' -%}
+    {%- liquid
+      assign qty_id = 'Quantity-' | append: section_id
+      assign add_label = 'cart.general.add_to_cart' | t
+      assign qty_max = ''
+      if current.inventory_management == 'shopify' and current.inventory_policy == 'deny' and current.inventory_quantity > 0
+        assign qty_max = current.inventory_quantity
+      endif
+    -%}
+    <product-form class="product-form" id="{{ buy_id }}" data-section-id="{{ section_id }}">
+      {%- form 'product', product, id: form_id, class: 'product-form__form', novalidate: 'novalidate' -%}
+        <input type="hidden" name="id" value="{{ current.id }}"{% unless current.available %} disabled{% endunless %}>
+        {%- unless product.has_only_default_variant -%}
+          <noscript>
+            <div class="select product-form__noscript">
+              <select name="id" aria-label="{{ 'products.product.variant_label' | t }}">
+                {%- for v in product.variants -%}
+                  <option value="{{ v.id }}"{% if v.id == current.id %} selected{% endif %}{% unless v.available %} disabled{% endunless %}>{{ v.title | escape }} · {{ v.price | money }}</option>
+                {%- endfor -%}
+              </select>
+            </div>
+          </noscript>
+        {%- endunless -%}
+        <div class="product-form__row">
+          {%- render 'quantity-input', id: qty_id, value: 1, min: 1, max: qty_max -%}
+          <button type="submit" name="add" class="btn btn--brand btn--lg product-form__add" data-add-button data-label-add="{{ add_label }}"{% unless current.available %} disabled{% endunless %}>
+            {%- render 'icon', name: 'bag-plus' -%}
+            {%- render 'icon', name: 'check' -%}
+            <span data-add-label>{% if current.available %}{{ add_label }}{% else %}{{ 'cart.general.sold_out' | t }}{% endif %}</span>
+          </button>
+        </div>
+        {%- if bs.show_buy_now -%}
+          <button type="submit" name="add" class="btn btn--ink btn--lg btn--block product-form__buy-now" data-redirect="checkout" data-buy-now{% unless current.available %} hidden{% endunless %}>
+            {{- 'products.product.buy_now' | t -}}
+          </button>
+        {%- endif -%}
+        {%- if bs.show_dynamic_checkout -%}
+          {{ form | payment_button }}
+        {%- endif -%}
+        <p class="form-message form-message--error" data-form-error role="alert" hidden></p>
+      {%- endform -%}
+    </product-form>
+
+  {%- when 'free_shipping' -%}
+    {%- render 'free-shipping-bar', total: cart.total_price, style: 'inline', class: 'product__free-ship' -%}
+
+  {%- when 'delivery_estimate' -%}
+    {%- render 'delivery-estimate', heading: bs.heading -%}
+
+  {%- when 'pickup' -%}
+    {%- assign pickup_on = false -%}
+    {%- if current.store_availabilities.size > 0 -%}{%- assign pickup_on = true -%}{%- endif -%}
+    {%- if pickup_on -%}
+      <pickup-availability class="product__pickup" data-url="{{ product.url }}" data-variant-id="{{ current.id }}"></pickup-availability>
+    {%- endif -%}
+
+  {%- when 'whatsapp' -%}
+    {%- assign wa_msg = 'products.product.whatsapp_message' | t: title: product.title -%}
+    {%- render 'whatsapp-button', style: 'card', label: bs.heading, text: bs.text, message: wa_msg, class: 'product__whatsapp' -%}
+
+  {%- when 'trust' -%}
+    <ul class="trust" role="list">
+      {%- for i in (1..3) -%}
+        {%- liquid
+          assign t_icon_key = 'icon_' | append: i
+          assign t_text_key = 'text_' | append: i
+          assign t_icon = bs[t_icon_key]
+          assign t_text = bs[t_text_key]
+        -%}
+        {%- if t_text != blank -%}
+          <li class="trust__item">
+            <span class="trust__icon">{% render 'icon', name: t_icon %}</span>
+            <span class="trust__text">{{ t_text | escape | replace: 'S/ ', 'S/&nbsp;' }}</span>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+
+  {%- when 'description' -%}
+    {%- assign desc_id = 'Description-' | append: section_id -%}
+    {%- render 'product-accordion', id: desc_id, heading: bs.heading, icon: bs.icon, content: product.description, open: bs.open -%}
+
+  {%- when 'collapsible' -%}
+    {%- assign c_content = bs.content | default: bs.page.content -%}
+    {%- render 'product-accordion', heading: bs.heading, icon: bs.icon, content: c_content, open: bs.open -%}
+
+  {%- when 'share' -%}
+    <share-button class="share js-only" data-url="{{ request.origin }}{{ product.url }}" data-title="{{ product.title | escape }}">
+      <button type="button" class="btn btn--link share__btn">{% render 'icon', name: 'share' %}{{ 'products.product.share.label' | t }}</button>
+      <span class="share__msg" role="status" data-share-msg hidden>{{ 'products.product.share.copied' | t }}</span>
+    </share-button>
+
+  {%- when 'custom_liquid' -%}
+    {{- bs.custom_liquid -}}
+{%- endcase -%}

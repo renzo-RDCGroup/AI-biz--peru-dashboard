@@ -1,0 +1,70 @@
+{
+  "type": "header",
+  "name": "Encabezado",
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "message-envio": {
+          "type": "message",
+          "settings": {
+            "text": "Envío gratis a todo el Perú desde S/ 220",
+            "code": ""
+          }
+        },
+        "message-rockbros": {
+          "type": "message",
+          "settings": {
+            "text": "Vendedor autorizado Rockbros: productos originales",
+            "link": "shopify://collections/rockbros",
+            "code": ""
+          }
+        },
+        "message-foto": {
+          "type": "message",
+          "settings": {
+            "text": "¿Dudas con un repuesto? Escríbenos con una foto",
+            "code": ""
+          }
+        },
+        "message-cambios": {
+          "type": "message",
+          "settings": {
+            "text": "Cambios dentro de los 7 días (producto sin abrir)",
+            "code": ""
+          }
+        }
+      },
+      "block_order": [
+        "message-envio",
+        "message-rockbros",
+        "message-foto",
+        "message-cambios"
+      ],
+      "settings": {
+        "scheme": "dark",
+        "mode": "marquee",
+        "speed": 40,
+        "rotate_seconds": 5,
+        "show_dots": true
+      }
+    },
+    "header": {
+      "type": "header",
+      "settings": {
+        "scheme": "light",
+        "menu": "main-menu",
+        "sticky": "always",
+        "show_search_bar": true,
+        "search_placeholder": "Busca por código, medida o nombre…",
+        "show_account": true,
+        "help_label": "Ayuda",
+        "show_shipping_note": true
+      }
+    }
+  },
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
+}

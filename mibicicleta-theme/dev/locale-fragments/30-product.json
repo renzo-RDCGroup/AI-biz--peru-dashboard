@@ -1,0 +1,62 @@
+{
+  "products": {
+    "product": {
+      "sku": "Código:",
+      "you_save": "Ahorras",
+      "tax_included": "Impuestos incluidos.",
+      "read_more": "Ver más",
+      "buy_now": "Comprar ahora",
+      "add_short": "Agregar",
+      "variant_label": "Variante",
+      "stock": {
+        "in_stock": "Disponible",
+        "low_stock_template": "¡Solo quedan [count]!",
+        "low_stock_one": "¡Solo queda 1!",
+        "sold_out": "Agotado",
+        "unavailable": "No disponible en esta combinación"
+      },
+      "picker": {
+        "sold_out": "agotado",
+        "unavailable": "no disponible"
+      },
+      "gallery": {
+        "label": "Galería de imágenes",
+        "thumbnails": "Miniaturas",
+        "go_to": "Ver imagen {{ index }}",
+        "open": "Ampliar imagen {{ index }}",
+        "lightbox": "Imágenes ampliadas"
+      },
+      "delivery": {
+        "heading": "Entrega estimada",
+        "lima": "Lima",
+        "provinces": "Provincias",
+        "range": "{{ min }} a {{ max }} días hábiles",
+        "days": {
+          "one": "{{ count }} día hábil",
+          "other": "{{ count }} días hábiles"
+        },
+        "countdown": "Compra en las próximas [time] y lo despachamos hoy.",
+        "time": "[h] h [m] min",
+        "minutes": "[m] min",
+        "note": "Plazos estimados en días hábiles.",
+        "today": "hoy",
+        "days_short": "dom,lun,mar,mié,jue,vie,sáb",
+        "months_short": "ene,feb,mar,abr,may,jun,jul,ago,set,oct,nov,dic"
+      },
+      "whatsapp_message": "Hola Mi Bicicleta, tengo una consulta sobre: {{ title }}",
+      "share": {
+        "label": "Compartir",
+        "copied": "¡Enlace copiado!"
+      },
+      "pickup": {
+        "available_html": "Retiro disponible en <strong>{{ location }}</strong>",
+        "unavailable_html": "Retiro no disponible en <strong>{{ location }}</strong>",
+        "more": "Ver disponibilidad en tiendas",
+        "store_info": "Ver información de la tienda",
+        "title": "Retiro en tienda",
+        "available": "Disponible",
+        "unavailable": "No disponible"
+      }
+    }
+  }
+}

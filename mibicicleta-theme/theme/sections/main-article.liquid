@@ -1,0 +1,199 @@
+{%- comment -%}
+  Blog article: header (breadcrumbs, first tag as eyebrow, h1, date · author · reading time),
+  wide hero image, rich-text body in a reading column, tags, share (Facebook + copy link),
+  back link, comments (only when the blog allows them) and up to 3 more articles.
+{%- endcomment -%}
+{{ 'section-pages.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign ss = section.settings
+  assign word_count = article.content | strip_html | split: ' ' | size
+  assign minutes = word_count | plus: 199 | divided_by: 200
+  if minutes < 1
+    assign minutes = 1
+  endif
+  assign share_url = request.origin | append: article.url
+  assign copied_label = 'pages.share.copied' | t
+  assign new_tab = 'accessibility.new_window' | t
+  assign more_title = 'blog.more_articles' | t
+  assign comments_id = 'Comments-' | append: section.id
+-%}
+
+<article class="article scheme-{{ ss.scheme }}">
+  <header class="article__header page-width page-width--read">
+    {%- render 'breadcrumbs', class: 'article__crumbs' -%}
+    {%- if article.tags.size > 0 -%}
+      <p class="eyebrow eyebrow--dot">{{ article.tags.first | escape }}</p>
+    {%- endif -%}
+    <h1 class="article__title">{{ article.title | escape }}</h1>
+    <p class="article__meta">
+      {{- article.published_at | time_tag: format: 'date' -}}
+      {%- if ss.show_author and article.author != blank -%}
+        <span aria-hidden="true"> · </span>{{ 'blog.by' | t: author: article.author }}
+      {%- endif -%}
+      <span aria-hidden="true"> · </span>{{ 'pages.reading_time' | t: count: minutes }}
+    </p>
+  </header>
+
+  {%- if ss.show_image and article.image != blank -%}
+    <div class="page-width article__hero">
+      <div class="media">
+        {%- render 'image', image: article.image, widths: '540,720,900,1080,1296,1512,1728,2048', sizes: '(min-width: 1400px) 1256px, 100vw', priority: true, alt: article.title -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="page-width page-width--read article__main">
+    <div class="rte article__content">{{ article.content }}</div>
+
+    {%- if article.tags.size > 0 -%}
+      <ul class="article__tags cluster" role="list">
+        {%- for tag in article.tags -%}
+          <li><a class="chip" href="{{ blog.url }}/tagged/{{ tag | handle }}">{{ tag | escape }}</a></li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    <div class="article__foot">
+      <a class="article__back" href="{{ blog.url }}">{% render 'icon', name: 'arrow-left' %}{{ 'blog.back' | t: blog: blog.title }}</a>
+      {%- if ss.show_share -%}
+        <div class="article__share">
+          <span class="article__share-label">{{ 'pages.share.label' | t }}</span>
+          <a class="btn btn--icon btn--sm btn--outline" href="https://www.facebook.com/sharer/sharer.php?u={{ share_url | url_encode }}" target="_blank" rel="noopener" aria-label="{{ 'pages.share.facebook' | t }} ({{ new_tab }})">{% render 'icon', name: 'facebook' %}</a>
+          <copy-link class="js-only" data-url="{{ share_url | escape }}" data-copied="{{ copied_label | escape }}">
+            <button type="button" class="btn btn--sm btn--outline">{% render 'icon', name: 'link' %}<span data-label>{{ 'pages.share.copy' | t }}</span></button>
+          </copy-link>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- if blog.comments_enabled? -%}
+    <section class="page-width page-width--read article__comments" id="comments" aria-labelledby="{{ comments_id }}">
+      <h2 class="article__comments-title" id="{{ comments_id }}">{{ 'blog.comments.count' | t: count: article.comments_count }}</h2>
+      {%- paginate article.comments by 10 -%}
+        {%- if article.comments_count > 0 -%}
+          <ul class="comments" role="list">
+            {%- for comment in article.comments -%}
+              <li class="comment">
+                <div class="rte">{{ comment.content }}</div>
+                <p class="comment__meta"><strong>{{ comment.author | escape }}</strong><span aria-hidden="true"> · </span>{{ comment.created_at | time_tag: format: 'date' }}</p>
+              </li>
+            {%- endfor -%}
+          </ul>
+          {%- render 'pagination', paginate: paginate, anchor: '#comments' -%}
+        {%- endif -%}
+      {%- endpaginate -%}
+
+      {%- form 'new_comment', article, class: 'comment-form' -%}
+        <h3 class="comment-form__title">{{ 'blog.comments.title' | t }}</h3>
+        {%- if form.posted_successfully? -%}
+          <p class="form-message form-message--success" role="status">
+            {%- if blog.moderated? -%}{{ 'blog.comments.success_moderated' | t }}{%- else -%}{{ 'blog.comments.success' | t }}{%- endif -%}
+          </p>
+        {%- endif -%}
+        {%- if form.errors -%}
+          <div class="form-message form-message--error" role="alert">
+            <div>
+              <p>{{ 'blog.comments.error_heading' | t }}</p>
+              <ul>
+                {%- for field in form.errors -%}
+                  <li>{{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}</li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          </div>
+        {%- endif -%}
+        <div class="comment-form__fields">
+          <div class="field">
+            <label class="field__label" for="CommentAuthor-{{ section.id }}">{{ 'blog.comments.name' | t }}</label>
+            <input class="input" type="text" id="CommentAuthor-{{ section.id }}" name="comment[author]" value="{{ form.author }}" autocomplete="name" required aria-required="true">
+          </div>
+          <div class="field">
+            <label class="field__label" for="CommentEmail-{{ section.id }}">{{ 'blog.comments.email' | t }}</label>
+            <input class="input" type="email" id="CommentEmail-{{ section.id }}" name="comment[email]" value="{{ form.email }}" autocomplete="email" autocapitalize="off" spellcheck="false" required aria-required="true">
+          </div>
+          <div class="field comment-form__full">
+            <label class="field__label" for="CommentBody-{{ section.id }}">{{ 'blog.comments.body' | t }}</label>
+            <textarea class="textarea" id="CommentBody-{{ section.id }}" name="comment[body]" rows="5" required aria-required="true">{{ form.body }}</textarea>
+          </div>
+        </div>
+        {%- if blog.moderated? -%}
+          <p class="field__hint comment-form__hint">{{ 'blog.comments.moderated' | t }}</p>
+        {%- endif -%}
+        <button type="submit" class="btn btn--primary">{{ 'blog.comments.post' | t }}</button>
+      {%- endform -%}
+    </section>
+  {%- endif -%}
+</article>
+
+{%- if ss.show_more and blog.articles_count > 1 -%}
+  <section class="section article-more scheme-soft" style="--pad-top: 56px; --pad-bottom: 72px;">
+    <div class="page-width">
+      {%- render 'section-heading', title: more_title, link_url: blog.url -%}
+      <ul class="article-grid" role="list">
+        {%- assign shown = 0 -%}
+        {%- for other in blog.articles -%}
+          {%- if other.id == article.id -%}{%- continue -%}{%- endif -%}
+          {%- if shown >= 3 -%}{%- break -%}{%- endif -%}
+          {%- assign shown = shown | plus: 1 -%}
+          <li class="article-grid__item">
+            <article class="article-card">
+              <a class="article-card__media media" href="{{ other.url }}" tabindex="-1" aria-hidden="true">
+                {%- if other.image != blank -%}
+                  {%- render 'image', image: other.image, widths: '360,540,720,900', sizes: '(min-width: 1200px) 420px, (min-width: 750px) 50vw, 100vw', lazy: true, alt: other.title -%}
+                {%- else -%}
+                  <span class="article-card__ph">{% render 'logo', variant: 'mark', label: '' %}</span>
+                {%- endif -%}
+              </a>
+              <div class="article-card__body">
+                <p class="article-card__meta">{{ other.published_at | time_tag: format: 'date' }}</p>
+                <h3 class="article-card__title"><a class="article-card__link" href="{{ other.url }}">{{ other.title | escape }}</a></h3>
+              </div>
+            </article>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+{%- endif -%}
+
+{%- if ss.show_share -%}
+  <script>
+    (function () {
+      if (customElements.get('copy-link')) return;
+      customElements.define('copy-link', class extends HTMLElement {
+        connectedCallback() {
+          const btn = this.querySelector('button');
+          const label = this.querySelector('[data-label]');
+          if (!btn || !label || this._bound) return;
+          this._bound = true;
+          const original = label.textContent;
+          btn.addEventListener('click', () => {
+            if (!navigator.clipboard) return;
+            navigator.clipboard.writeText(this.dataset.url || window.location.href).then(() => {
+              label.textContent = this.dataset.copied || original;
+              if (window.MiBici && MiBici.announce) MiBici.announce(label.textContent);
+              clearTimeout(this._t);
+              this._t = setTimeout(() => { label.textContent = original; }, 2000);
+            }).catch(() => {});
+          });
+        }
+      });
+    })();
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Artículo",
+  "class": "main-article-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "checkbox", "id": "show_image", "label": "Mostrar imagen destacada", "default": true},
+    {"type": "checkbox", "id": "show_author", "label": "Mostrar autor", "default": false},
+    {"type": "checkbox", "id": "show_share", "label": "Mostrar botones para compartir", "default": true},
+    {"type": "checkbox", "id": "show_more", "label": "Mostrar más artículos", "default": true}
+  ]
+}
+{% endschema %}

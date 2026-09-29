@@ -1,0 +1,37 @@
+{
+  "sections": {
+    "banner": {
+      "type": "main-collection-banner",
+      "settings": {
+        "scheme": "cream",
+        "show_breadcrumbs": true,
+        "show_count": true,
+        "show_description": true,
+        "show_image": true,
+        "show_chips": true,
+        "chips_menu": "main-menu",
+        "padding_top": 24,
+        "padding_bottom": 28
+      }
+    },
+    "main": {
+      "type": "main-collection",
+      "settings": {
+        "scheme": "light",
+        "products_per_page": 24,
+        "columns_desktop": "4",
+        "columns_mobile": "2",
+        "paging": "load_more",
+        "enable_filtering": true,
+        "filter_layout": "sidebar",
+        "enable_sorting": true,
+        "padding_top": 0,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": [
+    "banner",
+    "main"
+  ]
+}

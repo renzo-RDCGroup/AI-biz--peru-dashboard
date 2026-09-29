@@ -1,0 +1,19 @@
+{%- comment -%}
+  Star rating from the standard reviews metafields (reviews.rating / reviews.rating_count).
+  {% render 'rating', product: p, size: 'sm'|'md' %}
+  Renders NOTHING when the product has no rating (no reviews app installed today).
+{%- endcomment -%}
+{%- assign rating_data = product.metafields.reviews.rating.value -%}
+{%- if rating_data != blank and rating_data.rating != blank -%}
+  {%- liquid
+    assign rating_value = rating_data.rating | round: 1
+    assign rating_max = rating_data.scale_max | default: 5
+    assign rating_count = product.metafields.reviews.rating_count.value | default: 0
+  -%}
+  <div class="rating rating--{{ size | default: 'md' }}" style="--rating: {{ rating_value }}; --rating-max: {{ rating_max }};">
+    <span class="rating__stars" role="img" aria-label="{{ 'products.card.rating' | t: rating: rating_value, max: rating_max }}"></span>
+    {%- if rating_count > 0 -%}
+      <span class="rating__count"><span aria-hidden="true">({{ rating_count }})</span><span class="visually-hidden">{{ 'products.card.rating_count' | t: count: rating_count }}</span></span>
+    {%- endif -%}
+  </div>
+{%- endif -%}

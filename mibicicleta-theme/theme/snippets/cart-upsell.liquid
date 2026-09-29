@@ -1,0 +1,114 @@
+{%- comment -%}
+  "Complétalo con" upsell for the cart drawer and the cart page.
+  {% render 'cart-upsell',
+    layout: 'compact'|'cards',   compact = horizontal mini cards (drawer) · cards = product cards (cart page)
+    limit: 4,                    max products shown
+    heading: '',                 default settings.cart_upsell_heading
+    heading_tag: 'h3',
+    prefix: 'CartDrawer',        unique id prefix (form ids)
+    class: ''
+  %}
+  Source: settings.cart_upsell_collection, else collections['destacados']. Skips products already in
+  the cart and sold-out products. Renders nothing when no product qualifies.
+{%- endcomment -%}
+{%- liquid
+  assign up_collection = settings.cart_upsell_collection
+  if up_collection == blank
+    assign up_collection = collections['destacados']
+  endif
+  assign up_layout = layout | default: 'compact'
+  assign up_limit = limit | default: 4
+  assign up_tag = heading_tag | default: 'h3'
+  assign up_heading = heading | default: settings.cart_upsell_heading
+  assign up_prefix = prefix | default: 'Cart'
+  assign up_heading_id = up_prefix | append: '-upsell-title'
+
+  # ",id,id," so `contains` matches whole ids only.
+  assign in_cart = ','
+  for line in cart.items
+    assign in_cart = in_cart | append: line.product_id | append: ','
+  endfor
+  assign up_count = 0
+-%}
+{%- if up_collection != blank and up_collection.products_count > 0 -%}
+  {%- capture up_slides -%}
+    {%- for product in up_collection.products limit: 30 -%}
+      {%- liquid
+        assign needle = ',' | append: product.id | append: ','
+        if in_cart contains needle or product.available == false
+          continue
+        endif
+        assign up_count = up_count | plus: 1
+      -%}
+      {%- if up_layout == 'cards' -%}
+        <li class="carousel__slide">
+          {%- render 'product-card', product: product, section_id: up_prefix, sizes: '(min-width: 1200px) 250px, (min-width: 990px) 22vw, (min-width: 750px) 30vw, 44vw' -%}
+        </li>
+      {%- else -%}
+        {%- liquid
+          assign form_id = up_prefix | append: '-upsell-' | append: product.id
+          assign up_alt = product.featured_media.alt | default: product.title
+        -%}
+        <li class="carousel__slide cart-upsell__slide">
+          <div class="upsell-card">
+            <a class="upsell-card__media media media--contain media--blend" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+              {%- if product.featured_media != blank -%}
+                {%- render 'image', image: product.featured_media.preview_image, widths: '80,160,240', sizes: '80px', alt: up_alt -%}
+              {%- else -%}
+                <span class="cart-line__noimg">{% render 'logo', variant: 'mark', tone: 'mono-dark', label: '' %}</span>
+              {%- endif -%}
+            </a>
+            <div class="upsell-card__body">
+              <p class="upsell-card__title"><a href="{{ product.url }}">{{ product.title | escape }}</a></p>
+              <div class="upsell-card__row">
+                {%- render 'price', product: product, size: 'sm', show_save: false -%}
+                {%- if product.variants.size == 1 -%}
+                  <product-form class="upsell-card__form">
+                    {%- form 'product', product, id: form_id, novalidate: 'novalidate' -%}
+                      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                      <input type="hidden" name="quantity" value="1">
+                      <button type="submit" name="add" class="btn btn--brand btn--sm upsell-card__btn" aria-label="{{ 'cart.upsell.add_label' | t: title: product.title }}">
+                        {%- render 'icon', name: 'plus' -%}
+                        <span>{{ 'cart.upsell.add' | t }}</span>
+                      </button>
+                      <p class="form-message form-message--error upsell-card__error" data-form-error role="alert" hidden></p>
+                    {%- endform -%}
+                  </product-form>
+                {%- else -%}
+                  <a class="btn btn--outline btn--sm upsell-card__btn" href="{{ product.url }}" aria-label="{{ 'cart.upsell.options_label' | t: title: product.title }}">
+                    {{- 'cart.upsell.options' | t -}}
+                  </a>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        </li>
+      {%- endif -%}
+      {%- if up_count >= up_limit -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+  {%- endcapture -%}
+
+  {%- if up_count > 0 -%}
+    <div class="cart-upsell cart-upsell--{{ up_layout }}{% if up_count == 1 %} cart-upsell--single{% endif %}{% if class != blank %} {{ class }}{% endif %}">
+      <carousel-slider class="carousel cart-upsell__carousel{% if up_layout == 'cards' %} carousel--bleed carousel--arrows-overlay{% endif %}" aria-labelledby="{{ up_heading_id }}">
+        <div class="cart-upsell__head">
+          <{{ up_tag }} class="cart-upsell__title" id="{{ up_heading_id }}">{{ up_heading | escape }}</{{ up_tag }}>
+          {%- if up_layout == 'compact' and up_count > 1 -%}
+            <div class="carousel__controls cart-upsell__nav">
+              <button type="button" class="btn btn--icon btn--sm btn--ghost carousel__prev" aria-label="{{ 'general.carousel.previous' | t }}">{% render 'icon', name: 'chevron-left' %}</button>
+              <button type="button" class="btn btn--icon btn--sm btn--ghost carousel__next" aria-label="{{ 'general.carousel.next' | t }}">{% render 'icon', name: 'chevron-right' %}</button>
+            </div>
+          {%- endif -%}
+        </div>
+        <ul class="carousel__track" role="list">
+          {{- up_slides -}}
+        </ul>
+        {%- if up_layout == 'cards' -%}
+          <button type="button" class="btn btn--icon btn--outline carousel__prev" aria-label="{{ 'general.carousel.previous' | t }}">{% render 'icon', name: 'chevron-left' %}</button>
+          <button type="button" class="btn btn--icon btn--outline carousel__next" aria-label="{{ 'general.carousel.next' | t }}">{% render 'icon', name: 'chevron-right' %}</button>
+          <div class="carousel__controls cart-upsell__dots"><div class="carousel__dots"></div></div>
+        {%- endif -%}
+      </carousel-slider>
+    </div>
+  {%- endif -%}
+{%- endif -%}

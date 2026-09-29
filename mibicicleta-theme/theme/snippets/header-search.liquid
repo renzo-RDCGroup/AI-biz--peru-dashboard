@@ -1,0 +1,54 @@
+{%- comment -%}
+  Pill search form with predictive results (header).
+  {% render 'header-search', id: 'HeaderSearch', placeholder: '…', class: '' %}
+  Posts to routes.search_url without JS. With settings.predictive_search, <predictive-search>
+  (assets/predictive-search.js) turns the input into a combobox and injects the
+  "predictive-search" section into [data-predictive-panel].
+{%- endcomment -%}
+{%- liquid
+  assign sid = id | default: 'HeaderSearch'
+  assign ph = placeholder | default: ''
+  if ph == ''
+    assign ph = 'search.predictive.label' | t
+  endif
+  assign predictive = settings.predictive_search
+  assign panel_id = sid | append: '-results'
+-%}
+<predictive-search class="header-search{% if class != blank %} {{ class }}{% endif %}" data-status-template="{{ 'search.predictive.count' | t: count: 0 | replace: '0', '[count]' | escape }}" data-status-one="{{ 'search.predictive.count' | t: count: 1 | escape }}" data-status-none="{{ 'search.predictive.none' | t | escape }}">
+  <form action="{{ routes.search_url }}" method="get" role="search" class="header-search__form">
+    <label class="visually-hidden" for="{{ sid }}-input">{{ 'search.predictive.label' | t }}</label>
+    <input
+      class="header-search__input"
+      type="search"
+      id="{{ sid }}-input"
+      name="q"
+      value="{{ search.terms | escape }}"
+      placeholder="{{ ph | escape }}"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="search"
+      {%- if predictive %}
+        role="combobox"
+        aria-expanded="false"
+        aria-controls="{{ panel_id }}"
+        aria-autocomplete="list"
+        aria-haspopup="listbox"
+      {%- endif %}
+    >
+    <input type="hidden" name="options[prefix]" value="last">
+    <button type="button" class="header-search__clear" data-search-clear aria-label="{{ 'search.predictive.clear' | t }}" hidden>
+      {%- render 'icon', name: 'close' -%}
+    </button>
+    <button type="submit" class="header-search__submit">
+      {%- render 'icon', name: 'search' -%}
+      <span class="header-search__submit-label">{{ 'search.predictive.submit' | t }}</span>
+    </button>
+  </form>
+  {%- if predictive -%}
+    <div class="predictive-search__backdrop" data-predictive-close hidden></div>
+    <div class="predictive-search" id="{{ panel_id }}" data-predictive-panel hidden></div>
+    <p class="visually-hidden" role="status" aria-live="polite" data-predictive-status></p>
+  {%- endif -%}
+</predictive-search>

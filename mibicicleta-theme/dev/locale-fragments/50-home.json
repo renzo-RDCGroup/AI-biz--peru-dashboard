@@ -1,0 +1,37 @@
+{
+  "home": {
+    "hero": {
+      "label": "Novedades de Mi Bicicleta"
+    },
+    "search_hero": {
+      "label": "Buscar repuestos y accesorios",
+      "submit": "Buscar",
+      "status_none": "No encontramos resultados",
+      "status_one": "1 resultado disponible",
+      "status_other": "[count] resultados disponibles"
+    },
+    "category_grid": {
+      "placeholder": "Categoría",
+      "count": {
+        "one": "{{ count }} producto",
+        "other": "{{ count }} productos"
+      }
+    },
+    "featured": {
+      "tabs_label": "Elige una categoría",
+      "empty": "Pronto tendremos productos en esta colección.",
+      "view_collection": "Ver colección"
+    },
+    "marquee": {
+      "pause": "Pausar la cinta de marcas",
+      "play": "Reanudar la cinta de marcas"
+    }
+  },
+  "newsletter": {
+    "label": "Correo electrónico",
+    "placeholder": "tu@correo.com",
+    "submit": "Suscribirme",
+    "success": "¡Gracias! Ya estás en la lista: te avisaremos cuando llegue algo nuevo.",
+    "note": "Puedes darte de baja cuando quieras."
+  }
+}

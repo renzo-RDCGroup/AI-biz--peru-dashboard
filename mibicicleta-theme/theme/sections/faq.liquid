@@ -1,0 +1,110 @@
+{%- comment -%}
+  FAQ (styles: assets/section-home-2.css). Heading (+ optional text and WhatsApp card, which
+  renders nothing without a number) beside card accordions; one column on mobile.
+  Outputs FAQPage JSON-LD from the same blocks (setting "schema_markup").
+{%- endcomment -%}
+{{ 'section-home-2.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign title_id = 'FaqTitle-' | append: section.id
+  assign faq_json = ''
+  # Two columns only when the intro has more than the heading (text or a visible WhatsApp card).
+  assign wa_digits = settings.whatsapp_number | strip | remove: ' ' | remove: '+' | remove: '-' | remove: '(' | remove: ')' | remove: '.'
+  assign faq_layout = 'stack'
+  if section.settings.text != blank
+    assign faq_layout = 'split'
+  elsif section.settings.show_whatsapp and wa_digits != blank
+    assign faq_layout = 'split'
+  endif
+  assign heading_align = 'left'
+  if faq_layout == 'stack'
+    assign heading_align = 'center'
+  endif
+-%}
+
+<section class="faq section scheme-{{ section.settings.scheme }}" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;"{% if section.settings.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
+  <div class="page-width faq__grid faq__grid--{{ faq_layout }}">
+    <div class="faq__intro" data-reveal>
+      {%- render 'section-heading', title: section.settings.heading, subtitle: section.settings.text, id: title_id, align: heading_align, class: 'faq__heading' -%}
+      {%- if section.settings.show_whatsapp -%}
+        {%- render 'whatsapp-button', style: 'card', label: section.settings.whatsapp_label, text: section.settings.whatsapp_text, class: 'faq__wa' -%}
+      {%- endif -%}
+    </div>
+
+    <div class="faq__list" data-reveal style="--reveal-delay: 100ms;">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign q = block.settings.question | strip
+          assign a = block.settings.answer
+        -%}
+        {%- if q != blank -%}
+          <details class="accordion accordion--card faq__item" {{ block.shopify_attributes }}{% if section.settings.open_first and forloop.first %} open{% endif %}>
+            <summary class="accordion__summary">
+              <span>{{ q | escape }}</span>
+              {%- render 'icon', name: 'plus' -%}
+            </summary>
+            <div class="accordion__content rte">{{ a | replace: 'S/ ', 'S/ ' }}</div>
+          </details>
+          {%- liquid
+            if a != blank
+              assign q_json = q | json
+              assign a_json = a | strip_html | strip | json
+              assign entry = '{"@type":"Question","name":' | append: q_json | append: ',"acceptedAnswer":{"@type":"Answer","text":' | append: a_json | append: '}}'
+              if faq_json != ''
+                assign faq_json = faq_json | append: ','
+              endif
+              assign faq_json = faq_json | append: entry
+            endif
+          -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{%- if section.settings.schema_markup and faq_json != '' -%}
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{{ faq_json }}]}</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Preguntas frecuentes",
+  "tag": "div",
+  "class": "faq-section",
+  "max_blocks": 24,
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "soft", "label": "Gris suave"}, {"value": "light", "label": "Claro"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "soft"},
+    {"type": "text", "id": "heading", "label": "Título", "default": "Preguntas frecuentes"},
+    {"type": "text", "id": "text", "label": "Texto (opcional)"},
+    {"type": "checkbox", "id": "open_first", "label": "Abrir la primera pregunta", "default": false},
+    {"type": "checkbox", "id": "schema_markup", "label": "Agregar datos estructurados (FAQPage)", "info": "Ayuda a Google a mostrar las preguntas. Úsalo en una sola sección de preguntas por página.", "default": true},
+    {"type": "header", "content": "WhatsApp"},
+    {"type": "checkbox", "id": "show_whatsapp", "label": "Mostrar tarjeta de WhatsApp", "info": "Solo aparece si hay un número en Configuración del tema › Contacto.", "default": true},
+    {"type": "text", "id": "whatsapp_label", "label": "Título de la tarjeta", "default": "¿Tienes otra consulta?"},
+    {"type": "text", "id": "whatsapp_text", "label": "Texto de la tarjeta", "default": "Escríbenos por WhatsApp"},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64}
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Pregunta",
+      "settings": [
+        {"type": "text", "id": "question", "label": "Pregunta", "default": "¿Hacen envíos a provincias?"},
+        {"type": "richtext", "id": "answer", "label": "Respuesta", "default": "<p>Sí. Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde S/ 220.</p>"}
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Preguntas frecuentes",
+      "blocks": [
+        {"type": "question"},
+        {"type": "question", "settings": {"question": "¿Los productos son originales?", "answer": "<p>Sí. Somos vendedor autorizado Rockbros.</p>"}},
+        {"type": "question", "settings": {"question": "¿Puedo cambiar un producto?", "answer": "<p>Sí, tienes 7 días para cambiarlo, siempre que el producto esté sin abrir.</p>"}}
+      ]
+    }
+  ]
+}
+{% endschema %}

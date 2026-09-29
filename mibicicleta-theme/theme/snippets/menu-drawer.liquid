@@ -1,0 +1,139 @@
+{%- comment -%}
+  Mobile menu (left <side-drawer id="MenuDrawer">, opened by the header's hamburger).
+  {% render 'menu-drawer', menu: linklist, show_account: true|false %}
+  Levels are native <details> accordions (work without JS). Top-level rows get a category
+  icon when the title/URL matches one (luces → light, llantas → tire, …, rockbros/neco → medal).
+  Free-shipping card (from settings), then footer: account, WhatsApp (only with a number),
+  social icons.
+{%- endcomment -%}
+<side-drawer id="MenuDrawer" class="drawer menu-drawer" data-side="left">
+  <div class="drawer__overlay" data-drawer-close></div>
+  <div class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="MenuDrawer-title" tabindex="-1">
+    <div class="drawer__header menu-drawer__header">
+      <h2 class="drawer__title" id="MenuDrawer-title"><span class="heading-dot">{{ 'header.menu' | t }}</span></h2>
+      <button type="button" class="drawer__close" data-drawer-close aria-label="{{ 'general.close' | t }}">
+        {%- render 'icon', name: 'close' -%}
+      </button>
+    </div>
+
+    <div class="drawer__body menu-drawer__body">
+      {%- if menu.links.size > 0 -%}
+        <nav aria-label="{{ 'header.nav_label' | t }}">
+          <ul class="menu-drawer__list" role="list">
+            {%- for link in menu.links -%}
+              {%- liquid
+                assign key = link.title | handle | append: ' ' | append: link.url | downcase
+                assign icon = 'bike'
+                if key contains 'rockbros' or key contains 'neco'
+                  assign icon = 'medal'
+                elsif key contains 'componente' or key contains 'asiento' or key contains 'sillin'
+                  assign icon = 'seat'
+                elsif key contains 'luz' or key contains 'luces' or key contains 'linterna'
+                  assign icon = 'light'
+                elsif key contains 'llanta' or key contains 'camara'
+                  assign icon = 'tire'
+                elsif key contains 'pinon' or key contains 'transmision' or key contains 'cadena'
+                  assign icon = 'gear'
+                elsif key contains 'espejo'
+                  assign icon = 'mirror'
+                elsif key contains 'accesorio'
+                  assign icon = 'bag'
+                elsif key contains 'casco'
+                  assign icon = 'helmet'
+                elsif key contains 'pedal'
+                  assign icon = 'pedal'
+                elsif key contains 'grip' or key contains 'puno'
+                  assign icon = 'grip'
+                elsif key contains 'tapabarro'
+                  assign icon = 'mudguard'
+                elsif key contains 'lente'
+                  assign icon = 'glasses'
+                elsif key contains 'scooter'
+                  assign icon = 'scooter'
+                endif
+              -%}
+              <li class="menu-drawer__item">
+                {%- if link.links.size > 0 -%}
+                  <details class="menu-drawer__details"{% if link.child_active %} open{% endif %}>
+                    <summary class="menu-drawer__link{% if link.active or link.child_active %} is-active{% endif %}">
+                      <span class="menu-drawer__icon">{% render 'icon', name: icon %}</span>
+                      <span class="menu-drawer__label">{{ link.title | escape }}</span>
+                      {%- render 'icon', name: 'chevron-down', class: 'menu-drawer__chev' -%}
+                    </summary>
+                    <ul class="menu-drawer__sublist" role="list">
+                      <li>
+                        <a class="menu-drawer__sublink menu-drawer__sublink--all" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+                          {{- 'header.view_all_in' | t: title: link.title -}}
+                          {%- render 'icon', name: 'arrow-right' -%}
+                        </a>
+                      </li>
+                      {%- for child in link.links -%}
+                        <li>
+                          {%- if child.links.size > 0 -%}
+                            <details class="menu-drawer__details menu-drawer__details--nested"{% if child.child_active %} open{% endif %}>
+                              <summary class="menu-drawer__sublink">
+                                <span>{{ child.title | escape }}</span>
+                                {%- render 'icon', name: 'chevron-down', class: 'menu-drawer__chev' -%}
+                              </summary>
+                              <ul class="menu-drawer__sublist menu-drawer__sublist--nested" role="list">
+                                <li><a class="menu-drawer__sublink menu-drawer__sublink--all" href="{{ child.url }}">{{ 'header.view_all_in' | t: title: child.title }}</a></li>
+                                {%- for grandchild in child.links -%}
+                                  <li><a class="menu-drawer__sublink" href="{{ grandchild.url }}"{% if grandchild.current %} aria-current="page"{% endif %}>{{ grandchild.title | escape }}</a></li>
+                                {%- endfor -%}
+                              </ul>
+                            </details>
+                          {%- else -%}
+                            <a class="menu-drawer__sublink" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>{{ child.title | escape }}</a>
+                          {%- endif -%}
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  </details>
+                {%- else -%}
+                  <a class="menu-drawer__link{% if link.active %} is-active{% endif %}" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+                    <span class="menu-drawer__icon">{% render 'icon', name: icon %}</span>
+                    <span class="menu-drawer__label">{{ link.title | escape }}</span>
+                    {%- render 'icon', name: 'chevron-right', class: 'menu-drawer__chev' -%}
+                  </a>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+
+      {%- if settings.free_shipping_threshold > 0 -%}
+        {%- assign fs_amount = settings.free_shipping_threshold | times: 100 | money_without_trailing_zeros -%}
+        <div class="menu-drawer__promo has-watermark">
+          <span class="menu-drawer__promo-icon">{% render 'icon', name: 'truck' %}</span>
+          <p class="menu-drawer__promo-text">
+            <strong>{{ 'header.drawer.shipping_title' | t: amount: fs_amount }}</strong>
+            {%- if settings.free_shipping_zone != blank %}
+              <span>{{ 'shipping.zone' | t: zone: settings.free_shipping_zone }}</span>
+            {%- endif -%}
+          </p>
+          {%- render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'mi-watermark' -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- capture drawer_footer -%}
+      {%- if show_account -%}
+        <a class="menu-drawer__account" href="{{ routes.account_url }}">
+          {%- render 'icon', name: 'user' -%}
+          <span>{{ 'header.account' | t }}</span>
+        </a>
+      {%- endif -%}
+      {%- liquid
+        assign wa_label = 'header.drawer.whatsapp' | t
+        assign wa_text = 'header.drawer.whatsapp_text' | t
+      -%}
+      {%- render 'whatsapp-button', style: 'card', label: wa_label, text: wa_text, class: 'menu-drawer__whatsapp' -%}
+      {%- render 'social-icons', class: 'menu-drawer__social' -%}
+    {%- endcapture -%}
+    {%- assign drawer_footer = drawer_footer | strip -%}
+    {%- if drawer_footer != '' -%}
+      <div class="drawer__footer menu-drawer__footer">{{ drawer_footer }}</div>
+    {%- endif -%}
+  </div>
+</side-drawer>

@@ -1,0 +1,141 @@
+{%- comment -%}
+  Cart drawer (static section, rendered by layout/theme.liquid when settings.cart_type == 'drawer').
+  <cart-drawer> (assets/cart.js) extends <side-drawer>: registers this section for the Section
+  Rendering API, swaps .cart-drawer__inner on every `cart:updated`, animates the free-shipping bike
+  and handles line quantity / remove with inline errors. Styles: assets/component-cart.css.
+{%- endcomment -%}
+{{ 'component-cart.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cart.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign empty_menu = section.settings.empty_menu
+  assign stock_msg = 'cart.line.stock_limit' | t
+-%}
+<cart-drawer
+  id="CartDrawer"
+  class="drawer cart-drawer"
+  data-section="{{ section.id }}"
+  data-stock-msg="{{ stock_msg | escape }}"
+>
+  <div class="drawer__overlay" data-drawer-close></div>
+  <div class="drawer__panel cart-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="CartDrawer-title" tabindex="-1">
+    <div class="cart-drawer__inner{% if cart.item_count == 0 %} is-empty{% endif %}">
+      <div class="drawer__header cart-drawer__header">
+        <h2 class="drawer__title cart-drawer__title" id="CartDrawer-title" tabindex="-1" data-cart-heading>
+          {{- 'cart.title' | t -}}
+          {%- if cart.item_count > 0 -%}
+            <span class="cart-drawer__count" aria-hidden="true">{{ cart.item_count }}</span>
+            <span class="visually-hidden">({{ 'cart.count' | t: count: cart.item_count }})</span>
+          {%- endif -%}
+        </h2>
+        <button type="button" class="drawer__close" data-drawer-close aria-label="{{ 'general.close' | t }}">
+          {%- render 'icon', name: 'close' -%}
+        </button>
+      </div>
+
+      {%- if cart.item_count > 0 -%}
+        <div class="drawer__body cart-drawer__body" data-cart-scroll>
+          <div class="cart-ship">
+            {%- render 'free-shipping-bar', total: cart.total_price, style: 'card' -%}
+            <span class="cart-ship__confetti" aria-hidden="true">
+              {%- for i in (1..14) -%}
+                <i style="--a: {{ i | times: 26 }}deg; --d: {% cycle '34px', '48px', '40px', '54px' %};"></i>
+              {%- endfor -%}
+            </span>
+          </div>
+
+          <ul class="cart-lines" role="list" aria-label="{{ 'cart.items_label' | t }}">
+            {%- for item in cart.items -%}
+              {%- render 'cart-line-item', item: item, index: forloop.index, prefix: 'CartDrawer', form: 'CartDrawer-form', lazy: false -%}
+            {%- endfor -%}
+          </ul>
+
+          {%- if settings.cart_show_note -%}
+            <details class="accordion cart-note"{% if cart.note != blank %} open{% endif %}>
+              <summary class="accordion__summary">{{ 'cart.totals.note_toggle' | t }} {% render 'icon', name: 'plus' %}</summary>
+              <div class="accordion__content">
+                <label class="visually-hidden" for="CartDrawer-note">{{ 'cart.totals.note_label' | t }}</label>
+                <textarea class="textarea cart-note__input" id="CartDrawer-note" name="note" form="CartDrawer-form" rows="3" placeholder="{{ 'cart.totals.note_placeholder' | t }}" data-cart-note>{{ cart.note }}</textarea>
+              </div>
+            </details>
+          {%- endif -%}
+
+          {%- if section.settings.show_upsell -%}
+            {%- render 'cart-upsell', layout: 'compact', limit: section.settings.upsell_limit, prefix: 'CartDrawer', heading_tag: 'h3' -%}
+          {%- endif -%}
+        </div>
+
+        <form class="drawer__footer cart-drawer__footer" id="CartDrawer-form" action="{{ routes.cart_url }}" method="post" novalidate>
+          {%- render 'cart-totals', form: 'CartDrawer-form', prefix: 'CartDrawer' -%}
+          <button type="button" class="btn btn--link cart-drawer__continue" data-drawer-close>{{ 'cart.continue' | t }}</button>
+        </form>
+      {%- else -%}
+        <div class="drawer__body cart-drawer__body cart-drawer__body--empty" data-cart-scroll>
+          <div class="cart-empty">
+            <span class="cart-empty__icon">{% render 'icon', name: 'bag' %}</span>
+            <p class="cart-empty__title">{{ 'cart.empty.title' | t }}</p>
+            <p class="cart-empty__text">{{ 'cart.empty.text' | t }}</p>
+            <a class="btn btn--brand btn--lg cart-empty__cta" href="{{ routes.all_products_collection_url }}">
+              {{- 'cart.empty.cta' | t }} {% render 'icon', name: 'arrow-right' -%}
+            </a>
+            {%- if settings.free_shipping_threshold > 0 and settings.free_shipping_zone != blank -%}
+              {%- assign fs_amount = settings.free_shipping_threshold | times: 100 | money_without_trailing_zeros -%}
+              <p class="cart-empty__ship">{% render 'icon', name: 'truck' %} {{ 'cart.empty.free_shipping' | t: zone: settings.free_shipping_zone, amount: fs_amount }}</p>
+            {%- endif -%}
+          </div>
+
+          {%- if empty_menu.links.size > 0 -%}
+            <nav class="cart-empty__nav" aria-labelledby="CartDrawer-cats">
+              <p class="cart-empty__label" id="CartDrawer-cats">{{ 'cart.empty.categories' | t }}</p>
+              <ul class="cart-empty__chips" role="list">
+                {%- for link in empty_menu.links -%}
+                  <li><a class="chip" href="{{ link.url }}">{{ link.title | escape }}</a></li>
+                {%- endfor -%}
+              </ul>
+            </nav>
+          {%- endif -%}
+
+          {%- if section.settings.show_upsell -%}
+            {%- assign empty_heading = 'cart.empty.suggestions' | t -%}
+            {%- render 'cart-upsell', layout: 'compact', limit: section.settings.upsell_limit, prefix: 'CartDrawer', heading: empty_heading, heading_tag: 'h3' -%}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</cart-drawer>
+
+{% schema %}
+{
+  "name": "Carrito lateral",
+  "class": "cart-drawer-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "El envío gratis, la colección de sugerencias, su título y la nota del pedido se configuran en Configuración del tema › Carrito."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_upsell",
+      "label": "Mostrar productos sugeridos",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "upsell_limit",
+      "label": "Cantidad de sugeridos",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "link_list",
+      "id": "empty_menu",
+      "label": "Categorías del carrito vacío",
+      "info": "Se muestran como botones cuando el carrito está vacío.",
+      "default": "main-menu"
+    }
+  ]
+}
+{% endschema %}

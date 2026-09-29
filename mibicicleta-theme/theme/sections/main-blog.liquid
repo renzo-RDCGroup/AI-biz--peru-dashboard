@@ -1,0 +1,123 @@
+{%- comment -%}
+  Blog listing: title band (breadcrumbs, h1 + red dot, optional intro, topic chips from
+  blog.all_tags), then a grid of article cards (image, date · author, title, excerpt) with
+  numbered pagination. Empty blog → friendly empty state with a link to the catalog.
+{%- endcomment -%}
+{{ 'section-pages.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign ss = section.settings
+  assign title_last = blog.title | strip | slice: -1
+  assign title_dot = true
+  if title_last == '.' or title_last == '?' or title_last == '!' or title_last == ':' or title_last == '…'
+    assign title_dot = false
+  endif
+  case ss.image_ratio
+    when 'square'
+      assign ratio = 1
+    when 'portrait'
+      assign ratio = 0.8
+    else
+      assign ratio = 1.5
+  endcase
+-%}
+
+{%- paginate blog.articles by ss.per_page -%}
+  <div class="blog scheme-{{ ss.scheme }}">
+    <header class="page-hero scheme-cream has-watermark">
+      <div class="page-width">
+        {%- render 'breadcrumbs', class: 'page-hero__crumbs' -%}
+        <h1 class="page-hero__title{% if title_dot %} heading-dot{% endif %}">{{ blog.title | escape }}</h1>
+        {%- if ss.intro != blank -%}
+          <div class="page-hero__text">{{ ss.intro }}</div>
+        {%- endif -%}
+        {%- if ss.show_tags and blog.all_tags.size > 0 -%}
+          <nav class="blog__topics" aria-label="{{ 'blog.topics' | t }}">
+            <ul class="chip-row chip-row--bleed" role="list">
+              <li><a class="chip blog__chip" href="{{ blog.url }}"{% if current_tags == blank %} aria-current="page"{% endif %}>{{ 'blog.all' | t }}</a></li>
+              {%- for tag in blog.all_tags -%}
+                <li><a class="chip blog__chip" href="{{ blog.url }}/tagged/{{ tag | handle }}"{% if current_tags contains tag %} aria-current="page"{% endif %}>{{ tag | escape }}</a></li>
+              {%- endfor -%}
+            </ul>
+          </nav>
+        {%- endif -%}
+      </div>
+      {%- render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'mi-watermark' -%}
+    </header>
+
+    <div class="section" style="--pad-top: {{ ss.padding_top }}px; --pad-bottom: {{ ss.padding_bottom }}px;">
+      <div class="page-width">
+        {%- if blog.articles.size > 0 -%}
+          <ul class="article-grid{% if paginate.current_page == 1 and blog.articles.size > 2 %} article-grid--featured{% endif %}" role="list">
+            {%- for article in blog.articles -%}
+              <li class="article-grid__item" data-reveal>
+                <article class="article-card">
+                  {%- if ss.show_image -%}
+                    <a class="article-card__media media" href="{{ article.url }}" tabindex="-1" aria-hidden="true" style="--ratio: {{ ratio }};">
+                      {%- if article.image != blank -%}
+                        {%- liquid
+                          assign card_alt = article.image.alt | default: article.title
+                          assign card_lazy = true
+                          if forloop.index <= 3
+                            assign card_lazy = false
+                          endif
+                        -%}
+                        {%- render 'image', image: article.image, widths: '360,540,720,900,1080', sizes: '(min-width: 1200px) 420px, (min-width: 750px) 50vw, 100vw', lazy: card_lazy, alt: card_alt -%}
+                      {%- else -%}
+                        <span class="article-card__ph">{% render 'logo', variant: 'mark', label: '' %}</span>
+                      {%- endif -%}
+                    </a>
+                  {%- endif -%}
+                  <div class="article-card__body">
+                    <p class="article-card__meta">
+                      {{- article.published_at | time_tag: format: 'date' -}}
+                      {%- if ss.show_author and article.author != blank -%}
+                        <span aria-hidden="true"> · </span>{{ 'blog.by' | t: author: article.author }}
+                      {%- endif -%}
+                    </p>
+                    <h2 class="article-card__title"><a class="article-card__link" href="{{ article.url }}">{{ article.title | escape }}</a></h2>
+                    {%- if ss.show_excerpt -%}
+                      <p class="article-card__excerpt">{{ article.excerpt_or_content | strip_html | truncatewords: 26 }}</p>
+                    {%- endif -%}
+                    <span class="article-card__more" aria-hidden="true">{{ 'blog.read_more' | t }}{% render 'icon', name: 'arrow-right' %}</span>
+                  </div>
+                </article>
+              </li>
+            {%- endfor -%}
+          </ul>
+          {%- if paginate.pages > 1 -%}
+            <div class="blog__pagination">{% render 'pagination', paginate: paginate %}</div>
+          {%- endif -%}
+        {%- else -%}
+          <div class="blog-empty">
+            <span class="pg-beacon blog-empty__icon">{% render 'icon', name: 'bike' %}</span>
+            <h2 class="blog-empty__title">{{ 'blog.empty_title' | t }}</h2>
+            <p class="blog-empty__text">{{ 'blog.empty_text' | t }}</p>
+            <a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">{{ 'blog.empty_cta' | t }}{% render 'icon', name: 'arrow-right' %}</a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Blog",
+  "class": "main-blog-section",
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "richtext", "id": "intro", "label": "Texto bajo el título (opcional)"},
+    {"type": "checkbox", "id": "show_tags", "label": "Mostrar temas (etiquetas)", "default": true},
+    {"type": "range", "id": "per_page", "label": "Artículos por página", "info": "En la primera página el artículo más reciente se muestra destacado.", "min": 4, "max": 24, "step": 2, "default": 10},
+    {"type": "header", "content": "Tarjetas"},
+    {"type": "checkbox", "id": "show_image", "label": "Mostrar imagen", "default": true},
+    {"type": "select", "id": "image_ratio", "label": "Formato de imagen", "options": [{"value": "landscape", "label": "Horizontal"}, {"value": "square", "label": "Cuadrado"}, {"value": "portrait", "label": "Vertical"}], "default": "landscape"},
+    {"type": "checkbox", "id": "show_author", "label": "Mostrar autor", "default": false},
+    {"type": "checkbox", "id": "show_excerpt", "label": "Mostrar resumen", "default": true},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 72}
+  ]
+}
+{% endschema %}

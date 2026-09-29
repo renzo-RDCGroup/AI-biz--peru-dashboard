@@ -1,0 +1,101 @@
+{%- comment -%}
+  Breadcrumbs + BreadcrumbList JSON-LD (context from request.page_type).
+  {% render 'breadcrumbs', class: '', schema: true %}
+  Product pages without a /collections/… context use the product's first "real" category
+  (skips frontpage, destacados, brand and grouping collections). Renders nothing on the home page.
+{%- endcomment -%}
+{%- liquid
+  assign bc_sep = '~|~'
+  assign bc_names = ''
+  assign bc_urls = ''
+  case request.page_type
+    when 'product'
+      assign bc_collection = collection
+      if bc_collection == blank
+        assign bc_skip = 'frontpage,destacados,all,componentes,rockbros,neco' | split: ','
+        for c in product.collections
+          unless bc_skip contains c.handle
+            assign bc_collection = c
+            break
+          endunless
+        endfor
+      endif
+      if bc_collection != blank
+        assign bc_names = bc_names | append: bc_sep | append: bc_collection.title
+        assign bc_urls = bc_urls | append: bc_sep | append: bc_collection.url
+      endif
+      assign bc_names = bc_names | append: bc_sep | append: product.title
+      assign bc_urls = bc_urls | append: bc_sep | append: product.url
+    when 'collection'
+      assign bc_names = bc_names | append: bc_sep | append: collection.title
+      assign bc_urls = bc_urls | append: bc_sep | append: collection.url
+      if current_tags
+        assign bc_tags = current_tags | join: ', '
+        assign bc_names = bc_names | append: bc_sep | append: bc_tags
+        assign bc_urls = bc_urls | append: bc_sep | append: request.path
+      endif
+    when 'list-collections'
+      assign bc_label = 'general.collections' | t
+      assign bc_names = bc_names | append: bc_sep | append: bc_label
+      assign bc_urls = bc_urls | append: bc_sep | append: routes.collections_url
+    when 'search'
+      assign bc_label = 'general.search' | t
+      assign bc_names = bc_names | append: bc_sep | append: bc_label
+      assign bc_urls = bc_urls | append: bc_sep | append: routes.search_url
+    when 'cart'
+      assign bc_label = 'general.cart' | t
+      assign bc_names = bc_names | append: bc_sep | append: bc_label
+      assign bc_urls = bc_urls | append: bc_sep | append: routes.cart_url
+    when 'page'
+      assign bc_names = bc_names | append: bc_sep | append: page.title
+      assign bc_urls = bc_urls | append: bc_sep | append: page.url
+    when 'blog'
+      assign bc_names = bc_names | append: bc_sep | append: blog.title
+      assign bc_urls = bc_urls | append: bc_sep | append: blog.url
+    when 'article'
+      assign bc_names = bc_names | append: bc_sep | append: blog.title | append: bc_sep | append: article.title
+      assign bc_urls = bc_urls | append: bc_sep | append: blog.url | append: bc_sep | append: article.url
+    when '404'
+      assign bc_label = 'general.not_found' | t
+      assign bc_names = bc_names | append: bc_sep | append: bc_label
+      assign bc_urls = bc_urls | append: bc_sep | append: request.path
+    when 'index'
+      assign bc_names = ''
+    else
+      assign bc_names = bc_names | append: bc_sep | append: page_title
+      assign bc_urls = bc_urls | append: bc_sep | append: request.path
+  endcase
+  assign bc_name_list = bc_names | remove_first: bc_sep | split: bc_sep
+  assign bc_url_list = bc_urls | remove_first: bc_sep | split: bc_sep
+  assign bc_home = 'general.home' | t
+-%}
+{%- if bc_name_list.size > 0 -%}
+  <nav class="breadcrumbs{% if class != blank %} {{ class }}{% endif %}" aria-label="{{ 'general.breadcrumbs' | t }}">
+    <ol class="breadcrumbs__list">
+      <li class="breadcrumbs__item"><a href="{{ routes.root_url }}">{{ bc_home }}</a></li>
+      {%- for bc_name in bc_name_list -%}
+        <li class="breadcrumbs__item">
+          {%- if forloop.last -%}
+            <span aria-current="page">{{ bc_name | escape }}</span>
+          {%- else -%}
+            <a href="{{ bc_url_list[forloop.index0] }}">{{ bc_name | escape }}</a>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ol>
+  </nav>
+  {%- unless schema == false -%}
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {"@type": "ListItem", "position": 1, "name": {{ bc_home | json }}, "item": {{ request.origin | append: routes.root_url | json }}}
+          {%- for bc_name in bc_name_list -%}
+            ,{"@type": "ListItem", "position": {{ forloop.index | plus: 1 }}, "name": {{ bc_name | json }}, "item": {{ request.origin | append: bc_url_list[forloop.index0] | json }}}
+          {%- endfor %}
+        ]
+      }
+    </script>
+  {%- endunless -%}
+{%- endif -%}

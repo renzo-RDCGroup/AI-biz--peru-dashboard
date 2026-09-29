@@ -1,0 +1,151 @@
+{%- comment -%}
+  "¿Qué repuesto necesitas?" search band (styles: assets/section-home.css).
+  Big pill search (posts to routes.search_url, type=product) enhanced by the header's
+  <predictive-search> element when it is loaded; quick-search chips (blocks "chip");
+  optional WhatsApp line — a link only when settings.whatsapp_number is set, plain text otherwise.
+{%- endcomment -%}
+{{ 'section-home.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign scheme = section.settings.scheme
+  assign wm_tone = 'mono-dark'
+  if scheme == 'dark'
+    assign wm_tone = 'mono-light'
+  endif
+  assign input_id = 'SearchHero-' | append: section.id
+  assign title_id = 'SearchHeroTitle-' | append: section.id
+  assign wa_digits = settings.whatsapp_number | strip | remove: ' ' | remove: '+' | remove: '-' | remove: '(' | remove: ')' | remove: '.'
+  assign wa_text = section.settings.whatsapp_text | strip
+  assign show_wa_link = false
+  if section.settings.show_whatsapp and wa_text != blank and wa_digits != blank
+    assign show_wa_link = true
+  endif
+-%}
+
+<section class="search-hero section scheme-{{ scheme }}" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;" aria-labelledby="{{ title_id }}">
+  <div class="search-hero__bg" aria-hidden="true">
+    {%- render 'logo', variant: 'mark', tone: wm_tone, label: '', class: 'mi-watermark search-hero__watermark' -%}
+  </div>
+
+  <div class="page-width search-hero__inner">
+    <div class="search-hero__intro">
+      {%- liquid
+        assign h_last = section.settings.heading | strip | slice: -1
+        assign h_dot = true
+        if h_last == '.' or h_last == '?' or h_last == '!' or h_last == ':' or h_last == '…'
+          assign h_dot = false
+        endif
+      -%}
+      <h2 class="h1 search-hero__title{% if h_dot %} heading-dot{% endif %}" id="{{ title_id }}">{{ section.settings.heading | escape }}</h2>
+      {%- if section.settings.text != blank or wa_text != blank -%}
+        <p class="search-hero__text">
+          {{- section.settings.text | escape -}}
+          {%- if section.settings.show_whatsapp and wa_text != blank and show_wa_link == false %} {{ wa_text | escape }}{% endif -%}
+        </p>
+      {%- endif -%}
+      {%- if show_wa_link -%}
+        <p class="search-hero__wa">
+          {%- render 'whatsapp-button', style: 'link', label: wa_text, message: section.settings.whatsapp_message -%}
+        </p>
+      {%- endif -%}
+    </div>
+
+    <div class="search-hero__main">
+      <predictive-search class="search-hero__search" data-status-none="{{ 'home.search_hero.status_none' | t | escape }}" data-status-one="{{ 'home.search_hero.status_one' | t | escape }}" data-status-template="{{ 'home.search_hero.status_other' | t | escape }}">
+        <form action="{{ routes.search_url }}" method="get" role="search" class="search-hero__form">
+          <label class="visually-hidden" for="{{ input_id }}">{{ 'home.search_hero.label' | t }}</label>
+          <span class="search-hero__icon" aria-hidden="true">{% render 'icon', name: 'search' %}</span>
+          <input
+            class="search-hero__input"
+            type="search"
+            id="{{ input_id }}"
+            name="q"
+            placeholder="{{ section.settings.placeholder | escape }}"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            enterkeyhint="search"
+          >
+          <input type="hidden" name="type" value="product">
+          <input type="hidden" name="options[prefix]" value="last">
+          <button type="submit" class="btn btn--accent search-hero__submit">
+            {%- render 'icon', name: 'search' -%}
+            <span class="search-hero__submit-label">{{ 'home.search_hero.submit' | t }}</span>
+          </button>
+        </form>
+        {%- if settings.predictive_search -%}
+          <div class="predictive-search search-hero__results scheme-light" id="{{ input_id }}-results" data-predictive-panel hidden></div>
+          <p class="visually-hidden" role="status" aria-live="polite" data-predictive-status></p>
+        {%- endif -%}
+      </predictive-search>
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="search-hero__chips">
+          {%- if section.settings.chips_label != blank -%}
+            <p class="search-hero__chips-label" id="{{ input_id }}-chips">{{ section.settings.chips_label | escape }}</p>
+          {%- endif -%}
+          <ul class="chip-row chip-row--bleed search-hero__chip-row" role="list"{% if section.settings.chips_label != blank %} aria-labelledby="{{ input_id }}-chips"{% endif %}>
+            {%- for block in section.blocks -%}
+              {%- liquid
+                assign term = block.settings.term | strip
+                assign chip_label = block.settings.label | strip | default: term
+              -%}
+              {%- if term != blank -%}
+                <li {{ block.shopify_attributes }}>
+                  <a class="chip search-hero__chip" href="{{ routes.search_url }}?q={{ term | url_encode }}&amp;type=product">
+                    {{- chip_label | capitalize | escape -}}
+                  </a>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Buscador destacado",
+  "tag": "div",
+  "class": "search-hero-section",
+  "max_blocks": 12,
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}, {"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}], "default": "brand"},
+    {"type": "text", "id": "heading", "label": "Título", "default": "¿Qué repuesto necesitas?"},
+    {"type": "text", "id": "text", "label": "Texto", "default": "Busca por código, medida o nombre."},
+    {"type": "text", "id": "placeholder", "label": "Texto de ayuda del buscador", "default": "Ej.: llanta aro 26, luz trasera, piñón 9v…"},
+    {"type": "text", "id": "chips_label", "label": "Etiqueta de las sugerencias", "default": "Prueba con:"},
+    {"type": "header", "content": "WhatsApp"},
+    {"type": "checkbox", "id": "show_whatsapp", "label": "Mostrar la línea de WhatsApp", "info": "Es un enlace solo si hay un número en Configuración del tema › Contacto; si no, se muestra como texto.", "default": true},
+    {"type": "text", "id": "whatsapp_text", "label": "Texto de la línea", "default": "Si no sabes cuál es, escríbenos con una foto."},
+    {"type": "text", "id": "whatsapp_message", "label": "Mensaje inicial del chat", "info": "Vacío = usa el mensaje de Configuración del tema.", "default": "Hola Mi Bicicleta, estoy buscando un repuesto. Te envío una foto."},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48}
+  ],
+  "blocks": [
+    {
+      "type": "chip",
+      "name": "Sugerencia",
+      "settings": [
+        {"type": "text", "id": "term", "label": "Término de búsqueda", "default": "luces"},
+        {"type": "text", "id": "label", "label": "Texto visible (opcional)"}
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Buscador destacado",
+      "blocks": [
+        {"type": "chip", "settings": {"term": "luces"}},
+        {"type": "chip", "settings": {"term": "llantas"}},
+        {"type": "chip", "settings": {"term": "espejos"}},
+        {"type": "chip", "settings": {"term": "asientos"}}
+      ]
+    }
+  ]
+}
+{% endschema %}

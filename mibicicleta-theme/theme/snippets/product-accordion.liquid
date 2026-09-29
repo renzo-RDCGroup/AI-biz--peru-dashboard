@@ -1,0 +1,24 @@
+{%- comment -%}
+  Collapsible row for the product page (foundation .accordion markup).
+  {% render 'product-accordion',
+    id: 'Description-…',     optional id (target of the "Ver más" link)
+    heading: 'Descripción',
+    icon: 'truck',           optional leading icon name ('none' / blank = no icon)
+    content: html,           renders nothing when blank
+    open: true
+  %}
+{%- endcomment -%}
+{%- if content != blank -%}
+  <details class="accordion product-accordion"{% if id != blank %} id="{{ id }}"{% endif %}{% if open %} open{% endif %}>
+    <summary class="accordion__summary">
+      <span class="product-accordion__title">
+        {%- if icon != blank and icon != 'none' -%}
+          <span class="product-accordion__icon">{% render 'icon', name: icon %}</span>
+        {%- endif -%}
+        {{- heading | escape -}}
+      </span>
+      {%- render 'icon', name: 'chevron-down' -%}
+    </summary>
+    <div class="accordion__content rte">{{ content }}</div>
+  </details>
+{%- endif -%}

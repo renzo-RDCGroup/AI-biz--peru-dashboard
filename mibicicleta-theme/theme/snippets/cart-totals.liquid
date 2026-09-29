@@ -1,0 +1,55 @@
+{%- comment -%}
+  Cart totals + checkout button (cart drawer footer and cart page summary).
+  {% render 'cart-totals',
+    form: 'CartDrawer-form',   id of the cart <form action=routes.cart_url method=post> (checkout submits it)
+    prefix: 'CartDrawer'       unique id prefix
+  %}
+  Rows: cart-level discounts ("Descuentos − S/ x"), savings pill (compare-at + discounts, computed
+  from real prices), Subtotal, settings.cart_checkout_note, "Finalizar pedido".
+{%- endcomment -%}
+{%- liquid
+  # Savings = compare-at price differences + every discount applied to the cart.
+  assign compare_savings = 0
+  for line in cart.items
+    assign line_compare = line.variant.compare_at_price | default: 0
+    if line_compare > line.original_price
+      assign diff = line_compare | minus: line.original_price | times: line.quantity
+      assign compare_savings = compare_savings | plus: diff
+    endif
+  endfor
+  assign total_savings = compare_savings | plus: cart.total_discount
+  assign savings_money = total_savings | money
+-%}
+<div class="cart-totals" id="{{ prefix }}-totals">
+  {%- if cart.cart_level_discount_applications.size > 0 -%}
+    <ul class="cart-totals__discounts" role="list" aria-label="{{ 'cart.totals.discounts' | t }}">
+      {%- for discount in cart.cart_level_discount_applications -%}
+        <li class="cart-totals__row cart-totals__row--discount">
+          <span class="cart-totals__label">{% render 'icon', name: 'tag' %} {{ 'cart.totals.discounts' | t }} · {{ discount.title | escape }}</span>
+          <span class="cart-totals__value">−{{ discount.total_allocated_amount | money }}</span>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  <div class="cart-totals__row cart-totals__row--subtotal">
+    <span class="cart-totals__label">{{ 'cart.totals.subtotal' | t }}</span>
+    <span class="cart-totals__value">{{ cart.total_price | money }}</span>
+  </div>
+
+  {%- if total_savings > 0 or settings.cart_checkout_note != blank -%}
+    <div class="cart-totals__meta">
+      {%- if settings.cart_checkout_note != blank -%}
+        <p class="cart-totals__note">{{ settings.cart_checkout_note | escape }}</p>
+      {%- endif -%}
+      {%- if total_savings > 0 -%}
+        <p class="cart-totals__savings">{% render 'icon', name: 'percent' %} <span>{{ 'cart.totals.savings_html' | t: amount: savings_money }}</span></p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <button type="submit" name="checkout" form="{{ form }}" class="btn btn--brand btn--lg btn--block cart-totals__checkout" id="{{ prefix }}-checkout">
+    <span>{{ 'cart.totals.checkout' | t }}</span>
+    {%- render 'icon', name: 'arrow-right' -%}
+  </button>
+</div>

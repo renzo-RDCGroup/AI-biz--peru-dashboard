@@ -1,0 +1,38 @@
+{%- comment -%}
+  Free-shipping progress (threshold: settings.free_shipping_threshold, in soles).
+  {% render 'free-shipping-bar', total: cart.total_price, style: 'card'|'inline', class: '' %}
+  Renders nothing when the threshold is 0. global.js re-computes every [data-free-shipping]
+  on `cart:updated` (text, --progress on .free-ship__track, aria-valuenow, .is-complete).
+{%- endcomment -%}
+{%- assign fs_threshold = settings.free_shipping_threshold | default: 0 | times: 100 | round -%}
+{%- if fs_threshold > 0 -%}
+  {%- liquid
+    assign fs_total = total | default: cart.total_price | default: 0
+    assign fs_style = style | default: 'card'
+    assign fs_remaining = fs_threshold | minus: fs_total
+    if fs_remaining < 0
+      assign fs_remaining = 0
+    endif
+    assign fs_pct = fs_total | times: 100 | divided_by: fs_threshold | floor
+    if fs_pct > 100
+      assign fs_pct = 100
+    endif
+    assign fs_amount = fs_remaining | money
+  -%}
+  <div class="free-ship free-ship--{{ fs_style }}{% if fs_remaining == 0 %} is-complete{% endif %}{% if class != blank %} {{ class }}{% endif %}" data-free-shipping data-threshold="{{ fs_threshold }}">
+    <p class="free-ship__text" data-free-shipping-text>
+      {%- if fs_remaining > 0 -%}
+        {{- 'shipping.remaining_html' | t: amount: fs_amount -}}
+      {%- else -%}
+        {{- 'shipping.reached_html' | t -}}
+      {%- endif -%}
+      {%- if settings.free_shipping_zone != blank %}
+        <span class="free-ship__zone">{{ 'shipping.zone' | t: zone: settings.free_shipping_zone }}</span>
+      {%- endif -%}
+    </p>
+    <div class="free-ship__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ fs_pct }}" aria-label="{{ 'shipping.progress_label' | t }}" style="--progress: {{ fs_pct }}%;">
+      <div class="free-ship__fill"></div>
+      <span class="free-ship__marker">{% render 'icon', name: 'bike' %}</span>
+    </div>
+  </div>
+{%- endif -%}

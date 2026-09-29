@@ -1,0 +1,57 @@
+{
+  "header": {
+    "announcement": {
+      "label": "Anuncios",
+      "pause": "Pausar anuncios",
+      "previous": "Anuncio anterior",
+      "next": "Anuncio siguiente",
+      "copy_code": "Copiar el código {{ code }}",
+      "code": "Código"
+    },
+    "nav_label": "Categorías",
+    "submenu_toggle": "Ver subcategorías de {{ title }}",
+    "view_all_in": "Ver todo en {{ title }}",
+    "free_shipping_note": "Envío gratis desde {{ amount }}",
+    "open_menu": "Abrir menú",
+    "menu": "Menú",
+    "open_search": "Abrir búsqueda",
+    "home": "Ir al inicio",
+    "account": "Mi cuenta",
+    "cart": "Carrito",
+    "cart_count": {
+      "one": "Carrito, {{ count }} producto",
+      "other": "Carrito, {{ count }} productos"
+    },
+    "drawer": {
+      "shipping_title": "Envío gratis desde {{ amount }}",
+      "whatsapp": "¿Dudas? Escríbenos",
+      "whatsapp_text": "Si no sabes cuál es, mándanos una foto"
+    }
+  },
+  "search": {
+    "predictive": {
+      "label": "Buscar productos",
+      "submit": "Buscar",
+      "clear": "Borrar búsqueda",
+      "results_label": "Resultados de búsqueda",
+      "suggestions": "Sugerencias",
+      "products": "Productos",
+      "collections": "Categorías",
+      "search_for": "Buscar «{{ terms }}»",
+      "view_all": "Ver todos los resultados",
+      "view_all_count": {
+        "one": "Ver {{ count }} resultado",
+        "other": "Ver los {{ count }} resultados"
+      },
+      "no_results": "No encontramos resultados para «{{ terms }}»",
+      "no_results_hint": "Prueba con otra palabra, un código o una medida.",
+      "whatsapp_hint": "¿No lo encuentras? Escríbenos con una foto",
+      "loading": "Buscando…",
+      "count": {
+        "one": "{{ count }} sugerencia. Usa las flechas para recorrerla.",
+        "other": "{{ count }} sugerencias. Usa las flechas para recorrerlas."
+      },
+      "none": "Sin resultados."
+    }
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "breadcrumbs": { "type": "breadcrumbs", "settings": {} },
+        "badges": { "type": "badges", "settings": {} },
+        "vendor": { "type": "vendor", "settings": {} },
+        "title": { "type": "title", "settings": { "show_sku": true } },
+        "rating": { "type": "rating", "settings": {} },
+        "price": { "type": "price", "settings": { "show_save": true, "show_tax": true } },
+        "excerpt": { "type": "short_description", "settings": { "length": 160 } },
+        "stock": { "type": "stock", "settings": { "low_stock_threshold": 5 } },
+        "picker": { "type": "variant_picker", "settings": { "picker_style": "auto" } },
+        "buy": { "type": "buy_buttons", "settings": { "show_buy_now": true, "show_dynamic_checkout": false } },
+        "free_shipping": { "type": "free_shipping", "settings": {} },
+        "delivery": { "type": "delivery_estimate", "settings": { "heading": "Entrega estimada" } },
+        "pickup": { "type": "pickup", "settings": {} },
+        "whatsapp": {
+          "type": "whatsapp",
+          "settings": {
+            "heading": "¿Dudas con la medida o compatibilidad?",
+            "text": "Escríbenos por WhatsApp y te ayudamos"
+          }
+        },
+        "trust": {
+          "type": "trust",
+          "settings": {
+            "icon_1": "medal",
+            "text_1": "Productos originales",
+            "icon_2": "truck",
+            "text_2": "Envío gratis desde S/ 220",
+            "icon_3": "return",
+            "text_3": "7 días para cambios"
+          }
+        },
+        "description": { "type": "description", "settings": { "heading": "Descripción", "icon": "none", "open": true } },
+        "shipping": {
+          "type": "collapsible",
+          "settings": {
+            "heading": "Envíos",
+            "icon": "truck",
+            "content": "<p>Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde S/ 220.</p>",
+            "open": false
+          }
+        },
+        "returns": {
+          "type": "collapsible",
+          "settings": {
+            "heading": "Cambios",
+            "icon": "return",
+            "content": "<p>Tienes 7 días para cambiar tu producto, siempre que esté sin abrir.</p>",
+            "open": false
+          }
+        },
+        "share": { "type": "share", "settings": {} }
+      },
+      "block_order": [
+        "breadcrumbs",
+        "badges",
+        "vendor",
+        "title",
+        "rating",
+        "price",
+        "excerpt",
+        "stock",
+        "picker",
+        "buy",
+        "free_shipping",
+        "delivery",
+        "pickup",
+        "whatsapp",
+        "trust",
+        "description",
+        "shipping",
+        "returns",
+        "share"
+      ],
+      "settings": {
+        "scheme": "light",
+        "media_ratio": "square",
+        "image_blend": true,
+        "media_zoom": true,
+        "lightbox": true,
+        "sticky_columns": true,
+        "sticky_atc": true,
+        "padding_top": 24,
+        "padding_bottom": 56
+      }
+    },
+    "complementary": {
+      "type": "product-recommendations",
+      "settings": {
+        "intent": "complementary",
+        "heading": "Complétalo con",
+        "heading_dot": false,
+        "limit": 8,
+        "columns_desktop": "4",
+        "scheme": "soft",
+        "padding_top": 48,
+        "padding_bottom": 48
+      }
+    },
+    "usp": {
+      "type": "usp-strip",
+      "blocks": {
+        "originales": {
+          "type": "item",
+          "settings": { "icon": "medal", "title": "Productos originales", "text": "Vendedor autorizado Rockbros" }
+        },
+        "envios": {
+          "type": "item",
+          "settings": { "icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde S/ 220" }
+        },
+        "whatsapp": {
+          "type": "item",
+          "settings": { "icon": "whatsapp", "title": "Atención por WhatsApp", "text": "Consultas y pedidos por chat" }
+        },
+        "cambios": {
+          "type": "item",
+          "settings": { "icon": "return", "title": "Cambios y garantía", "text": "7 días para cambiar, sin abrir" }
+        }
+      },
+      "block_order": ["originales", "envios", "whatsapp", "cambios"],
+      "settings": {}
+    },
+    "related": {
+      "type": "product-recommendations",
+      "settings": {
+        "intent": "related",
+        "heading": "También te puede servir",
+        "heading_dot": true,
+        "limit": 8,
+        "columns_desktop": "4",
+        "scheme": "light",
+        "padding_top": 48,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": ["main", "complementary", "usp", "related"]
+}

@@ -1,0 +1,57 @@
+{
+  "type": "footer",
+  "name": "Pie de página",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "blocks": {
+        "menu-categorias": {
+          "type": "menu",
+          "settings": {
+            "heading": "Categorías",
+            "menu": "main-menu",
+            "show_children": false
+          }
+        },
+        "menu-ayuda": {
+          "type": "menu",
+          "settings": {
+            "heading": "Ayuda",
+            "menu": "footer",
+            "show_children": false
+          }
+        },
+        "contacto": {
+          "type": "contact",
+          "settings": {
+            "heading": "Contacto",
+            "show_whatsapp": true,
+            "whatsapp_label": "Escríbenos por WhatsApp"
+          }
+        }
+      },
+      "block_order": [
+        "menu-categorias",
+        "menu-ayuda",
+        "contacto"
+      ],
+      "settings": {
+        "scheme": "dark",
+        "big_logo": true,
+        "heading": "",
+        "text": "<p>Accesorios y repuestos para bicicleta y scooter. Seguridad, confort y estilo en cada trayecto.</p>",
+        "show_social": true,
+        "show_whatsapp": true,
+        "whatsapp_label": "¿Dudas con un repuesto?",
+        "whatsapp_text": "Escríbenos con una foto",
+        "show_policies": true,
+        "show_payment": true,
+        "padding_top": 64,
+        "padding_bottom": 28
+      }
+    }
+  },
+  "order": [
+    "footer"
+  ]
+}

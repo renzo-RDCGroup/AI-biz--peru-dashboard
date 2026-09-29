@@ -1,0 +1,21 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-blog",
+      "settings": {
+        "scheme": "light",
+        "show_tags": true,
+        "per_page": 10,
+        "show_image": true,
+        "image_ratio": "landscape",
+        "show_author": false,
+        "show_excerpt": true,
+        "padding_top": 40,
+        "padding_bottom": 72
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

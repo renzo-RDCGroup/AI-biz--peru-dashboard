@@ -1,0 +1,219 @@
+/* Mi Bici 2026 — section-predictive-search.css
+   Header pill search field (snippets/header-search.liquid), its results dropdown
+   (<predictive-search>) and the injected "predictive-search" section (.psearch).
+   Keyboard-active option = [aria-selected="true"]. */
+
+/* ---------- Pill search field ---------- */
+.header-search { position: relative; display: block; }
+.header-search__form { position: relative; display: flex; align-items: center; }
+.header-search__input {
+  width: 100%;
+  height: 46px;
+  margin: 0;
+  padding: 0 52px 0 20px;
+  border: 1.5px solid var(--color-ink);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font: 400 1rem/1.2 var(--font-body);
+  text-overflow: ellipsis;
+  appearance: none;
+  transition: box-shadow var(--dur) var(--ease);
+}
+.header-search__input::placeholder { color: var(--color-muted); opacity: 1; }
+.header-search__input::-webkit-search-cancel-button,
+.header-search__input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+.header-search__input:hover { box-shadow: 0 0 0 3px var(--color-brand-soft); }
+/* Focus: the spec's 3px ink ring, drawn over the pill border, plus a soft yellow halo. */
+.header-search__input:focus-visible { outline: 3px solid var(--color-ink); outline-offset: -2px; box-shadow: 0 0 0 5px rgba(255, 210, 25, .5); }
+.header-search__form:has(.header-search__clear:not([hidden])) .header-search__input { padding-right: 92px; }
+.header-search__submit,
+.header-search__clear {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.header-search__submit { right: 4px; background: var(--color-brand); color: #000; transition: background-color var(--dur-fast) var(--ease); }
+.header-search__submit:hover { background: var(--color-brand-strong); }
+.header-search__submit .icon { --icon-size: 20px; }
+.header-search__submit-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.header-search__clear { right: 46px; color: var(--color-muted); }
+.header-search__clear:hover { color: var(--color-ink); background: var(--color-surface); }
+.header-search__clear .icon { --icon-size: 18px; }
+.header-search.is-loading .header-search__submit .icon { visibility: hidden; }
+.header-search.is-loading .header-search__submit::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2px solid #000;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: mibi-spin .7s linear infinite;
+}
+
+@media (min-width: 990px) {
+  .header-search__input { height: 50px; padding-left: 24px; padding-right: 124px; }
+  .header-search__form:has(.header-search__clear:not([hidden])) .header-search__input { padding-right: 164px; }
+  /* Desktop: a bold yellow "Buscar" pill inside the field. */
+  .header-search__submit { display: inline-flex; align-items: center; gap: 8px; width: auto; height: 42px; padding: 0 20px 0 16px; border-radius: var(--radius-pill); font: 800 .9375rem/1 var(--font-heading); }
+  .header-search__submit .icon { --icon-size: 18px; }
+  .header-search__submit-label { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  .header-search__clear { right: 118px; }
+  .header-search.is-loading .header-search__submit::after { left: 16px; margin-left: 0; }
+}
+
+/* ---------- Results dropdown ---------- */
+.predictive-search {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 20;
+  max-height: var(--ps-max-h, 70vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-lg);
+  text-align: left;
+  animation: mibi-ps-in var(--dur) var(--ease);
+}
+@keyframes mibi-ps-in { from { opacity: 0; transform: translateY(-4px); } }
+@media (min-width: 990px) {
+  .predictive-search { right: auto; width: max(100%, 660px); }
+}
+
+/* Dims the page under the header while results are open (click closes). */
+.predictive-search__backdrop {
+  position: fixed;
+  top: var(--ps-top, 0);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  background: rgba(11, 11, 11, .38);
+  animation: mibi-ps-fade var(--dur) var(--ease);
+}
+@keyframes mibi-ps-fade { from { opacity: 0; } }
+
+/* ---------- Results ---------- */
+.psearch { --ps-pad: 8px; }
+.psearch__grid { display: grid; gap: 4px; padding: var(--ps-pad); }
+.psearch__col { display: grid; align-content: start; gap: 4px; min-width: 0; }
+@media (min-width: 750px) {
+  .psearch:not(.psearch--empty) .psearch__grid { grid-template-columns: 210px minmax(0, 1fr); gap: 8px; }
+  .psearch:not(.psearch--empty) .psearch__col--aside { padding-right: 8px; border-right: 1px solid var(--color-border); }
+}
+/* Mobile: suggestions + categories become compact wrapping pills (same DOM order as the
+   keyboard order), so products show up without scrolling. */
+@media (max-width: 749.98px) {
+  .psearch__col--aside .psearch__list { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 6px 6px; }
+  .psearch__col--aside [role="option"] { min-height: 38px; padding: 6px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-pill); font-size: .875rem; }
+  .psearch__col--aside .psearch__collection { padding-left: 5px; }
+  .psearch__col--aside .psearch__query:not(.psearch__query--search) .icon { display: none; }
+  .psearch__col--main { padding-top: 4px; border-top: 1px solid var(--color-border); }
+}
+
+.psearch__heading {
+  padding: 10px 10px 6px;
+  font: 800 .6875rem/1.2 var(--font-heading);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.psearch__list { margin: 0; padding: 0; list-style: none; }
+
+.psearch [role="option"] {
+  position: relative;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.psearch [role="option"]:hover { background: var(--color-surface); }
+.psearch [role="option"][aria-selected="true"] { background: var(--color-brand-soft); box-shadow: inset 3px 0 0 var(--color-ink); }
+
+.psearch__query,
+.psearch__collection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 10px;
+  font-size: .9375rem;
+  line-height: 1.3;
+}
+.psearch__query .icon { --icon-size: 18px; flex: none; color: var(--color-muted); }
+.psearch__query--search { font-weight: 700; }
+.psearch__query--search .icon { color: var(--color-ink); }
+/* Shopify marks the typed part; the completion reads bold. */
+.psearch__query:not(.psearch__query--search) span { font-weight: 700; }
+.psearch__query mark { background: none; color: inherit; font-weight: 400; }
+.psearch__collection-icon { display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--color-brand); color: #000; }
+.psearch__collection-icon .icon { --icon-size: 15px; }
+
+.psearch__products { display: grid; gap: 2px; }
+.psearch__product { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 14px; padding: 8px; }
+.psearch__thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  isolation: isolate;
+}
+.psearch__thumb img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+.psearch__noimg { width: 50%; opacity: .12; }
+.psearch__info { display: grid; gap: 4px; min-width: 0; }
+.psearch__title {
+  display: -webkit-box;
+  overflow: hidden;
+  font: 600 .9375rem/1.3 var(--font-body);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.psearch__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.psearch__meta .price { --price-size: 1rem; }
+.psearch__badges { display: inline-flex; }
+.psearch__badges:empty { display: none; }
+.psearch__badges .badge { min-height: 20px; padding: 3px 8px; font-size: .6875rem; }
+
+.psearch__all {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  margin-top: 4px;
+  border-radius: var(--radius-pill) !important;
+  background: var(--color-ink);
+  color: #fff !important;
+  font: 800 .9375rem/1.2 var(--font-heading);
+}
+.psearch__all .icon { --icon-size: 18px; transition: transform var(--dur) var(--ease); }
+.psearch__all:hover { background: #000 !important; }
+.psearch__all:hover .icon { transform: translateX(3px); }
+.psearch__all[aria-selected="true"] { background: #000; box-shadow: 0 0 0 3px var(--color-brand) !important; }
+
+.psearch__empty { padding: 18px 18px 6px; }
+.psearch__empty-title { font: 800 1.0625rem/1.25 var(--font-heading); overflow-wrap: anywhere; }
+.psearch__empty-hint { margin-top: 4px; font-size: .875rem; color: var(--color-muted); }
+.psearch__whatsapp { margin-top: 10px; font-size: .875rem; }
+.psearch__whatsapp .icon { color: #128C4B; }

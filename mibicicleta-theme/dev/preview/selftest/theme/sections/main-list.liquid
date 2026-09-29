@@ -1,0 +1,2 @@
+{%- paginate collections by 5 -%}<div class="lc" data-pages="{{ paginate.pages }}" data-items="{{ paginate.items }}">{% for c in collections %}<span>{{ c.handle }}</span>{% endfor %}</div>{%- endpaginate -%}
+{% schema %}{ "name": "Lista", "settings": [] }{% endschema %}

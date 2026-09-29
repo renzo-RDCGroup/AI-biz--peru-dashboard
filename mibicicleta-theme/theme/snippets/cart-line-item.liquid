@@ -1,0 +1,134 @@
+{%- comment -%}
+  One cart line (cart drawer + cart page). Styles: assets/component-cart.css; behaviour: assets/cart.js.
+  {% render 'cart-line-item',
+    item: item,                  cart line item (required)
+    index: forloop.index,        1-based line index (updates[] order, url_to_remove)
+    prefix: 'CartDrawer',        id prefix, unique per cart UI on the page ('CartDrawer' | 'Cart')
+    form: 'CartDrawer-form',     id of the <form> the quantity input belongs to (updates[] + checkout)
+    lazy: true
+  %}
+  Hooks for cart.js: [data-line-key] on the <li>, .qty__input[data-key] (quantity change),
+  [data-cart-remove][data-key] (remove), [data-line-error] (inline error message).
+  "Eliminar" is a real link to item.url_to_remove, so it also works without JavaScript.
+{%- endcomment -%}
+{%- liquid
+  assign line_id = prefix | append: '-line-' | append: index
+  assign qty_id = prefix | append: '-qty-' | append: index
+  assign line_title = item.product.title | default: item.title
+
+  # Unit price: final (after line discounts) vs. the highest of original price and compare-at price.
+  assign unit_now = item.final_price
+  assign unit_was = item.original_price
+  assign compare_at = item.variant.compare_at_price | default: 0
+  if compare_at > unit_was
+    assign unit_was = compare_at
+  endif
+  assign on_sale = false
+  if unit_was > unit_now
+    assign on_sale = true
+  endif
+
+  # Stock cap only when Shopify tracks it and overselling is off (SPEC §1).
+  assign max_qty = ''
+  if item.variant.inventory_management == 'shopify' and item.variant.inventory_policy == 'deny' and item.variant.inventory_quantity > 0
+    assign max_qty = item.variant.inventory_quantity
+    if item.quantity > max_qty
+      assign max_qty = item.quantity
+    endif
+  endif
+
+  assign qty_label = 'cart.line.quantity_label' | t: title: line_title
+  assign remove_label = 'cart.line.remove_label' | t: title: line_title
+-%}
+<li class="cart-line" id="{{ line_id }}" data-line-key="{{ item.key }}" data-line="{{ index }}">
+  <a class="cart-line__media media media--contain media--blend" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+    {%- if item.image != blank -%}
+      {%- render 'image', image: item.image, widths: '96,192,288', sizes: '(min-width: 750px) 120px, 88px', lazy: lazy, alt: line_title -%}
+    {%- else -%}
+      <span class="cart-line__noimg">{% render 'logo', variant: 'mark', tone: 'mono-dark', label: '' %}</span>
+    {%- endif -%}
+  </a>
+
+  <div class="cart-line__info">
+    {%- if item.vendor != blank and item.vendor != shop.name -%}
+      <p class="cart-line__vendor">{{ item.vendor | escape }}</p>
+    {%- endif -%}
+    <p class="cart-line__title"><a href="{{ item.url }}" data-line-focus="title">{{ line_title | escape }}</a></p>
+
+    {%- unless item.product.has_only_default_variant -%}
+      <dl class="cart-line__options">
+        {%- for option in item.options_with_values -%}
+          <div><dt>{{ option.name | escape }}:</dt> <dd>{{ option.value | escape }}</dd></div>
+        {%- endfor -%}
+      </dl>
+    {%- endunless -%}
+
+    {%- if item.selling_plan_allocation != blank -%}
+      <p class="cart-line__meta">{{ item.selling_plan_allocation.selling_plan.name | escape }}</p>
+    {%- endif -%}
+
+    {%- for property in item.properties -%}
+      {%- assign prop_first = property.first | slice: 0 -%}
+      {%- if property.last != blank and prop_first != '_' -%}
+        <p class="cart-line__meta">
+          {{ property.first | escape }}:
+          {% if property.last contains '/uploads/' -%}
+            <a href="{{ property.last }}" target="_blank" rel="noopener">{{ property.last | split: '/' | last | escape }}</a>
+          {%- else -%}
+            {{ property.last | escape }}
+          {%- endif %}
+        </p>
+      {%- endif -%}
+    {%- endfor -%}
+
+    <div class="price price--sm cart-line__price{% if on_sale %} price--sale{% endif %}">
+      {%- if on_sale -%}<span class="visually-hidden">{{ 'products.price.sale' | t }}</span>{%- endif -%}
+      <span class="price__current">{{ unit_now | money }}</span>
+      {%- if on_sale -%}
+        <span class="visually-hidden">{{ 'products.price.regular' | t }}</span>
+        <s class="price__compare">{{ unit_was | money }}</s>
+      {%- endif -%}
+      {%- if item.unit_price_measurement -%}
+        <span class="cart-line__unit">
+          {{- item.unit_price | money }}/
+          {%- if item.unit_price_measurement.reference_value != 1 -%}{{ item.unit_price_measurement.reference_value }}{%- endif -%}
+          {{ item.unit_price_measurement.reference_unit -}}
+        </span>
+      {%- endif -%}
+    </div>
+
+    {%- if item.line_level_discount_allocations.size > 0 -%}
+      <ul class="cart-line__discounts" role="list">
+        {%- for allocation in item.line_level_discount_allocations -%}
+          <li>{% render 'icon', name: 'tag' %} {{ allocation.discount_application.title | escape }} (−{{ allocation.amount | money }})</li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+
+  <div class="cart-line__actions">
+    {%- render 'quantity-input',
+      id: qty_id,
+      name: 'updates[]',
+      value: item.quantity,
+      min: 0,
+      max: max_qty,
+      label: qty_label,
+      line: index,
+      key: item.key,
+      form: form,
+      size: 'sm'
+    -%}
+    <a class="cart-line__remove" href="{{ item.url_to_remove }}" data-cart-remove data-key="{{ item.key }}" aria-label="{{ remove_label }}">
+      {{- 'cart.line.remove' | t -}}
+    </a>
+    <p class="cart-line__total">
+      <span class="visually-hidden">{{ 'cart.line.line_total' | t }}:</span>
+      {%- if item.original_line_price > item.final_line_price -%}
+        <s class="cart-line__total-was">{{ item.original_line_price | money }}</s>
+      {%- endif -%}
+      <span class="cart-line__total-now">{{ item.final_line_price | money }}</span>
+    </p>
+  </div>
+  <p class="form-message form-message--error cart-line__error" data-line-error role="alert" hidden></p>
+</li>

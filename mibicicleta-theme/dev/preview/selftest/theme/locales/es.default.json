@@ -1,0 +1,7 @@
+{
+  "general": {
+    "hello": "Hola {{ name }}",
+    "hello_html": "Hola {{ name }}",
+    "items": { "one": "{{ count }} producto", "other": "{{ count }} productos" }
+  }
+}

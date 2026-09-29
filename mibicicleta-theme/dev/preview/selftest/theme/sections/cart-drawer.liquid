@@ -1,0 +1,10 @@
+<cart-drawer id="CartDrawer" data-heading="{{ section.settings.heading }}">
+  <span class="count">{{ cart.item_count }}</span>
+  {%- for item in cart.items -%}
+    <div class="line" data-key="{{ item.key }}">{{ item.product_title }} × {{ item.quantity }} = {{ item.final_line_price | money }}</div>
+  {%- endfor -%}
+  <span class="total">{{ cart.total_price | money }}</span>
+</cart-drawer>
+{% schema %}
+{ "name": "Cart drawer", "settings": [ { "type": "text", "id": "heading", "label": "Título", "default": "Carrito default" } ] }
+{% endschema %}

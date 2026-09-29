@@ -1,0 +1,155 @@
+/* ==========================================================================
+   Mi Bici 2026 — product-card.css (markup: snippets/product-card.liquid)
+   1:1 surface tile (radius 16) · badges top-left · yellow round quick-add
+   bottom-right · 2-line title · bold Urbanist price.
+   ========================================================================== */
+
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  color: inherit;
+}
+
+.product-card__media {
+  --ratio: 1;
+  /* Above the stretched title link (z-index 1): .media isolates its own stacking
+     context, so the quick-add button inside must win at this level. */
+  z-index: 2;
+  border-radius: var(--radius-card);
+}
+.product-card__link { position: absolute; inset: 0; display: block; }
+.product-card__media img { transition: opacity .35s var(--ease), transform .6s var(--ease); }
+.product-card__media.media--contain img { padding: 7%; }
+.product-card__img--secondary { opacity: 0; }
+
+@media (hover: hover) and (min-width: 990px) {
+  .product-card:hover .product-card__img--primary { transform: scale(1.04); }
+  .product-card--has-secondary:hover .product-card__img--primary { opacity: 0; }
+  .product-card--has-secondary:hover .product-card__img--secondary { opacity: 1; }
+}
+
+.product-card--soldout .product-card__media img { opacity: .55; }
+
+/* Product without images: branded "mi" mark instead of a generic illustration. */
+.product-card__noimg { position: absolute; inset: 0; display: grid; place-items: center; color: var(--color-ink); }
+.product-card__noimg .logo { width: 34%; min-width: 0; opacity: .1; }
+
+.product-card__badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  max-width: calc(100% - 20px);
+  pointer-events: none;
+}
+
+/* Quick add: sits above the stretched title link (z-index 1). */
+.product-card__quick {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 3;
+  display: block;
+}
+.product-card__quick form { margin: 0; }
+.product-card__quick .btn--icon {
+  width: 44px;
+  height: 44px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .16);
+}
+.product-card__quick .btn--icon .icon { --icon-size: 22px; }
+.product-card__quick .btn--icon:hover { transform: scale(1.06); }
+.product-card__quick .btn--icon:active { transform: scale(.96); }
+.product-card__quick .icon--check { display: none; }
+.product-card__quick .is-added .icon--check { display: inline-block; }
+.product-card__quick .is-added .icon--bag-plus { display: none; }
+.product-card__quick .form-message {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  width: max-content;
+  max-width: 220px;
+  box-shadow: var(--shadow-md);
+}
+/* Compact badges on narrow 2-column cards so two of them fit on one line. */
+@media (max-width: 749.98px) {
+  .product-card__badges { gap: 4px; }
+  .product-card__badges .badge { min-height: 22px; padding: 3px 8px; font-size: .6875rem; }
+}
+@media (min-width: 750px) {
+  .product-card__badges { top: 12px; left: 12px; }
+  .product-card__quick { right: 12px; bottom: 12px; }
+  .product-card__quick .btn--icon { width: 48px; height: 48px; }
+}
+
+.product-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-inline: 2px;
+}
+
+.product-card__vendor {
+  min-height: calc(var(--fs-xs) * 1.2); /* kept (empty) when vendor = shop name → titles align */
+  font: 700 var(--fs-xs)/1.2 var(--font-heading);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--scheme-muted);
+}
+
+.product-card__title {
+  display: -webkit-box;
+  min-height: calc(2em * 1.35);
+  margin: 0;
+  overflow: hidden;
+  font: 500 var(--fs-sm)/1.35 var(--font-body);
+  letter-spacing: 0;
+  text-wrap: pretty;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+@media (min-width: 750px) {
+  .product-card__title { font-size: .9375rem; }
+}
+
+.product-card__title-link { color: inherit; text-decoration: none; }
+/* Stretched hit area: the whole card is clickable through the title link. */
+.product-card__title-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--radius-card);
+}
+.product-card__title-link:focus-visible { outline: 0; }
+.product-card__title-link:focus-visible::after {
+  outline: 3px solid var(--scheme-focus);
+  outline-offset: 3px;
+}
+.product-card:hover .product-card__title-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .18em;
+}
+
+.product-card .price { margin-top: 2px; }
+
+.product-card__swatches {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 16px;
+}
+.product-card__swatches-more {
+  margin-left: 2px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--scheme-muted);
+}
+
+/* Onboarding placeholder (blank product) */
+.product-card--placeholder .product-card__title { color: var(--scheme-muted); }

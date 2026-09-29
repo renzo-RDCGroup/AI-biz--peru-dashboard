@@ -1,0 +1,2 @@
+<div class="search" data-count="{{ search.results_count }}" data-terms="{{ search.terms }}" data-performed="{{ search.performed }}">{% for r in search.results %}<span class="r" data-type="{{ r.object_type }}">{{ r.title }}</span>{% endfor %}</div>
+{% schema %}{ "name": "Búsqueda", "settings": [] }{% endschema %}

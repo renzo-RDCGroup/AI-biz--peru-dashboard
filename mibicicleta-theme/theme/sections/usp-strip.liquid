@@ -1,0 +1,133 @@
+{%- comment -%}
+  Reasons to buy (styles: assets/section-home.css). Reusable on any template (home, product…).
+  Blocks "item": icon, title, text, link (+ link_whatsapp). 2×2 compact cards on mobile,
+  one row ≥750. WhatsApp items (icon "whatsapp" or link_whatsapp) render NOTHING when
+  settings.whatsapp_number is blank — the number is never invented.
+{%- endcomment -%}
+{{ 'section-home.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign wa_digits = settings.whatsapp_number | strip | remove: ' ' | remove: '+' | remove: '-' | remove: '(' | remove: ')' | remove: '.'
+  assign wa_url = ''
+  if wa_digits != blank
+    assign wa_url = 'https://wa.me/' | append: wa_digits
+    if settings.whatsapp_message != blank
+      assign wa_msg = settings.whatsapp_message | url_encode
+      assign wa_url = wa_url | append: '?text=' | append: wa_msg
+    endif
+  endif
+
+  # Count the items that will actually render (drives the desktop column count).
+  assign visible = 0
+  for block in section.blocks
+    if wa_digits == blank
+      if block.settings.icon == 'whatsapp' or block.settings.link_whatsapp
+        continue
+      endif
+    endif
+    assign visible = visible | plus: 1
+  endfor
+  assign title_id = 'UspTitle-' | append: section.id
+  assign new_tab = 'accessibility.new_window' | t
+-%}
+
+{%- if visible > 0 -%}
+  <section class="usp section scheme-{{ section.settings.scheme }}" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;"{% if section.settings.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
+    <div class="page-width">
+      {%- render 'section-heading', title: section.settings.heading, id: title_id, align: section.settings.heading_align -%}
+      <ul class="usp__list usp__list--{{ visible }}" role="list" style="--usp-cols: {{ visible | at_most: 4 }};">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign is_wa = false
+            if block.settings.icon == 'whatsapp' or block.settings.link_whatsapp
+              assign is_wa = true
+            endif
+            if is_wa and wa_digits == blank
+              continue
+            endif
+            assign item_url = block.settings.link
+            assign item_external = false
+            if block.settings.link_whatsapp
+              assign item_url = wa_url
+              assign item_external = true
+            endif
+          -%}
+          <li class="usp__item{% if item_url != blank %} usp__item--link{% endif %}" data-reveal style="--reveal-delay: {{ forloop.index0 | times: 60 }}ms;" {{ block.shopify_attributes }}>
+            <span class="usp__icon usp__icon--{{ block.settings.icon }}" aria-hidden="true">
+              {%- render 'icon', name: block.settings.icon -%}
+            </span>
+            <div class="usp__body">
+              <p class="usp__title">
+                {%- if item_url != blank -%}
+                  <a class="usp__link" href="{{ item_url }}"{% if item_external %} target="_blank" rel="noopener"{% endif %}>
+                    {{- block.settings.title | escape -}}
+                    {%- if item_external %}<span class="visually-hidden"> ({{ new_tab }})</span>{% endif -%}
+                  </a>
+                {%- else -%}
+                  {{- block.settings.title | escape -}}
+                {%- endif -%}
+              </p>
+              {%- if block.settings.text != blank -%}
+                <p class="usp__text">{{ block.settings.text | escape | replace: 'S/ ', 'S/ ' }}</p>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Beneficios",
+  "tag": "div",
+  "class": "usp-section",
+  "max_blocks": 8,
+  "settings": [
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "soft", "label": "Gris suave"}, {"value": "light", "label": "Claro"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "soft"},
+    {"type": "text", "id": "heading", "label": "Título (opcional)"},
+    {"type": "select", "id": "heading_align", "label": "Alineación del título", "options": [{"value": "left", "label": "Izquierda"}, {"value": "center", "label": "Centro"}], "default": "left"},
+    {"type": "paragraph", "content": "Los beneficios con el ícono de WhatsApp (o enlazados a WhatsApp) se ocultan mientras no haya un número en Configuración del tema › Contacto."},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40}
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Beneficio",
+      "settings": [
+        {"type": "select", "id": "icon", "label": "Ícono", "options": [
+          {"value": "medal", "label": "Medalla"},
+          {"value": "truck", "label": "Camión"},
+          {"value": "whatsapp", "label": "WhatsApp"},
+          {"value": "shield", "label": "Escudo"},
+          {"value": "return", "label": "Devolución"},
+          {"value": "lock", "label": "Candado"},
+          {"value": "store", "label": "Tienda"},
+          {"value": "clock", "label": "Reloj"},
+          {"value": "card", "label": "Tarjeta"},
+          {"value": "wrench", "label": "Llave"},
+          {"value": "bike", "label": "Bicicleta"}
+        ], "default": "medal"},
+        {"type": "text", "id": "title", "label": "Título", "default": "Productos originales"},
+        {"type": "text", "id": "text", "label": "Texto", "default": "Vendedor autorizado Rockbros"},
+        {"type": "url", "id": "link", "label": "Enlace (opcional)"},
+        {"type": "checkbox", "id": "link_whatsapp", "label": "Enlazar a WhatsApp", "info": "Usa el número de Configuración del tema. Sin número, este beneficio no se muestra.", "default": false}
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Beneficios",
+      "blocks": [
+        {"type": "item"},
+        {"type": "item", "settings": {"icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde S/ 220"}},
+        {"type": "item", "settings": {"icon": "whatsapp", "title": "Atención por WhatsApp", "text": "Consultas y pedidos por chat", "link_whatsapp": true}},
+        {"type": "item", "settings": {"icon": "return", "title": "Cambios y garantía", "text": "7 días para cambiar, sin abrir"}}
+      ]
+    }
+  ]
+}
+{% endschema %}

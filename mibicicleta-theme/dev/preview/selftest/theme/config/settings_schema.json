@@ -1,0 +1,13 @@
+[
+  { "name": "theme_info", "theme_name": "Selftest", "theme_version": "1.0.0", "theme_author": "HA" },
+  {
+    "name": "Colores",
+    "settings": [
+      { "type": "color", "id": "color_brand", "label": "Marca", "default": "#FFD219" },
+      { "type": "image_picker", "id": "hero_image", "label": "Hero" },
+      { "type": "checkbox", "id": "show_x", "label": "X", "default": true },
+      { "type": "text", "id": "empty_text", "label": "Vacío" },
+      { "type": "link_list", "id": "menu", "label": "Menú", "default": "main-menu" }
+    ]
+  }
+]

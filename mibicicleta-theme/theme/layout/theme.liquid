@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" class="no-js">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="{{ settings.color_brand | default: '#FFD219' }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 64, height: 64 }}">
+      <link rel="apple-touch-icon" href="{{ settings.favicon | image_url: width: 180, height: 180 }}">
+    {%- else -%}
+      <link rel="icon" type="image/svg+xml" href="{{ 'favicon.svg' | asset_url }}">
+    {%- endif -%}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {%- if settings.adobe_fonts_kit != blank -%}
+      <link rel="preconnect" href="https://use.typekit.net" crossorigin>
+      <link rel="stylesheet" href="https://use.typekit.net/{{ settings.adobe_fonts_kit | strip | escape }}.css">
+    {%- endif -%}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Urbanist:wght@700;800;900&display=swap">
+
+    {%- liquid
+      assign meta_tags = current_tags | join: ', '
+    -%}
+    <title>
+      {{- page_title -}}
+      {%- if current_tags %} &ndash; {{ 'general.meta.tagged_with' | t: tags: meta_tags }}{% endif -%}
+      {%- if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+    {%- if page_description -%}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+    {% render 'meta-tags' %}
+
+    <script>document.documentElement.className = document.documentElement.className.replace('no-js', 'js');</script>
+
+    {% render 'css-variables' %}
+    {{ 'base.css' | asset_url | stylesheet_tag }}
+    {{ 'components.css' | asset_url | stylesheet_tag }}
+    {{ 'components-ui.css' | asset_url | stylesheet_tag }}
+    {{ 'product-card.css' | asset_url | stylesheet_tag }}
+
+    {%- liquid
+      assign free_ship_cents = settings.free_shipping_threshold | default: 0 | times: 100 | round
+      assign wa_digits = settings.whatsapp_number | strip | remove: ' ' | remove: '+' | remove: '-' | remove: '(' | remove: ')' | remove: '.'
+    -%}
+    <script>
+      window.MiBici = window.MiBici || {};
+      MiBici.routes = {
+        root: {{ routes.root_url | json }},
+        cart: {{ routes.cart_url | json }},
+        cart_add: {{ routes.cart_add_url | json }},
+        cart_change: {{ routes.cart_change_url | json }},
+        cart_update: {{ routes.cart_update_url | json }},
+        predictive_search: {{ routes.predictive_search_url | json }},
+        search: {{ routes.search_url | json }},
+        product_recommendations: {{ routes.product_recommendations_url | json }},
+        all_products: {{ routes.all_products_collection_url | json }}
+      };
+      MiBici.moneyFormat = {{ shop.money_format | json }};
+      MiBici.settings = {
+        cartType: {{ settings.cart_type | default: 'drawer' | json }},
+        freeShippingThreshold: {{ free_ship_cents }},
+        freeShippingZone: {{ settings.free_shipping_zone | json }},
+        whatsapp: {{ wa_digits | json }},
+        predictiveSearch: {{ settings.predictive_search | json }},
+        designMode: {{ request.design_mode | json }}
+      };
+      MiBici.strings = {
+        addToCart: {{ 'cart.general.add_to_cart' | t | json }},
+        soldOut: {{ 'cart.general.sold_out' | t | json }},
+        unavailable: {{ 'cart.general.unavailable' | t | json }},
+        adding: {{ 'cart.general.adding' | t | json }},
+        added: {{ 'cart.general.added' | t | json }},
+        cartError: {{ 'cart.general.error' | t | json }},
+        cartUpdated: {{ 'cart.general.updated' | t | json }},
+        itemsOne: {{ 'cart.general.items_one' | t: n: '[count]' | json }},
+        itemsOther: {{ 'cart.general.items_other' | t: n: '[count]' | json }},
+        priceSale: {{ 'products.price.sale' | t | json }},
+        priceRegular: {{ 'products.price.regular' | t | json }},
+        freeShippingRemaining: {{ 'shipping.remaining_html' | t: amount: '[amount]' | json }},
+        freeShippingReached: {{ 'shipping.reached_html' | t | json }},
+        freeShippingZone: {{ 'shipping.zone' | t: zone: settings.free_shipping_zone | json }},
+        close: {{ 'general.close' | t | json }},
+        loading: {{ 'general.loading' | t | json }},
+        copied: {{ 'general.copied' | t | json }},
+        decrease: {{ 'accessibility.decrease' | t | json }},
+        increase: {{ 'accessibility.increase' | t | json }},
+        newWindow: {{ 'accessibility.new_window' | t | json }},
+        carouselPrev: {{ 'general.carousel.previous' | t | json }},
+        carouselNext: {{ 'general.carousel.next' | t | json }},
+        carouselPause: {{ 'general.carousel.pause' | t | json }},
+        carouselPlay: {{ 'general.carousel.play' | t | json }},
+        carouselGoTo: {{ 'general.carousel.go_to' | t: index: '[index]' | json }},
+        carouselSlide: {{ 'general.carousel.slide' | t: index: '[index]', total: '[total]' | json }},
+        carouselLabel: {{ 'general.carousel.label' | t | json }},
+        carouselSlideLabel: {{ 'general.carousel.slide_label' | t | json }}
+      };
+    </script>
+    <script src="{{ 'global.js' | asset_url }}" defer></script>
+    <script src="{{ 'global-ui.js' | asset_url }}" defer></script>
+    <script src="{{ 'carousel.js' | asset_url }}" defer></script>
+
+    {{ content_for_header }}
+  </head>
+
+  <body class="template-{{ template.name | handle }}{% if template.suffix != blank %} template-{{ template.suffix | handle }}{% endif %}{% if settings.heading_dot %} has-heading-dot{% endif %}">
+    <a class="skip-link" href="#MainContent">{{ 'accessibility.skip_to_content' | t }}</a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" class="content" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    {%- if settings.cart_type == 'drawer' -%}
+      {% section 'cart-drawer' %}
+    {%- endif -%}
+
+    {% render 'whatsapp-button', style: 'float' %}
+
+    <div id="A11yLive" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+    {%- if request.page_type == 'index' -%}
+      {%- liquid
+        assign same_as = ''
+        assign networks = 'instagram,facebook,tiktok,youtube' | split: ','
+        for network in networks
+          assign key = 'social_' | append: network
+          if settings[key] != blank
+            assign same_as = same_as | append: '|' | append: settings[key]
+          endif
+        endfor
+        assign same_as = same_as | remove_first: '|' | split: '|'
+        assign shop_url = request.origin | append: routes.root_url
+      -%}
+      <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "name": {{ shop.name | json }},
+              "url": {{ shop_url | json }},
+              {%- if settings.logo != blank %}
+                "logo": {{ settings.logo | image_url: width: 600 | prepend: 'https:' | json }},
+              {%- endif %}
+              "sameAs": {{ same_as | json }}
+            },
+            {
+              "@type": "WebSite",
+              "name": {{ shop.name | json }},
+              "url": {{ shop_url | json }},
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": {{ request.origin | append: routes.search_url | append: '?q={search_term_string}' | json }},
+                "query-input": "required name=search_term_string"
+              }
+            }
+          ]
+        }
+      </script>
+    {%- endif -%}
+  </body>
+</html>

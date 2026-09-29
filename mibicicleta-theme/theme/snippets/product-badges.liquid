@@ -1,0 +1,61 @@
+{%- comment -%}
+  Product badges (max 2; priority: Agotado › oferta › Nuevo › Más vendido).
+  {% render 'product-badges', product: p, variant: v (optional), limit: 2, sale_label: false %}
+    - sale: "-NN%" (best % across variants, or the passed variant's %)
+            sale_label: true → shows "Oferta" instead (used by product cards, whose price
+            row already shows the "-NN%" pill)
+    - "Nuevo" ⇔ tag `nuevo` · "Más vendido" ⇔ tag `mas-vendido` (case-insensitive)
+  Outputs only <span class="badge …"> elements; wrap them in your own `.badges` container.
+  No other tags are ever displayed.
+{%- endcomment -%}
+{%- liquid
+  assign badge_limit = limit | default: 2
+  assign badge_count = 0
+  assign best_pct = 0
+
+  if variant != blank
+    assign is_sold_out = false
+    if variant.available == false
+      assign is_sold_out = true
+    endif
+    if variant.compare_at_price > variant.price
+      assign best_pct = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round
+    endif
+  else
+    assign is_sold_out = false
+    if product.available == false
+      assign is_sold_out = true
+    endif
+    if product.compare_at_price_max > product.price_min
+      for v in product.variants
+        if v.compare_at_price > v.price
+          assign pct = v.compare_at_price | minus: v.price | times: 100.0 | divided_by: v.compare_at_price | round
+          if pct > best_pct
+            assign best_pct = pct
+          endif
+        endif
+      endfor
+    endif
+  endif
+
+  assign tags_lower = product.tags | join: '|' | downcase | split: '|'
+-%}
+{%- if is_sold_out and badge_count < badge_limit -%}
+  <span class="badge badge--soldout">{{ 'products.badges.sold_out' | t }}</span>
+  {%- assign badge_count = badge_count | plus: 1 -%}
+{%- endif -%}
+{%- if best_pct > 0 and badge_count < badge_limit -%}
+  <span class="badge badge--sale">
+    {%- if sale_label -%}{{ 'products.badges.sale' | t }}{%- else -%}{{ 'products.badges.save' | t: percent: best_pct }}{%- endif -%}
+  </span>
+  {%- assign badge_count = badge_count | plus: 1 -%}
+{%- endif -%}
+{%- if tags_lower contains 'nuevo' and badge_count < badge_limit -%}
+  <span class="badge badge--new">{{ 'products.badges.new' | t }}</span>
+  {%- assign badge_count = badge_count | plus: 1 -%}
+{%- endif -%}
+{%- if badge_count < badge_limit -%}
+  {%- if tags_lower contains 'mas-vendido' or tags_lower contains 'más-vendido' -%}
+    <span class="badge badge--dark">{{ 'products.badges.best_seller' | t }}</span>
+  {%- endif -%}
+{%- endif -%}

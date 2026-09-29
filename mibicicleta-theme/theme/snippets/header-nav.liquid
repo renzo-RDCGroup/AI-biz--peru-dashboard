@@ -1,0 +1,102 @@
+{%- comment -%}
+  Desktop navigation (≥990). {% render 'header-nav', menu: linklist %}
+  Disclosure pattern: each parent keeps its real link plus a chevron <button aria-expanded>
+  that opens the panel (hover opens it too, with a small delay). Keyboard (header.js):
+  Enter/Space on the chevron toggles, ↓ opens and focuses the first link, ↑↓ Home End move
+  inside, Esc closes and returns focus, ←→ move between top-level links, Tab away closes.
+  Without JS the panels open on :hover / :focus-within.
+  Children without their own children → compact list with category icons; any grandchild →
+  a full-width mega panel with one column per child.
+{%- endcomment -%}
+<nav class="header-nav" aria-label="{{ 'header.nav_label' | t }}">
+  <ul class="header-nav__list" role="list">
+    {%- for link in menu.links -%}
+      {%- liquid
+        assign has_children = false
+        if link.links.size > 0
+          assign has_children = true
+        endif
+        assign is_mega = false
+        if link.levels > 1
+          assign is_mega = true
+        endif
+        assign panel_id = 'HeaderNavPanel-' | append: forloop.index
+      -%}
+      <li class="header-nav__item{% if has_children %} header-nav__item--parent{% endif %}{% if is_mega %} header-nav__item--mega{% endif %}"{% if has_children %} data-nav-item{% endif %}>
+        <a class="header-nav__link{% if link.active or link.child_active %} is-active{% endif %}" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>
+          {{- link.title | escape -}}
+        </a>
+        {%- if has_children -%}
+          <button type="button" class="header-nav__toggle" data-nav-toggle aria-expanded="false" aria-controls="{{ panel_id }}" aria-label="{{ 'header.submenu_toggle' | t: title: link.title }}">
+            {%- render 'icon', name: 'chevron-down' -%}
+          </button>
+          <div class="header-nav__panel{% if is_mega %} header-nav__panel--mega{% endif %}" id="{{ panel_id }}" data-nav-panel>
+            {%- if is_mega -%}
+              <div class="header-nav__mega">
+                {%- for child in link.links -%}
+                  <div class="header-nav__col">
+                    <a class="header-nav__col-title" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>{{ child.title | escape }}</a>
+                    {%- if child.links.size > 0 -%}
+                      <ul class="header-nav__col-list" role="list">
+                        {%- for grandchild in child.links -%}
+                          <li><a href="{{ grandchild.url }}"{% if grandchild.current %} aria-current="page"{% endif %}>{{ grandchild.title | escape }}</a></li>
+                        {%- endfor -%}
+                      </ul>
+                    {%- endif -%}
+                  </div>
+                {%- endfor -%}
+              </div>
+            {%- else -%}
+              <ul class="header-nav__sublist" role="list">
+                {%- for child in link.links -%}
+                  {%- liquid
+                    # Category icon from the link title + URL (e.g. "Pedales" → pedal).
+                    assign key = child.title | handle | append: ' ' | append: child.url | downcase
+                    assign icon = 'bike'
+                    if key contains 'rockbros' or key contains 'neco'
+                      assign icon = 'medal'
+                    elsif key contains 'asiento' or key contains 'componente' or key contains 'sillin'
+                      assign icon = 'seat'
+                    elsif key contains 'pedal'
+                      assign icon = 'pedal'
+                    elsif key contains 'grip' or key contains 'puno'
+                      assign icon = 'grip'
+                    elsif key contains 'tapabarro'
+                      assign icon = 'mudguard'
+                    elsif key contains 'casco'
+                      assign icon = 'helmet'
+                    elsif key contains 'luz' or key contains 'luces' or key contains 'linterna'
+                      assign icon = 'light'
+                    elsif key contains 'llanta' or key contains 'camara'
+                      assign icon = 'tire'
+                    elsif key contains 'pinon' or key contains 'transmision' or key contains 'cadena'
+                      assign icon = 'gear'
+                    elsif key contains 'espejo'
+                      assign icon = 'mirror'
+                    elsif key contains 'lente'
+                      assign icon = 'glasses'
+                    elsif key contains 'accesorio'
+                      assign icon = 'bag'
+                    elsif key contains 'scooter'
+                      assign icon = 'scooter'
+                    endif
+                  -%}
+                  <li>
+                    <a class="header-nav__sublink" href="{{ child.url }}"{% if child.current %} aria-current="page"{% endif %}>
+                      <span class="header-nav__icon">{% render 'icon', name: icon %}</span>
+                      <span>{{ child.title | escape }}</span>
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+            <a class="header-nav__all" href="{{ link.url }}">
+              <span>{{ 'header.view_all_in' | t: title: link.title }}</span>
+              {%- render 'icon', name: 'arrow-right' -%}
+            </a>
+          </div>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</nav>

@@ -1,0 +1,14 @@
+{%- comment -%}
+  Payment method icons enabled in Shopify Payments / checkout settings.
+  {% render 'payment-icons', class: '' %} — renders nothing when none are enabled.
+{%- endcomment -%}
+{%- if shop.enabled_payment_types.size > 0 -%}
+  <div class="payment-icons-wrap{% if class != blank %} {{ class }}{% endif %}">
+    <span class="visually-hidden">{{ 'general.payment_methods' | t }}</span>
+    <ul class="payment-icons" role="list">
+      {%- for type in shop.enabled_payment_types -%}
+        <li>{{ type | payment_type_svg_tag: class: 'payment-icon' }}</li>
+      {%- endfor -%}
+    </ul>
+  </div>
+{%- endif -%}

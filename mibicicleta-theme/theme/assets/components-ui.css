@@ -1,0 +1,373 @@
+/* ==========================================================================
+   Mi Bici 2026 — components-ui.css (second half of the component library)
+   Section heading · breadcrumbs · pagination · social/payment icons ·
+   drawer · modal · accordion · carousel · free-shipping bar · WhatsApp.
+   ========================================================================== */
+
+/* ---------- Section heading (snippets/section-heading.liquid) ------------ */
+.section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: var(--space-6);
+}
+.section-heading__text { display: flex; flex-direction: column; gap: 8px; max-width: 760px; }
+.section-heading__subtitle { color: var(--scheme-muted); }
+.section-heading__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-block: 6px;
+  border-bottom: 2px solid var(--scheme-accent-bg);
+  font: 800 var(--fs-sm)/1.2 var(--font-heading);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.section-heading__link .icon { transition: transform var(--dur) var(--ease); }
+.section-heading__link:hover .icon { transform: translateX(4px); }
+.section-heading--center { flex-direction: column; align-items: center; text-align: center; }
+.section-heading--center .section-heading__text { align-items: center; margin-inline: auto; }
+@media (min-width: 750px) { .section-heading { margin-bottom: var(--space-7); } }
+
+/* ---------- Breadcrumbs --------------------------------------------------
+   Inline flow (not flex): long product titles wrap like text and never force a
+   parent grid/flex column wider than the screen. */
+.breadcrumbs { font-size: var(--fs-xs); line-height: 1.5; color: var(--scheme-muted); }
+.breadcrumbs__list { display: block; margin: 0; padding: 0; list-style: none; }
+.breadcrumbs__item { display: inline; }
+.breadcrumbs__item + .breadcrumbs__item::before { content: "/"; margin-inline: .5em; opacity: .5; }
+.breadcrumbs a { text-decoration: none; }
+.breadcrumbs a:hover { color: var(--scheme-fg); text-decoration: underline; }
+.breadcrumbs [aria-current="page"] { color: var(--scheme-fg); font-weight: 600; }
+
+/* ---------- Pagination --------------------------------------------------- */
+.pagination__list { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.pagination__item {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  font: 800 var(--fs-sm)/1 var(--font-heading);
+  text-decoration: none;
+}
+a.pagination__item:hover { background: var(--scheme-surface); }
+.pagination__item.is-current { background: var(--scheme-fg); color: var(--scheme-bg); }
+.pagination__item--gap { min-width: 24px; }
+
+/* ---------- Social + payment icons --------------------------------------- */
+.social-icons { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.social-icons__link {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--scheme-border);
+  border-radius: var(--radius-pill);
+  color: inherit;
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.social-icons__link .icon { --icon-size: 20px; }
+.social-icons__link:hover { border-color: transparent; background: var(--scheme-accent-bg); color: var(--scheme-accent-fg); }
+
+.payment-icons { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.payment-icon { display: block; width: 38px; height: 24px; }
+
+/* ---------- Drawer (<side-drawer class="drawer">) -------------------------
+   Closed = invisible + inert to pointer; [open] slides the panel in.
+   data-side: right (default) | left | bottom. */
+.drawer {
+  --drawer-dur: 320ms;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear var(--drawer-dur);
+}
+.drawer[data-side="left"] { justify-content: flex-start; }
+.drawer[data-side="bottom"] { align-items: flex-end; }
+.drawer[open] { visibility: visible; pointer-events: auto; transition-delay: 0s; }
+
+.drawer__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 11, 11, .5);
+  opacity: 0;
+  transition: opacity var(--drawer-dur) var(--ease);
+}
+.drawer[open] .drawer__overlay { opacity: 1; }
+
+.drawer__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--scheme-bg);
+  color: var(--scheme-fg);
+  box-shadow: var(--shadow-lg);
+  outline: none;
+  transform: translateX(100%);
+  transition: transform var(--drawer-dur) var(--ease);
+}
+.drawer[data-side="left"] .drawer__panel { transform: translateX(-100%); }
+.drawer[data-side="bottom"] .drawer__panel {
+  height: auto;
+  max-height: 88vh;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transform: translateY(100%);
+}
+.drawer[open] .drawer__panel { transform: none; }
+@media (min-width: 750px) {
+  .drawer__panel { width: 440px; }
+  .drawer[data-side="left"] .drawer__panel { width: 380px; }
+  .drawer[data-side="bottom"] .drawer__panel { width: 100%; }
+}
+
+.drawer__header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 12px 10px 20px;
+  border-bottom: 1px solid var(--scheme-border);
+}
+.drawer__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: var(--fw-heading) var(--fs-xl)/1.1 var(--font-heading);
+  letter-spacing: -.01em;
+}
+.drawer__close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  color: inherit;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.drawer__close .icon { --icon-size: 22px; }
+.drawer__close:hover { background: var(--scheme-surface); }
+.drawer__body {
+  flex: 1 1 auto;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.drawer__footer {
+  flex: none;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--scheme-border);
+  background: var(--scheme-bg);
+}
+
+/* ---------- Modal (native <dialog class="modal">) ------------------------ */
+.modal {
+  width: min(92vw, 720px);
+  max-width: none;
+  max-height: 90vh;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--scheme-bg);
+  color: var(--scheme-fg);
+  box-shadow: var(--shadow-lg);
+}
+.modal::backdrop { background: rgba(11, 11, 11, .6); }
+.modal[open] { animation: mibi-pop var(--dur) var(--ease); }
+.modal--fullscreen { width: 100vw; height: 100dvh; max-height: none; border-radius: 0; }
+.modal__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 12px 12px 20px; }
+.modal__body { padding: 0 20px 20px; }
+.modal__close { position: absolute; top: 10px; right: 10px; z-index: 2; }
+@keyframes mibi-pop { from { opacity: 0; transform: translateY(12px) scale(.98); } }
+
+/* ---------- Accordion (<details class="accordion">) ---------------------- */
+.accordion { border-bottom: 1px solid var(--scheme-border); }
+.accordion__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 14px 0;
+  font: 800 var(--fs-md)/1.25 var(--font-heading);
+  list-style: none;
+  cursor: pointer;
+}
+.accordion__summary::-webkit-details-marker { display: none; }
+.accordion__summary::marker { content: ""; }
+.accordion__summary .icon { --icon-size: 20px; transition: transform var(--dur) var(--ease); }
+.accordion[open] > .accordion__summary .icon--chevron-down { transform: rotate(180deg); }
+.accordion[open] > .accordion__summary .icon--plus { transform: rotate(45deg); }
+.accordion__content { padding-bottom: 20px; }
+.accordion--card { margin-bottom: 10px; padding-inline: 18px; border: 0; border-radius: var(--radius); background: var(--scheme-surface); }
+
+/* ---------- Carousel (<carousel-slider class="carousel">) ----------------
+   Section sets --per-view (e.g. 2.15 → 3 @750 → 4 @990) and optional --gap. */
+.carousel { --per-view: 1; --gap: var(--grid-gap); position: relative; display: block; }
+.carousel__track {
+  position: relative;
+  display: flex;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  list-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.carousel__track::-webkit-scrollbar { display: none; }
+.carousel__slide {
+  flex: 0 0 calc((100% - (var(--per-view) - 1) * var(--gap)) / var(--per-view));
+  min-width: 0;
+  scroll-snap-align: start;
+}
+@media (max-width: 989.98px) {
+  .carousel--bleed .carousel__track { margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); }
+}
+.carousel__controls { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: var(--space-5); }
+.carousel__dots { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; }
+.carousel__dot { display: grid; place-items: center; width: 24px; height: 24px; color: inherit; }
+.carousel__dot::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: .3;
+  transition: width var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+.carousel__dot[aria-current="true"]::before { width: 22px; opacity: 1; }
+.carousel__dot:hover::before { opacity: .7; }
+.carousel--arrows-overlay .carousel__prev,
+.carousel--arrows-overlay .carousel__next {
+  position: absolute;
+  top: var(--arrows-top, 50%);
+  z-index: 3;
+  transform: translateY(-50%);
+  box-shadow: var(--shadow-md);
+}
+.carousel--arrows-overlay .carousel__prev { left: 8px; }
+.carousel--arrows-overlay .carousel__next { right: 8px; }
+.carousel--arrows-overlay .carousel__prev:active,
+.carousel--arrows-overlay .carousel__next:active { transform: translateY(-50%) scale(.96); }
+.carousel--arrows-overlay [aria-disabled="true"] { opacity: 0; pointer-events: none; }
+/* Phones swipe: overlay arrows would cover the slide content. */
+@media (max-width: 749.98px) {
+  .carousel--arrows-overlay :is(.carousel__prev, .carousel__next) { display: none; }
+}
+
+/* ---------- Free-shipping bar (snippets/free-shipping-bar.liquid) -------- */
+.free-ship { --progress: 0%; display: grid; gap: 14px; color: var(--color-ink); }
+.free-ship--card { padding: 14px 18px 20px; border-radius: var(--radius); background: var(--color-brand-soft); }
+.free-ship__text { font-size: var(--fs-sm); line-height: 1.45; text-align: center; text-wrap: balance; }
+.free-ship__text strong { font-weight: 800; white-space: nowrap; }
+.free-ship__zone { color: var(--color-muted); }
+.free-ship__track { position: relative; height: 6px; margin-inline: 16px; border-radius: 999px; background: rgba(0, 0, 0, .12); }
+.free-ship__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: clamp(0%, var(--progress), 100%);
+  border-radius: inherit;
+  background: var(--color-ink);
+  transition: width .6s var(--ease);
+}
+.free-ship__marker {
+  position: absolute;
+  top: 50%;
+  left: clamp(0%, var(--progress), 100%);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-brand);
+  color: #000;
+  transform: translate(-50%, -50%);
+  transition: left .6s var(--ease), background-color var(--dur) var(--ease);
+}
+.free-ship__marker .icon { --icon-size: 18px; }
+.free-ship.is-complete .free-ship__fill { background: var(--color-success); }
+.free-ship.is-complete .free-ship__marker { border-color: var(--color-success); background: var(--color-success); color: #fff; }
+.free-ship--inline { gap: 16px; padding-bottom: 12px; }
+.free-ship--inline .free-ship__text { text-align: left; }
+.free-ship--inline .free-ship__track { height: 4px; margin-inline: 12px; }
+.free-ship--inline .free-ship__marker { width: 26px; height: 26px; }
+.free-ship--inline .free-ship__marker .icon { --icon-size: 15px; }
+.scheme-dark .free-ship--inline { color: #fff; }
+.scheme-dark .free-ship--inline .free-ship__zone { color: var(--scheme-muted); }
+.scheme-dark .free-ship--inline .free-ship__track { background: rgba(255, 255, 255, .2); }
+.scheme-dark .free-ship--inline .free-ship__fill { background: var(--color-brand); }
+
+/* ---------- WhatsApp (snippets/whatsapp-button.liquid) ------------------- */
+.whatsapp-float {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + var(--bottom-offset) + env(safe-area-inset-bottom));
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  font: 800 var(--fs-sm)/1 var(--font-heading);
+  text-decoration: none;
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), bottom var(--dur) var(--ease);
+}
+.whatsapp-float .icon { --icon-size: 28px; color: var(--color-whatsapp); }
+.whatsapp-float__label { display: none; }
+.whatsapp-float:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.whatsapp-float:active { transform: scale(.96); }
+@media (min-width: 990px) {
+  .whatsapp-float { right: 24px; bottom: calc(24px + var(--bottom-offset)); width: auto; padding: 0 20px 0 14px; }
+  .whatsapp-float__label { display: inline; }
+}
+
+.btn--whatsapp { --btn-bg: var(--color-ink); --btn-fg: #fff; }
+.btn--whatsapp .icon { color: var(--color-whatsapp); }
+.scheme-dark .btn--whatsapp { --btn-bg: #fff; --btn-fg: #000; }
+
+.whatsapp-link { display: inline-flex; align-items: flex-start; gap: 6px; font-weight: 700; text-decoration: underline; text-underline-offset: .2em; }
+.whatsapp-link .icon { --icon-size: 1.15em; margin-top: .1em; }
+
+.whatsapp-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--scheme-border);
+  border-radius: var(--radius);
+  background: var(--scheme-surface);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color var(--dur) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.whatsapp-card:hover { border-color: currentColor; }
+.whatsapp-card:active { transform: scale(.99); }
+.whatsapp-card__icon { display: grid; flex: none; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--color-whatsapp); color: #000; }
+.whatsapp-card__icon .icon { --icon-size: 24px; }
+.whatsapp-card__body { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; font-size: var(--fs-sm); line-height: 1.35; }
+.whatsapp-card__body strong { font: 800 var(--fs-base)/1.2 var(--font-heading); }
+.whatsapp-card__body span { color: var(--scheme-muted); }
+.whatsapp-card > .icon { --icon-size: 20px; }

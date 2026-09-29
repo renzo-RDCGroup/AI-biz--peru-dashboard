@@ -1,0 +1,142 @@
+{%- comment -%}
+  Product gallery. JS: <product-gallery> in assets/product.js (thumbnails ↔ carousel sync, hover
+  zoom ≥990px, lightbox, jump to the variant's featured media).
+  {% render 'product-gallery',
+    product: product,
+    variant: current,           selected variant (its featured media is shown first)
+    section_id: section.id,
+    ratio: 'square'|'portrait'|'natural',
+    blend: true,                multiply white-background photos into the surface tile
+    zoom: true,                 hover zoom on desktop
+    lightbox: true              click → full-screen <dialog> with every image stacked
+  %}
+  Layout: mobile = swipe carousel (dots over the image) + thumbnail row; ≥990px = vertical
+  thumbnail rail on the left of the main image (CSS in section-main-product.css).
+{%- endcomment -%}
+{%- liquid
+  assign g_ratio = 1
+  case ratio
+    when 'portrait'
+      assign g_ratio = 0.8
+    when 'natural'
+      assign g_ratio = product.featured_media.aspect_ratio | default: 1
+  endcase
+  assign g_media_class = 'product-gallery__media media media--contain'
+  if blend
+    assign g_media_class = g_media_class | append: ' media--blend'
+  endif
+  assign g_count = product.media.size
+  assign g_start = 0
+  if variant.featured_media != blank
+    for media in product.media
+      if media.id == variant.featured_media.id
+        assign g_start = forloop.index0
+        break
+      endif
+    endfor
+  endif
+  assign g_sizes = '(min-width: 1400px) 660px, (min-width: 990px) calc(58vw - 150px), (min-width: 750px) 640px, 100vw'
+-%}
+<product-gallery class="product-gallery{% if g_count > 1 %} product-gallery--thumbs{% endif %}" data-start="{{ g_start }}"{% if zoom %} data-zoom{% endif %}>
+  <carousel-slider class="carousel carousel--arrows-overlay product-gallery__slider" aria-label="{{ 'products.product.gallery.label' | t }}">
+    <ul class="carousel__track product-gallery__track" role="list">
+      {%- for media in product.media -%}
+        <li class="carousel__slide product-gallery__slide" data-media-id="{{ media.id }}">
+          <div class="{{ g_media_class }}" style="--ratio: {{ g_ratio }};">
+            {%- case media.media_type -%}
+              {%- when 'image' -%}
+                {%- liquid
+                  assign g_alt = media.alt | default: product.title
+                  assign g_first = false
+                  if forloop.index0 == g_start
+                    assign g_first = true
+                  endif
+                  assign g_lazy = true
+                  if g_first
+                    assign g_lazy = false
+                  endif
+                -%}
+                {%- capture g_img -%}
+                  {%- render 'image',
+                    image: media.preview_image,
+                    sizes: g_sizes,
+                    priority: g_first,
+                    lazy: g_lazy,
+                    alt: g_alt
+                  -%}
+                {%- endcapture -%}
+                {%- if lightbox -%}
+                  <button type="button" class="product-gallery__zoom" data-lightbox-open="{{ forloop.index0 }}" aria-label="{{ 'products.product.gallery.open' | t: index: forloop.index }}">{{ g_img }}</button>
+                {%- else -%}
+                  <div class="product-gallery__zoom">{{ g_img }}</div>
+                {%- endif -%}
+              {%- when 'external_video' -%}
+                {{- media | external_video_tag: class: 'product-gallery__video', loading: 'lazy' -}}
+              {%- when 'video' -%}
+                {{- media | video_tag: controls: true, preload: 'metadata', image_size: '1080x', class: 'product-gallery__video' -}}
+              {%- when 'model' -%}
+                {{- media | model_viewer_tag: image_size: '1080x', reveal: 'interaction', toggleable: true -}}
+              {%- else -%}
+                {{- media | media_tag -}}
+            {%- endcase -%}
+          </div>
+        </li>
+      {%- else -%}
+        <li class="carousel__slide product-gallery__slide">
+          <div class="product-gallery__media media" style="--ratio: {{ g_ratio }};">
+            <span class="product-gallery__noimg">{% render 'logo', variant: 'mark', tone: 'mono-dark', label: '' %}</span>
+          </div>
+        </li>
+      {%- endfor -%}
+    </ul>
+    {%- if g_count > 1 -%}
+      <button type="button" class="btn btn--icon carousel__prev product-gallery__arrow" aria-label="{{ 'general.carousel.previous' | t }}">{% render 'icon', name: 'chevron-left' %}</button>
+      <button type="button" class="btn btn--icon carousel__next product-gallery__arrow" aria-label="{{ 'general.carousel.next' | t }}">{% render 'icon', name: 'chevron-right' %}</button>
+      <div class="carousel__controls product-gallery__dots"><div class="carousel__dots"></div></div>
+    {%- endif -%}
+  </carousel-slider>
+
+  {%- if g_count > 1 -%}
+    <ul class="product-gallery__thumbs" role="list" aria-label="{{ 'products.product.gallery.thumbnails' | t }}">
+      {%- for media in product.media -%}
+        <li class="product-gallery__thumb-item">
+          <button
+            type="button"
+            class="product-gallery__thumb {{ g_media_class }}"
+            data-thumb="{{ forloop.index0 }}"
+            aria-label="{{ 'products.product.gallery.go_to' | t: index: forloop.index }}"
+            {% if forloop.index0 == g_start %}aria-current="true"{% endif %}
+          >
+            {%- if media.preview_image != blank -%}
+              {{- media.preview_image | image_url: width: 180 | image_tag: loading: 'lazy', widths: '90,180', sizes: '80px', alt: '' -}}
+            {%- endif -%}
+            {%- if media.media_type == 'video' or media.media_type == 'external_video' -%}
+              <span class="product-gallery__play">{% render 'icon', name: 'play' %}</span>
+            {%- endif -%}
+          </button>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  {%- if lightbox and g_count > 0 -%}
+    <dialog class="modal modal--fullscreen product-lightbox" aria-label="{{ 'products.product.gallery.lightbox' | t }}" data-lightbox>
+      <button type="button" class="btn btn--icon modal__close product-lightbox__close" data-lightbox-close aria-label="{{ 'general.close' | t }}">{% render 'icon', name: 'close' %}</button>
+      <ul class="product-lightbox__list" role="list">
+        {%- for media in product.media -%}
+          {%- if media.media_type == 'image' -%}
+            {%- assign g_alt = media.alt | default: product.title -%}
+            <li class="product-lightbox__item" data-lightbox-item="{{ forloop.index0 }}">
+              {%- render 'image',
+                image: media.preview_image,
+                sizes: '(min-width: 1100px) 1000px, 100vw',
+                lazy: true,
+                alt: g_alt
+              -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </dialog>
+  {%- endif -%}
+</product-gallery>

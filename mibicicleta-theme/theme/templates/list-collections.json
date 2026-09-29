@@ -1,0 +1,21 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-list-collections",
+      "settings": {
+        "scheme": "light",
+        "heading": "Categorías",
+        "text": "Accesorios y repuestos para tu bici o scooter, ordenados por categoría.",
+        "sort": "alphabetical",
+        "ratio": "landscape",
+        "columns_desktop": "4",
+        "show_count": true,
+        "padding_top": 24,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

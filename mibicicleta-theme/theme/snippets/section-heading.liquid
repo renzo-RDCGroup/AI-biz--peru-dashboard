@@ -1,0 +1,60 @@
+{%- comment -%}
+  Section heading row: [eyebrow / title (+ red dot) / subtitle]  ·  "Ver todo →" link.
+  {% render 'section-heading',
+    title: section.settings.heading,
+    subtitle: '',            optional text under the title (HTML allowed)
+    eyebrow: '',             optional small uppercase label above the title
+    link_url: '', link_label: '',   link shown on the right (label default "Ver todo")
+    align: 'left'|'center',
+    tag: 'h2'|'h1'|'h3'|'p',
+    id: '',                  id for the title (use with aria-labelledby on the section)
+    dot: true,               false = no red dot (it is also skipped when the title ends in . ? ! : …)
+    class: ''
+  %}
+  Renders nothing when title, subtitle and link are all blank.
+{%- endcomment -%}
+{%- if title != blank or subtitle != blank or link_url != blank -%}
+  {%- liquid
+    assign sh_tag = tag | default: 'h2'
+    assign sh_align = align | default: 'left'
+    assign sh_link_label = link_label | default: ''
+    if sh_link_label == ''
+      assign sh_link_label = 'general.view_all' | t
+    endif
+    assign sh_dot = true
+    if dot == false
+      assign sh_dot = false
+    endif
+    assign sh_last = title | strip_html | strip | slice: -1
+    if sh_last == '.' or sh_last == '?' or sh_last == '!' or sh_last == ':' or sh_last == '…'
+      assign sh_dot = false
+    endif
+    case sh_tag
+      when 'h1'
+        assign sh_size = 'h1'
+      when 'h3'
+        assign sh_size = 'h3'
+      else
+        assign sh_size = 'h2'
+    endcase
+  -%}
+  <div class="section-heading section-heading--{{ sh_align }}{% if class != blank %} {{ class }}{% endif %}">
+    <div class="section-heading__text">
+      {%- if eyebrow != blank -%}
+        <p class="eyebrow">{{ eyebrow }}</p>
+      {%- endif -%}
+      {%- if title != blank -%}
+        <{{ sh_tag }} class="section-heading__title {{ sh_size }}{% if sh_dot %} heading-dot{% endif %}"{% if id != blank %} id="{{ id }}"{% endif %}>{{ title }}</{{ sh_tag }}>
+      {%- endif -%}
+      {%- if subtitle != blank -%}
+        <div class="section-heading__subtitle">{{ subtitle }}</div>
+      {%- endif -%}
+    </div>
+    {%- if link_url != blank -%}
+      <a class="section-heading__link" href="{{ link_url }}">
+        {{- sh_link_label -}}
+        {%- render 'icon', name: 'arrow-right' -%}
+      </a>
+    {%- endif -%}
+  </div>
+{%- endif -%}

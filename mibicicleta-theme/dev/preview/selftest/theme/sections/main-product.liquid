@@ -1,0 +1,19 @@
+<div class="prod" data-id="{{ product.id }}">
+  <h1 class="ptitle">{{ product.title }}</h1>
+  <span class="price">{{ product.price | money }}</span>
+  <span class="selected">{{ product.selected_or_first_available_variant.title }}</span>
+  <span class="src">{{ product.featured_image.src }}</span>
+  <div class="img">{{ product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 50vw, 100vw', class: 'pimg' }}</div>
+  <div class="img-widths">{{ product.featured_image | image_url: width: 1000 | image_tag: widths: '300, 600, 2000' }}</div>
+  {% form 'product', product, id: 'product-form-x', class: 'pf', novalidate: 'novalidate', data-type: 'add-to-cart-form' %}
+    <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+    <span class="posted">{{ form.posted_successfully? }}</span>
+    <button type="submit" name="add">Agregar</button>
+  {% endform %}
+  <variant-picker>{% for option in product.options_with_values %}<fieldset><legend>{{ option.name }}</legend>{% for v in option.values %}<input type="radio" id="opt-{{ forloop.index }}" name="{{ option.name }}" value="{{ v | escape }}" data-variant-id="{{ v.variant.id }}"{% if v.selected %} checked{% endif %}><label for="opt-{{ forloop.index }}">{{ v }}</label>{% endfor %}</fieldset>{% endfor %}</variant-picker>
+  <div class="opts">{% for option in product.options_with_values %}{{ option.name }}:{% for v in option.values %}{{ v }}{% if v.selected %}*{% endif %}{% unless v.available %}!{% endunless %}{% unless forloop.last %}/{% endunless %}{% endfor %}{% endfor %}</div>
+  <div class="ov">{% for option in product.options_with_values %}{% for v in option.values %}{% if forloop.index == 3 %}{{ v.id }}{% endif %}{% endfor %}{% endfor %}</div>
+  <div class="rating">[{{ product.metafields.reviews.rating.value }}]</div>
+  <script type="application/json" data-product-json>{{ product | json }}</script>
+</div>
+{% schema %}{ "name": "Producto", "settings": [] }{% endschema %}
