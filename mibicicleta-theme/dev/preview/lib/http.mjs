@@ -244,7 +244,10 @@ async function recommendations(app, req, res, url) {
   if (!product) return sendJson(res, 404, { status: 404, message: 'Product not found', description: `No product with id ${pid}` });
   const intent = url.searchParams.get('intent') === 'complementary' ? 'complementary' : 'related';
   const limit = Math.min(10, Math.max(1, toInt(url.searchParams.get('limit'), 10)));
-  const route = { pageType: 'product', template: 'product', suffix: null, objects: { product, recommendations: { product, intent, limit } }, handle: product.handle, status: 200 };
+  // Worst case on purpose: Shopify only documents `recommendations` for this render, so the
+  // `product` global stays nil and request.page_type isn't 'product'. `template` stays 'product'
+  // only so lenient section-id lookup prefers the product template.
+  const route = { pageType: 'recommendations', template: 'product', suffix: null, objects: { recommendations: { product, intent, limit, performed: true } }, handle: '', status: 200 };
   const w = app.world(url, route);
   const sectionId = url.searchParams.get('section_id');
   if (sectionId) {
@@ -398,7 +401,8 @@ async function routeRequest(app, req, res, url) {
     } else {
       u.searchParams.set(type === 'customer' ? 'customer_posted' : 'contact_posted', 'true');
     }
-    return redirect(res, `${u.pathname}${u.search}#${type === 'customer' ? 'contact_form' : 'contact_form'}`);
+    // No fragment: like Shopify, the browser keeps the form action's own `#<form id>` anchor.
+    return redirect(res, `${u.pathname}${u.search}`);
   }
 
   if (method !== 'GET' && method !== 'HEAD') return send(res, 405, 'Method not allowed', 'text/plain; charset=utf-8');

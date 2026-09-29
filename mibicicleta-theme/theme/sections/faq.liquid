@@ -2,8 +2,14 @@
   FAQ (styles: assets/section-home-2.css). Heading (+ optional text and WhatsApp card, which
   renders nothing without a number) beside card accordions; one column on mobile.
   Outputs FAQPage JSON-LD from the same blocks (setting "schema_markup").
+  "[envio_gratis]" in an answer prints settings.free_shipping_threshold as money; with a
+  threshold of 0 that question is skipped (never "gratis desde S/ 0").
+  In the theme editor, home.js opens the selected question.
 {%- endcomment -%}
 {{ 'section-home-2.css' | asset_url | stylesheet_tag }}
+{%- if request.design_mode -%}
+  <script src="{{ 'home.js' | asset_url }}" defer></script>
+{%- endif -%}
 
 {%- liquid
   assign title_id = 'FaqTitle-' | append: section.id
@@ -19,6 +25,11 @@
   assign heading_align = 'left'
   if faq_layout == 'stack'
     assign heading_align = 'center'
+  endif
+  assign fs_token = '[envio_gratis]'
+  assign fs_amount = ''
+  if settings.free_shipping_threshold > 0
+    assign fs_amount = settings.free_shipping_threshold | times: 100 | money_without_trailing_zeros
   endif
 -%}
 
@@ -36,6 +47,12 @@
         {%- liquid
           assign q = block.settings.question | strip
           assign a = block.settings.answer
+          if a contains fs_token
+            if fs_amount == blank
+              continue
+            endif
+            assign a = a | replace: fs_token, fs_amount
+          endif
         -%}
         {%- if q != blank -%}
           <details class="accordion accordion--card faq__item" {{ block.shopify_attributes }}{% if section.settings.open_first and forloop.first %} open{% endif %}>
@@ -80,8 +97,8 @@
     {"type": "checkbox", "id": "schema_markup", "label": "Agregar datos estructurados (FAQPage)", "info": "Ayuda a Google a mostrar las preguntas. Úsalo en una sola sección de preguntas por página.", "default": true},
     {"type": "header", "content": "WhatsApp"},
     {"type": "checkbox", "id": "show_whatsapp", "label": "Mostrar tarjeta de WhatsApp", "info": "Solo aparece si hay un número en Configuración del tema › Contacto.", "default": true},
-    {"type": "text", "id": "whatsapp_label", "label": "Título de la tarjeta", "default": "¿Tienes otra consulta?"},
-    {"type": "text", "id": "whatsapp_text", "label": "Texto de la tarjeta", "default": "Escríbenos por WhatsApp"},
+    {"type": "text", "id": "whatsapp_label", "label": "Título de la tarjeta", "default": "¿Tienes otra consulta?", "visible_if": "{{ section.settings.show_whatsapp }}"},
+    {"type": "text", "id": "whatsapp_text", "label": "Texto de la tarjeta", "default": "Escríbenos por WhatsApp", "visible_if": "{{ section.settings.show_whatsapp }}"},
     {"type": "header", "content": "Espaciado"},
     {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64},
     {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64}
@@ -92,7 +109,7 @@
       "name": "Pregunta",
       "settings": [
         {"type": "text", "id": "question", "label": "Pregunta", "default": "¿Hacen envíos a provincias?"},
-        {"type": "richtext", "id": "answer", "label": "Respuesta", "default": "<p>Sí. Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde S/ 220.</p>"}
+        {"type": "richtext", "id": "answer", "label": "Respuesta", "info": "[envio_gratis] muestra el monto de envío gratis de Configuración del tema › Carrito (si es 0, la pregunta no se muestra).", "default": "<p>Sí. Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde [envio_gratis].</p>"}
       ]
     }
   ],
@@ -105,6 +122,7 @@
         {"type": "question", "settings": {"question": "¿Puedo cambiar un producto?", "answer": "<p>Sí, tienes 7 días para cambiarlo, siempre que el producto esté sin abrir.</p>"}}
       ]
     }
-  ]
+  ],
+  "disabled_on": {"groups": ["header", "footer"]}
 }
 {% endschema %}

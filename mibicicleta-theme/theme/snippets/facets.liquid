@@ -12,6 +12,7 @@
     context: 'more', paginate: paginate, paging: 'load_more' | 'pages', shown: 24
                                      → "Mostrando 24 de 47" + progress + "Cargar más" (numbered
                                        pagination without JS / with paging 'pages')
+    context: 'prev', paginate: paginate, paging: …  → "Ver productos anteriores" (load more, page > 1)
     terms: search.terms,             search only (kept as hidden q)
     active_count: 0,                 number of active filter values (drawer title badge)
     results_count: 0,                drawer "Ver N productos" button
@@ -55,8 +56,11 @@
       else
         assign group_active = filter.active_values.size
       endif
+      # Open: active groups, the first one, and in the sidebar the first three (long lists collapse).
       assign is_open = false
-      if ctx == 'sidebar' or group_active > 0 or forloop.first
+      if group_active > 0 or forloop.first
+        assign is_open = true
+      elsif ctx == 'sidebar' and forloop.index <= 3
         assign is_open = true
       endif
     -%}
@@ -156,14 +160,28 @@
   {%- endfor -%}{%- endif -%}
 {%- endcapture -%}
 
-{%- if ctx == 'more' -%}
+{%- if ctx == 'prev' -%}
+  {%- if paginate.previous and paging != 'pages' -%}
+    <p class="results-prev"><a class="btn btn--outline" href="{{ paginate.previous.url }}">{{ 'collections.load_more.previous' | t }}</a></p>
+  {%- endif -%}
+{%- elsif ctx == 'more' -%}
   {%- if paginate.pages > 1 -%}
     <div class="results-more" data-results-more>
       {%- if paging == 'pages' -%}
         {%- render 'pagination', paginate: paginate, anchor: '' -%}
       {%- else -%}
-        {%- assign progress = shown | times: 100 | divided_by: paginate.items -%}
-        <p class="results-more__status" id="ResultsStatus-{{ section_id }}">{{ 'collections.load_more.status' | t: shown: shown, total: paginate.items }}</p>
+        {%- liquid
+          assign progress = shown | times: 100 | divided_by: paginate.items
+          assign status = 'collections.load_more.status' | t: shown: shown, total: paginate.items
+          assign tpl = ''
+          # Landed on ?page=N: "Mostrando 9–16 de 17"; data-tpl keeps the start when facets.js appends.
+          if paginate.current_page > 1
+            assign from = paginate.current_offset | plus: 1
+            assign status = 'collections.load_more.status_range' | t: from: from, shown: shown, total: paginate.items
+            assign tpl = 'collections.load_more.status_range' | t: from: from, shown: '[n]', total: paginate.items
+          endif
+        -%}
+        <p class="results-more__status" id="ResultsStatus-{{ section_id }}" data-shown="{{ shown }}"{% if tpl != '' %} data-tpl="{{ tpl | escape }}"{% endif %}>{{ status }}</p>
         <div class="results-more__bar" aria-hidden="true"><span style="width: {{ progress }}%;"></span></div>
         {%- if paginate.next -%}
           <button type="button" class="btn btn--primary results-more__btn no-js-hidden" data-load-more data-next-page="{{ paginate.current_page | plus: 1 }}" aria-describedby="ResultsStatus-{{ section_id }}">

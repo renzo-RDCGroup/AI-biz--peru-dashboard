@@ -1,6 +1,6 @@
 /* ==========================================================================
    Mi Bici 2026 — section-hero.css (sections/hero-slideshow.liquid)
-   Mobile: 4:3 photo on top + compact colour panel. ≥990: split 45/55 (or
+   Mobile: 4:3 photo on top (16:9 on tablets) + compact colour panel. ≥990: split 45/55 (or
    overlay card) at min(640px, 70vh). The carousel is a size container so the
    panel text can line up with .page-width content (100cqw = slider width).
    ========================================================================== */
@@ -46,6 +46,9 @@
   height: 100%;
   object-fit: cover;
 }
+/* Focal points (set per slide from each image's presentation.focal_point). !important beats
+   the object-position that image_tag inlines from the desktop image. */
+.hero__img { object-position: var(--hero-fp-m, var(--hero-fp, 50% 50%)) !important; }
 
 /* ---------- Panel -------------------------------------------------------- */
 .hero__panel {
@@ -74,6 +77,7 @@
   color: var(--scheme-muted);
   font-size: var(--fs-md);
   line-height: 1.45;
+  text-wrap: pretty;
 }
 .hero__buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
 .hero__btn .icon { transition: transform var(--dur) var(--ease); }
@@ -122,6 +126,9 @@
 
 /* ---------- Tablet ------------------------------------------------------- */
 @media (min-width: 750px) {
+  /* 16:9 (the photos' native ratio) keeps the headline and CTA above the fold on tablets. */
+  .hero__media { aspect-ratio: 16 / 9; }
+  .hero__controls { top: calc(56.25vw - 58px); top: calc(56.25cqw - 58px); }
   .hero__panel { padding: 36px var(--gutter) 44px; }
   .hero__content { gap: 16px; }
 }
@@ -139,6 +146,7 @@
     grid-template-areas: "media panel";
   }
   .hero__media { grid-area: media; aspect-ratio: auto; }
+  .hero__img { object-position: var(--hero-fp, 50% 50%) !important; }
   .hero__panel {
     grid-area: panel;
     padding: 64px clamp(40px, 4vw, 72px) 80px var(--hero-edge);

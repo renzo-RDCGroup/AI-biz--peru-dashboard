@@ -116,7 +116,7 @@
       "type": "usp-strip",
       "blocks": {
         "usp_originales": {"type": "item", "settings": {"icon": "medal", "title": "Productos originales", "text": "Vendedor autorizado Rockbros", "link": "", "link_whatsapp": false}},
-        "usp_envios": {"type": "item", "settings": {"icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde S/ 220", "link": "", "link_whatsapp": false}},
+        "usp_envios": {"type": "item", "settings": {"icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde [envio_gratis]", "link": "", "link_whatsapp": false}},
         "usp_whatsapp": {"type": "item", "settings": {"icon": "whatsapp", "title": "Atención por WhatsApp", "text": "Consultas y pedidos por chat", "link": "", "link_whatsapp": true}},
         "usp_cambios": {"type": "item", "settings": {"icon": "return", "title": "Cambios y garantía", "text": "7 días para cambiar, sin abrir", "link": "", "link_whatsapp": false}}
       },
@@ -241,7 +241,7 @@
     "faq": {
       "type": "faq",
       "blocks": {
-        "faq_envios": {"type": "question", "settings": {"question": "¿Hacen envíos a provincias?", "answer": "<p>Sí. Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde S/ 220.</p>"}},
+        "faq_envios": {"type": "question", "settings": {"question": "¿Hacen envíos a provincias?", "answer": "<p>Sí. Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde [envio_gratis].</p>"}},
         "faq_originales": {"type": "question", "settings": {"question": "¿Los productos son originales?", "answer": "<p>Sí. Somos vendedor autorizado Rockbros.</p>"}},
         "faq_cambios": {"type": "question", "settings": {"question": "¿Puedo cambiar un producto?", "answer": "<p>Sí, tienes 7 días para cambiarlo, siempre que el producto esté sin abrir.</p>"}},
         "faq_repuesto": {"type": "question", "settings": {"question": "No sé qué repuesto le queda a mi bici o scooter", "answer": "<p>Escríbenos con una foto de la pieza o del modelo y te ayudamos a encontrar el repuesto correcto.</p>"}}

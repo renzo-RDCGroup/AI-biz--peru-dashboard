@@ -7,16 +7,19 @@
 
 {%- liquid
   assign stock_msg = 'cart.line.stock_limit' | t
+  assign stock_msg_one = 'cart.line.stock_limit_one' | t
   assign empty_menu = section.settings.empty_menu
   assign fs_amount = settings.free_shipping_threshold | times: 100 | money_without_trailing_zeros
+  assign fs_left = settings.free_shipping_threshold | default: 0 | times: 100 | round | minus: cart.total_price
 -%}
 <cart-page
   class="main-cart section scheme-{{ section.settings.scheme }}"
   data-section="{{ section.id }}"
   data-stock-msg="{{ stock_msg | escape }}"
+  data-stock-msg-one="{{ stock_msg_one | escape }}"
   style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;"
 >
-  <div class="main-cart__inner{% if cart.item_count == 0 %} is-empty{% endif %}">
+  <div class="main-cart__inner{% if cart.item_count == 0 %} is-empty{% endif %}" data-cart-item-count="{{ cart.item_count }}" data-cart-total-price="{{ cart.total_price }}">
     {%- if cart.item_count > 0 -%}
       <div class="page-width">
         <div class="main-cart__head">
@@ -40,7 +43,9 @@
             </div>
             <ul class="cart-lines cart-lines--page" role="list">
               {%- for item in cart.items -%}
-                {%- render 'cart-line-item', item: item, index: forloop.index, prefix: 'Cart', form: 'Cart-form', lazy: false -%}
+                {%- assign line_lazy = false -%}
+                {%- if forloop.index > 3 %}{% assign line_lazy = true %}{% endif -%}
+                {%- render 'cart-line-item', item: item, index: forloop.index, prefix: 'Cart', form: 'Cart-form', lazy: line_lazy -%}
               {%- endfor -%}
             </ul>
             <noscript>
@@ -73,7 +78,7 @@
               {%- render 'cart-totals', form: 'Cart-form', prefix: 'Cart' -%}
 
               {%- if section.settings.show_payment_icons -%}
-                {%- render 'payment-icons', class: 'cart-summary__payments' -%}
+                {%- render 'payment-icons', class: 'cart-summary__payments', scope: 'cart' -%}
               {%- endif -%}
 
               {%- if section.settings.show_trust -%}
@@ -99,8 +104,11 @@
         </div>
       </div>
 
-      {%- comment -%} Mobile: sticky checkout bar while the summary's button is off-screen (cart.js). {%- endcomment -%}
       <div class="main-cart__sticky" data-cart-sticky aria-hidden="true">
+        {%- if settings.free_shipping_threshold > 0 and fs_left > 0 -%}
+          {%- assign fs_left_money = fs_left | money -%}
+          <p class="main-cart__sticky-ship">{% render 'icon', name: 'truck' %} <span>{{ 'shipping.remaining_html' | t: amount: fs_left_money }}</span></p>
+        {%- endif -%}
         <p class="main-cart__sticky-total">
           <span>{{ 'cart.totals.subtotal' | t }}</span>
           <strong>{{ cart.total_price | money }}</strong>
@@ -153,7 +161,6 @@
 {% stylesheet %}
 /* Cart page only (drawer + shared styles: assets/component-cart.css). */
 cart-page { display: block; }
-/* ---------- Cart page (sections/main-cart.liquid) ---------------------------- */
 .main-cart__head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px; margin-bottom: var(--space-6); }
 .main-cart__title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
 .main-cart__title:focus { outline: none; }
@@ -202,30 +209,22 @@ cart-page { display: block; }
   .main-cart__grid { grid-template-columns: minmax(0, 1fr) minmax(360px, 420px); gap: var(--space-9); align-items: start; }
   .main-cart__summary { position: sticky; top: calc(var(--header-height) + 24px); }
 }
-
-/* Mobile sticky checkout bar (cart.js toggles .is-visible). */
-.main-cart__sticky {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 80;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom));
-  background: var(--color-bg);
-  color: var(--color-ink);
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, .12);
-  visibility: hidden;
-  transform: translateY(110%);
-  transition: transform var(--dur) var(--ease), visibility 0s linear var(--dur);
+/* 990–1199: slimmer summary + columns, titles keep 220px+. */
+@media (min-width: 990px) and (max-width: 1199.98px) {
+  .main-cart__grid { grid-template-columns: minmax(0, 1fr) 340px; gap: var(--space-7); }
+  .cart-summary { padding: var(--space-5); }
+  .main-cart__cols { grid-template-columns: minmax(0, 1fr) 112px 104px; column-gap: 16px; }
+  .cart-lines--page .cart-line { --line-media: 88px; grid-template-columns: var(--line-media) minmax(0, 1fr) 112px 104px; column-gap: 16px; }
 }
+
+/* Mobile sticky bar: free-shipping nudge + checkout (cart.js toggles .is-visible). */
+.main-cart__sticky { position: fixed; right: 0; bottom: 0; left: 0; z-index: 80; display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 8px 12px; padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom)); background: var(--color-bg); color: var(--color-ink); box-shadow: 0 -8px 24px rgba(0, 0, 0, .12); visibility: hidden; transform: translateY(110%); transition: transform var(--dur) var(--ease), visibility 0s linear var(--dur); }
 .main-cart__sticky.is-visible { visibility: visible; transform: none; transition-delay: 0s; }
 .main-cart__sticky-total { display: grid; font-size: var(--fs-xs); line-height: 1.2; color: var(--color-muted); }
 .main-cart__sticky-total strong { font: 800 var(--fs-lg)/1.1 var(--font-heading); color: var(--color-ink); }
 .main-cart__sticky-btn { flex: 1 1 auto; max-width: 240px; }
+.main-cart__sticky-ship { flex: 1 0 100%; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; font-size: var(--fs-xs); line-height: 1.3; text-align: center; }
+.main-cart__sticky-ship .icon { --icon-size: 16px; flex: none; }
 @media (min-width: 990px) { .main-cart__sticky { display: none; } }
 .no-js .main-cart__sticky { display: none; }
 

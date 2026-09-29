@@ -93,7 +93,13 @@ or a JSON body). Plain form posts redirect to `/cart` instead.
 * `/recommendations/products(.json)?product_id=&limit=&intent=related|complementary[&section_id=]`
   * `related`: products sharing collections with the source product.
   * `complementary`: products of a different product type.
-  * `recommendations` is set when rendering the section.
+  * The section renders in a deliberately minimal context, because Shopify only documents the
+    `recommendations` object for this endpoint: `recommendations.performed?` (and Dawn's
+    `performed` alias) is true, but the `product` global is **nil** and `request.page_type` is
+    `recommendations`, not `product`. A section that gates its response on `product` renders
+    empty here, just as it may on the live store.
+  * Everywhere else (page renders, plain `?section_id=` / `?sections=` requests) `performed?` is
+    false, `products` is empty and `intent` is nil, like Shopify.
 
 ### Static
 * `/assets/*` is served from `theme/assets`. `x.css.liquid` is rendered and served as `x.css`.

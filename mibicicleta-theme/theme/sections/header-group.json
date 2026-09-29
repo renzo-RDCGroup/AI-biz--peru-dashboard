@@ -8,7 +8,7 @@
         "message-envio": {
           "type": "message",
           "settings": {
-            "text": "Envío gratis a todo el Perú desde S/ 220",
+            "text": "Envío gratis a todo el Perú desde [envio_gratis]",
             "code": ""
           }
         },
@@ -54,7 +54,7 @@
       "settings": {
         "scheme": "light",
         "menu": "main-menu",
-        "sticky": "always",
+        "sticky": "on-scroll-up",
         "show_search_bar": true,
         "search_placeholder": "Busca por código, medida o nombre…",
         "show_account": true,

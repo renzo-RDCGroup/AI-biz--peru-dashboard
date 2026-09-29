@@ -21,7 +21,7 @@
     "free_shipping_zone": "todo el Perú",
     "cart_upsell_heading": "Complétalo con",
     "cart_show_note": false,
-    "cart_checkout_note": "Impuestos incluidos. El envío se calcula en el checkout.",
+    "cart_checkout_note": "El envío se calcula en el checkout.",
     "whatsapp_message": "Hola Mi Bicicleta, tengo una consulta",
     "whatsapp_float": true,
     "delivery_lima_min": 1,

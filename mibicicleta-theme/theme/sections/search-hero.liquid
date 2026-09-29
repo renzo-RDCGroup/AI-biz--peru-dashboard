@@ -1,10 +1,15 @@
 {%- comment -%}
   "¿Qué repuesto necesitas?" search band (styles: assets/section-home.css).
-  Big pill search (posts to routes.search_url, type=product) enhanced by the header's
-  <predictive-search> element when it is loaded; quick-search chips (blocks "chip");
+  Big pill search (posts to routes.search_url, type=product) enhanced by <predictive-search>
+  (predictive-search.js is loaded here too, so autocomplete works even when the header search
+  is turned off; its define() is guarded); quick-search chips (blocks "chip");
   optional WhatsApp line — a link only when settings.whatsapp_number is set, plain text otherwise.
 {%- endcomment -%}
 {{ 'section-home.css' | asset_url | stylesheet_tag }}
+{%- if settings.predictive_search -%}
+  {{ 'section-predictive-search.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'predictive-search.js' | asset_url }}" defer></script>
+{%- endif -%}
 
 {%- liquid
   assign scheme = section.settings.scheme
@@ -52,7 +57,7 @@
 
     <div class="search-hero__main">
       <predictive-search class="search-hero__search" data-status-none="{{ 'home.search_hero.status_none' | t | escape }}" data-status-one="{{ 'home.search_hero.status_one' | t | escape }}" data-status-template="{{ 'home.search_hero.status_other' | t | escape }}">
-        <form action="{{ routes.search_url }}" method="get" role="search" class="search-hero__form">
+        <form action="{{ routes.search_url }}" method="get" role="search" class="search-hero__form" aria-label="{{ 'home.search_hero.label' | t | escape }}">
           <label class="visually-hidden" for="{{ input_id }}">{{ 'home.search_hero.label' | t }}</label>
           <span class="search-hero__icon" aria-hidden="true">{% render 'icon', name: 'search' %}</span>
           <input
@@ -88,13 +93,20 @@
           <ul class="chip-row chip-row--bleed search-hero__chip-row" role="list"{% if section.settings.chips_label != blank %} aria-labelledby="{{ input_id }}-chips"{% endif %}>
             {%- for block in section.blocks -%}
               {%- liquid
+                # Custom labels print exactly as typed; bare terms only get a capital first letter
+                # (never `capitalize`, which lower-cases the rest: "CIGNA" → "Cigna", "9V" → "9v").
                 assign term = block.settings.term | strip
-                assign chip_label = block.settings.label | strip | default: term
+                assign chip_label = block.settings.label | strip
+                if chip_label == blank
+                  assign c_first = term | slice: 0 | upcase
+                  assign c_rest = term | slice: 1, 200
+                  assign chip_label = c_first | append: c_rest
+                endif
               -%}
               {%- if term != blank -%}
                 <li {{ block.shopify_attributes }}>
                   <a class="chip search-hero__chip" href="{{ routes.search_url }}?q={{ term | url_encode }}&amp;type=product">
-                    {{- chip_label | capitalize | escape -}}
+                    {{- chip_label | escape -}}
                   </a>
                 </li>
               {%- endif -%}
@@ -120,8 +132,8 @@
     {"type": "text", "id": "chips_label", "label": "Etiqueta de las sugerencias", "default": "Prueba con:"},
     {"type": "header", "content": "WhatsApp"},
     {"type": "checkbox", "id": "show_whatsapp", "label": "Mostrar la línea de WhatsApp", "info": "Es un enlace solo si hay un número en Configuración del tema › Contacto; si no, se muestra como texto.", "default": true},
-    {"type": "text", "id": "whatsapp_text", "label": "Texto de la línea", "default": "Si no sabes cuál es, escríbenos con una foto."},
-    {"type": "text", "id": "whatsapp_message", "label": "Mensaje inicial del chat", "info": "Vacío = usa el mensaje de Configuración del tema.", "default": "Hola Mi Bicicleta, estoy buscando un repuesto. Te envío una foto."},
+    {"type": "text", "id": "whatsapp_text", "label": "Texto de la línea", "default": "Si no sabes cuál es, escríbenos con una foto.", "visible_if": "{{ section.settings.show_whatsapp }}"},
+    {"type": "text", "id": "whatsapp_message", "label": "Mensaje inicial del chat", "info": "Vacío = usa el mensaje de Configuración del tema.", "default": "Hola Mi Bicicleta, estoy buscando un repuesto. Te envío una foto.", "visible_if": "{{ section.settings.show_whatsapp }}"},
     {"type": "header", "content": "Espaciado"},
     {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48},
     {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48}
@@ -146,6 +158,7 @@
         {"type": "chip", "settings": {"term": "asientos"}}
       ]
     }
-  ]
+  ],
+  "disabled_on": {"groups": ["header", "footer"]}
 }
 {% endschema %}

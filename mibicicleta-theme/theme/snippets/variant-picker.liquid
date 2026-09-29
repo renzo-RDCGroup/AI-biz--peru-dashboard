@@ -7,7 +7,8 @@
              other options as pills, options with more than 12 values as a dropdown.
     Unavailable combinations stay selectable, crossed out (+ visually-hidden "agotado").
   Color option test (same as color-swatch): option name "color", "colour" or "color/colour".
-  Renders nothing for products with only the default variant.
+  Renders nothing for products with only the default variant. Hidden without JS (.js-only):
+  the buy_buttons block then shows a <noscript> variant <select>.
 {%- endcomment -%}
 {%- unless product.has_only_default_variant -%}
   {%- liquid
@@ -15,7 +16,7 @@
     assign label_sold_out = 'products.product.picker.sold_out' | t
     assign label_unavailable = 'products.product.picker.unavailable' | t
   -%}
-  <variant-picker class="variant-picker" data-section-id="{{ section_id }}" data-label-sold-out="{{ label_sold_out }}" data-label-unavailable="{{ label_unavailable }}">
+  <variant-picker class="variant-picker js-only" data-section-id="{{ section_id }}" data-label-sold-out="{{ label_sold_out }}" data-label-unavailable="{{ label_unavailable }}">
     {%- for option in product.options_with_values -%}
       {%- liquid
         assign option_name = option.name | downcase | strip
@@ -108,8 +109,12 @@
             if v.inventory_management == 'shopify' and v.inventory_policy == 'deny'
               assign v_stock = v.inventory_quantity | default: 0
             endif
+            assign v_thumb = ''
+            if v.featured_media
+              assign v_thumb = v.featured_media.preview_image | image_url: width: 160
+            endif
           -%}
-          {"id":{{ v.id }},"title":{{ v.title | json }},"options":{{ v.options | json }},"price":{{ v.price | default: 0 }},"compare_at_price":{{ v.compare_at_price | default: 0 }},"available":{{ v.available | json }},"sku":{{ v.sku | default: '' | json }},"media":{{ v.featured_media.id | default: 0 }},"stock":{{ v_stock }}}{% unless forloop.last %},{% endunless %}
+          {"id":{{ v.id }},"title":{{ v.title | json }},"options":{{ v.options | json }},"price":{{ v.price | default: 0 }},"compare_at_price":{{ v.compare_at_price | default: 0 }},"available":{{ v.available | json }},"sku":{{ v.sku | default: '' | json }},"media":{{ v.featured_media.id | default: 0 }},"stock":{{ v_stock }},"thumb":{{ v_thumb | json }}}{% unless forloop.last %},{% endunless %}
         {%- endfor -%}
       ]
     </script>

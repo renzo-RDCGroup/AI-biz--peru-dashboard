@@ -237,6 +237,8 @@ a.pagination__item:hover { background: var(--scheme-surface); }
   min-width: 0;
   scroll-snap-align: start;
 }
+/* Room for the card focus ring (outline-offset 3px) inside the scroller's clip. */
+.carousel__track:has(.product-card) { margin: -6px; padding: 6px; scroll-padding-inline: 6px; }
 @media (max-width: 989.98px) {
   .carousel--bleed .carousel__track { margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); scroll-padding-inline: var(--gutter); }
 }
@@ -266,10 +268,16 @@ a.pagination__item:hover { background: var(--scheme-surface); }
 .carousel--arrows-overlay .carousel__next { right: 8px; }
 .carousel--arrows-overlay .carousel__prev:active,
 .carousel--arrows-overlay .carousel__next:active { transform: translateY(-50%) scale(.96); }
-.carousel--arrows-overlay [aria-disabled="true"] { opacity: 0; pointer-events: none; }
+/* Beats .btn--outline's 35% fade; stays visible while keyboard-focused so focus isn't lost. */
+.carousel--arrows-overlay :is(.carousel__prev, .carousel__next)[aria-disabled="true"]:not(:focus-visible) { opacity: 0; visibility: hidden; pointer-events: none; }
 /* Phones swipe: overlay arrows would cover the slide content. */
 @media (max-width: 749.98px) {
   .carousel--arrows-overlay :is(.carousel__prev, .carousel__next) { display: none; }
+}
+
+@media (forced-colors: active) {
+  .carousel__dot::before { forced-color-adjust: none; background: CanvasText; }
+  .carousel__dot[aria-current="true"]::before { background: Highlight; }
 }
 
 /* ---------- Free-shipping bar (snippets/free-shipping-bar.liquid) -------- */
@@ -314,6 +322,7 @@ a.pagination__item:hover { background: var(--scheme-surface); }
 .scheme-dark .free-ship--inline .free-ship__zone { color: var(--scheme-muted); }
 .scheme-dark .free-ship--inline .free-ship__track { background: rgba(255, 255, 255, .2); }
 .scheme-dark .free-ship--inline .free-ship__fill { background: var(--color-brand); }
+@media (forced-colors: active) { .free-ship__fill { forced-color-adjust: none; background: Highlight; } }
 
 /* ---------- WhatsApp (snippets/whatsapp-button.liquid) ------------------- */
 .whatsapp-float {

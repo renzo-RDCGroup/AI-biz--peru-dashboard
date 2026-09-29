@@ -206,7 +206,7 @@
         "type": "number",
         "id": "free_shipping_threshold",
         "label": "Monto para envío gratis (S/)",
-        "info": "Monto en soles. Verificado en Configuración › Envíos: gratis desde S/ 220 en todo el Perú. 0 = ocultar la barra.",
+        "info": "Monto en soles. Verificado en Configuración › Envíos: gratis desde S/ 220 en todo el Perú. 0 = ocultar la barra. Los textos que usan [envio_gratis] (barra de anuncios, franjas de beneficios, preguntas frecuentes, garantías y filas del producto, página de contacto) muestran este monto solos; con 0, esos textos se ocultan. Si escribiste el monto a mano en algún texto, actualízalo también.",
         "default": 220
       },
       {
@@ -242,7 +242,8 @@
         "type": "text",
         "id": "cart_checkout_note",
         "label": "Texto bajo el subtotal",
-        "default": "Impuestos incluidos. El envío se calcula en el checkout."
+        "info": "«Impuestos incluidos» se muestra aparte, solo si tus precios incluyen IGV (Configuración › Impuestos y aranceles).",
+        "default": "El envío se calcula en el checkout."
       }
     ]
   },
@@ -253,7 +254,7 @@
         "type": "text",
         "id": "whatsapp_number",
         "label": "Número de WhatsApp",
-        "info": "Solo dígitos con código de país, ej. 51987654321. Vacío = se ocultan todos los botones de WhatsApp."
+        "info": "Con código de país 51 al inicio, ej. 51987654321 (si pones solo los 9 dígitos del celular, agregamos el 51). Vacío = se ocultan todos los botones de WhatsApp."
       },
       {
         "type": "text",
@@ -270,7 +271,7 @@
       {
         "type": "header",
         "content": "Datos de contacto",
-        "info": "Se muestran en el pie de página. Los campos vacíos no aparecen."
+        "info": "Se muestran en el pie de página y en la página de contacto. Los campos vacíos no aparecen."
       },
       {
         "type": "text",

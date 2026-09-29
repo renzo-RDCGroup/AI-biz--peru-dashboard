@@ -1,12 +1,5 @@
-/* Mi Bici 2026 — facets.js (collection + search results)
-   <facet-results data-section-id> wraps main-collection / main-search:
-   · filter forms ([data-facets-form]), sort select ([data-sort-select]) and filter links
-     ([data-facet-link]: active chips, "Limpiar") re-render through the Section Rendering API
-     (?section_id=), then swap every [data-swap] zone, the filter groups and history.replaceState.
-   · "Cargar más" ([data-load-more]) appends the next page to [data-results-grid].
-   · Sticky toolbar gets .is-stuck (shadow) once it sticks under the header.
-   Page-wide: [data-readmore] description toggles (collection banner) and centring of the active
-   chip in [data-chip-row]. Loaded by several sections: the guard below runs it once. */
+/* Mi Bici 2026 — facets.js: <facet-results> (main-collection / main-search) filters, sort,
+   "Cargar más", sticky toolbar/sidebar; page-wide "Leer más" + current-chip centring. */
 (function () {
   'use strict';
 
@@ -32,6 +25,16 @@
   const paramsFromHref = (href) => {
     try { return new URL(href, location.href).searchParams; } catch (e) { return new URLSearchParams(); }
   };
+  // "Ver N más" / "Leer más": expand the target, swap the button label.
+  const toggleMore = (btn, id) => {
+    const target = doc.getElementById(id);
+    if (!target) return;
+    const open = !target.classList.contains('is-expanded');
+    target.classList.toggle('is-expanded', open);
+    btn.setAttribute('aria-expanded', String(open));
+    if (!btn.dataset.labelMore) btn.dataset.labelMore = btn.textContent.trim();
+    btn.textContent = open ? btn.dataset.labelLess : btn.dataset.labelMore;
+  };
 
   class FacetResults extends HTMLElement {
     connectedCallback() {
@@ -46,13 +49,34 @@
       this.addEventListener('submit', (e) => this.onSubmit(e));
       this.addEventListener('click', (e) => this.onClick(e));
       this.initToolbar();
+      this.initSide();
+      addEventListener('pagehide', () => this.remember({ mbY: scrollY }));
+      this.restore();
+    }
+
+    // Loaded pages live in history.state: Back re-appends them, then restores the scroll.
+    remember(data, url) {
+      history.replaceState(Object.assign({}, history.state, data), '', url);
+    }
+
+    async restore() {
+      const st = history.state || {};
+      const nav = performance.getEntriesByType('navigation')[0] || {};
+      if (!(st.mbPages > 1)) return;
+      if (nav.type !== 'back_forward') return this.remember({ mbPages: 1 });
+      history.scrollRestoration = 'manual';
+      let n = 1, btn;
+      while (n < st.mbPages && (btn = this.querySelector('[data-load-more]')) && (await this.loadMore(btn, true))) n++;
+      this.remember({ mbPages: n });
+      scrollTo(0, st.mbY || 0);
+      history.scrollRestoration = 'auto';
     }
 
     disconnectedCallback() {
       if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
     }
 
-    /* ---------- Events --------------------------------------------------- */
+    /* Events */
     onChange(e) {
       const t = e.target;
       if (!(t instanceof Element)) return;
@@ -84,7 +108,7 @@
       }
       if (!form.matches('[data-facets-form]')) return;
       e.preventDefault();
-      // Pending (debounced) change → apply now. Then the drawer's "Ver N productos" closes it.
+      // Apply a pending (debounced) change now; the drawer's "Ver N productos" closes it.
       if (this.timer) this.flush(form);
       const drawer = form.closest('side-drawer');
       if (drawer && typeof drawer.close === 'function') drawer.close();
@@ -108,21 +132,13 @@
         return;
       }
       const toggle = t.closest('[data-facet-more]');
-      if (toggle) {
-        const list = doc.getElementById(toggle.getAttribute('aria-controls'));
-        if (!list) return;
-        const open = !list.classList.contains('is-expanded');
-        list.classList.toggle('is-expanded', open);
-        toggle.setAttribute('aria-expanded', String(open));
-        if (!toggle.dataset.labelMore) toggle.dataset.labelMore = toggle.textContent.trim();
-        toggle.textContent = open ? toggle.dataset.labelLess : toggle.dataset.labelMore;
-      }
+      if (toggle) toggleMore(toggle, toggle.getAttribute('aria-controls'));
     }
 
-    /* ---------- Params ----------------------------------------------------- */
+    /* Params */
     get sortSelect() { return this.querySelector('[data-sort-select]'); }
 
-    // The sort select lives outside the filter forms; the default order stays out of the URL.
+    // Sort lives outside the filter forms; the default order stays out of the URL.
     withSort(params) {
       const select = this.sortSelect;
       params.delete('sort_by');
@@ -148,7 +164,7 @@
       this.apply(this.withSort(cleanParams(params)), this.pendingSource);
     }
 
-    /* ---------- Render ----------------------------------------------------- */
+    /* Render */
     url(params, extra) {
       const p = new URLSearchParams(params);
       if (extra) Object.keys(extra).forEach((k) => p.set(k, extra[k]));
@@ -160,8 +176,8 @@
       const url = this.url(params, Object.assign({ section_id: this.sectionId }, extra || {}));
       if (this.cache.has(url)) return this.cache.get(url);
       if (this.controller) this.controller.abort();
-      const controller = (this.controller = 'AbortController' in window ? new AbortController() : null);
-      const res = await fetch(url, { credentials: 'same-origin', signal: controller ? controller.signal : undefined });
+      const controller = (this.controller = new AbortController());
+      const res = await fetch(url, { credentials: 'same-origin', signal: controller.signal });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const html = await res.text();
       if (this.cache.size > 20) this.cache.clear();
@@ -178,7 +194,7 @@
         const fresh = M.parseHTML(html).querySelector('facet-results');
         if (!fresh) throw new Error('No section');
         this.swap(fresh, source);
-        history.replaceState(history.state, '', this.url(params));
+        this.remember({ mbPages: 1 }, this.url(params));
         const count = this.querySelector('[data-swap="count"]');
         if (count) M.announce(count.textContent.trim());
       } catch (err) {
@@ -207,8 +223,8 @@
         if (cur) cur.innerHTML = zone.innerHTML;
       });
 
-      // 2. Filter groups, per form. The group being edited keeps its inputs (only counts
-      //    and disabled states change); the others are replaced but keep their open state.
+      // 2. Filter groups: the one being edited only syncs counts/states; others are replaced
+      //    but keep their open state.
       this.querySelectorAll('form[data-facets-form]').forEach((form) => {
         const next = fresh.querySelector('#' + CSS.escape(form.id));
         const wrap = form.querySelector('.facets__groups');
@@ -263,9 +279,10 @@
       if (summary && nextSummary) summary.innerHTML = nextSummary.innerHTML;
     }
 
-    /* ---------- Load more -------------------------------------------------- */
-    async loadMore(button) {
-      if (button.classList.contains('is-loading')) return;
+    /* Load more */
+    // quiet = Back restore (no focus/announce/history). Resolves true on success.
+    async loadMore(button, quiet) {
+      if (button.classList.contains('is-loading')) return false;
       button.classList.add('is-loading');
       button.setAttribute('aria-busy', 'true');
       const params = cleanParams(new URLSearchParams(location.search));
@@ -289,14 +306,24 @@
 
         const more = this.querySelector('[data-results-more]');
         const nextMore = fresh.querySelector('[data-results-more]');
+        // Landed on ?page=N: keep the range start ("Mostrando 9–24 de 40").
+        const old = more && more.querySelector('[data-tpl]');
         if (more && nextMore) more.replaceWith(doc.adoptNode(nextMore));
         else if (more) more.remove();
+        const status = this.querySelector('.results-more__status');
+        if (status && old) {
+          status.dataset.tpl = old.dataset.tpl;
+          status.textContent = old.dataset.tpl.replace('[n]', status.dataset.shown);
+        }
+        if (quiet) return true;
 
         const first = added[0] && added[0].querySelector('a[href]:not([tabindex="-1"])');
         if (first) first.focus({ preventScroll: true });
-        const status = this.querySelector('.results-more__status');
         if (status) M.announce(status.textContent.trim());
+        this.remember({ mbPages: ((history.state && history.state.mbPages) || 1) + 1 });
+        return true;
       } catch (err) {
+        if (quiet) return false;
         const next = new URLSearchParams(params);
         next.set('page', button.dataset.nextPage);
         window.location.href = this.url(next);
@@ -306,7 +333,22 @@
       }
     }
 
-    /* ---------- Sticky toolbar --------------------------------------------- */
+    // Sidebar sticks only while it fits; on unsticking the page scrolls to keep it in place.
+    initSide() {
+      const s = this.querySelector('.results__sidebar');
+      const fit = () => {
+        const y = s.getBoundingClientRect().top;
+        const was = s.classList.contains('is-fit');
+        const on = s.offsetHeight + (parseFloat(getComputedStyle(s).top) || 0) + 16 <= innerHeight;
+        s.classList.toggle('is-fit', on);
+        if (was && !on) scrollBy({ top: s.getBoundingClientRect().top - y, behavior: 'instant' });
+      };
+      if (!s || !window.ResizeObserver) return;
+      new ResizeObserver(fit).observe(s);
+      addEventListener('resize', fit);
+    }
+
+    /* Sticky toolbar */
     initToolbar() {
       const bar = this.querySelector('[data-toolbar]');
       if (!bar) return;
@@ -325,8 +367,7 @@
   }
   M.define('facet-results', FacetResults);
 
-  /* ---------- Page-wide helpers ------------------------------------------- */
-  // Collection description "Leer más": the button is shown only when the text overflows.
+  /* Page-wide: "Leer más" shows only when the description overflows. */
   const initReadMore = () => {
     doc.querySelectorAll('[data-readmore]').forEach((btn) => {
       const target = doc.getElementById(btn.getAttribute('data-readmore'));
@@ -338,14 +379,7 @@
   };
   doc.addEventListener('click', (e) => {
     const btn = e.target instanceof Element ? e.target.closest('[data-readmore]') : null;
-    if (!btn) return;
-    const target = doc.getElementById(btn.getAttribute('data-readmore'));
-    if (!target) return;
-    const open = !target.classList.contains('is-expanded');
-    target.classList.toggle('is-expanded', open);
-    btn.setAttribute('aria-expanded', String(open));
-    if (!btn.dataset.labelMore) btn.dataset.labelMore = btn.textContent.trim();
-    btn.textContent = open ? btn.dataset.labelLess : btn.dataset.labelMore;
+    if (btn) toggleMore(btn, btn.getAttribute('data-readmore'));
   });
 
   // Scroll horizontally-scrolling chip rows so the current chip is visible.

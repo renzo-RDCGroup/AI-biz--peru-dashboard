@@ -8,6 +8,9 @@
       "buy_now": "Comprar ahora",
       "add_short": "Agregar",
       "variant_label": "Variante",
+      "sold_out_more": "Ver más en {{ collection }}",
+      "free_shipping_teaser_html": "<strong>Envío gratis</strong> a {{ zone }} en pedidos desde <strong>{{ amount }}</strong>",
+      "free_shipping_teaser_all_html": "<strong>Envío gratis</strong> en pedidos desde <strong>{{ amount }}</strong>",
       "stock": {
         "in_stock": "Disponible",
         "low_stock_template": "¡Solo quedan [count]!",

@@ -3,18 +3,37 @@
   Blocks "item": icon, title, text, link (+ link_whatsapp). 2×2 compact cards on mobile,
   one row ≥750. WhatsApp items (icon "whatsapp" or link_whatsapp) render NOTHING when
   settings.whatsapp_number is blank — the number is never invented.
+  "[envio_gratis]" in an item's text prints settings.free_shipping_threshold as money (one source
+  of truth for "Gratis desde S/ 220"); with a threshold of 0 that text line is not shown.
 {%- endcomment -%}
 {{ 'section-home.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
   assign wa_digits = settings.whatsapp_number | strip | remove: ' ' | remove: '+' | remove: '-' | remove: '(' | remove: ')' | remove: '.'
+  # Same normalisation as snippets/whatsapp-button: drop an international "00" prefix, and a
+  # local 9-digit Peruvian mobile ("987 654 321") gets the 51 country code wa.me needs.
+  assign wa_first = wa_digits | slice: 0, 2
+  if wa_first == '00'
+    assign wa_digits = wa_digits | remove_first: '00'
+  endif
+  assign wa_first = wa_digits | slice: 0
+  if wa_digits.size == 9 and wa_first == '9'
+    assign wa_digits = '51' | append: wa_digits
+  endif
   assign wa_url = ''
   if wa_digits != blank
     assign wa_url = 'https://wa.me/' | append: wa_digits
     if settings.whatsapp_message != blank
-      assign wa_msg = settings.whatsapp_message | url_encode
+      # url_encode turns spaces into "+" (form encoding); wa.me expects %20. A literal "+" is
+      # already %2B at this point, so only spaces are affected.
+      assign wa_msg = settings.whatsapp_message | url_encode | replace: '+', '%20'
       assign wa_url = wa_url | append: '?text=' | append: wa_msg
     endif
+  endif
+  assign fs_token = '[envio_gratis]'
+  assign fs_amount = ''
+  if settings.free_shipping_threshold > 0
+    assign fs_amount = settings.free_shipping_threshold | times: 100 | money_without_trailing_zeros
   endif
 
   # Count the items that will actually render (drives the desktop column count).
@@ -45,6 +64,14 @@
             if is_wa and wa_digits == blank
               continue
             endif
+            assign item_text = block.settings.text
+            if item_text contains fs_token
+              if fs_amount == blank
+                assign item_text = ''
+              else
+                assign item_text = item_text | replace: fs_token, fs_amount
+              endif
+            endif
             assign item_url = block.settings.link
             assign item_external = false
             if block.settings.link_whatsapp
@@ -67,8 +94,8 @@
                   {{- block.settings.title | escape -}}
                 {%- endif -%}
               </p>
-              {%- if block.settings.text != blank -%}
-                <p class="usp__text">{{ block.settings.text | escape | replace: 'S/ ', 'S/ ' }}</p>
+              {%- if item_text != blank -%}
+                <p class="usp__text">{{ item_text | escape | replace: 'S/ ', 'S/ ' }}</p>
               {%- endif -%}
             </div>
           </li>
@@ -103,7 +130,7 @@
           {"value": "truck", "label": "Camión"},
           {"value": "whatsapp", "label": "WhatsApp"},
           {"value": "shield", "label": "Escudo"},
-          {"value": "return", "label": "Devolución"},
+          {"value": "return", "label": "Cambio"},
           {"value": "lock", "label": "Candado"},
           {"value": "store", "label": "Tienda"},
           {"value": "clock", "label": "Reloj"},
@@ -112,7 +139,7 @@
           {"value": "bike", "label": "Bicicleta"}
         ], "default": "medal"},
         {"type": "text", "id": "title", "label": "Título", "default": "Productos originales"},
-        {"type": "text", "id": "text", "label": "Texto", "default": "Vendedor autorizado Rockbros"},
+        {"type": "text", "id": "text", "label": "Texto", "info": "[envio_gratis] muestra el monto de envío gratis de Configuración del tema › Carrito (si es 0, este texto no se muestra).", "default": "Vendedor autorizado Rockbros"},
         {"type": "url", "id": "link", "label": "Enlace (opcional)"},
         {"type": "checkbox", "id": "link_whatsapp", "label": "Enlazar a WhatsApp", "info": "Usa el número de Configuración del tema. Sin número, este beneficio no se muestra.", "default": false}
       ]
@@ -123,7 +150,7 @@
       "name": "Beneficios",
       "blocks": [
         {"type": "item"},
-        {"type": "item", "settings": {"icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde S/ 220"}},
+        {"type": "item", "settings": {"icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde [envio_gratis]"}},
         {"type": "item", "settings": {"icon": "whatsapp", "title": "Atención por WhatsApp", "text": "Consultas y pedidos por chat", "link_whatsapp": true}},
         {"type": "item", "settings": {"icon": "return", "title": "Cambios y garantía", "text": "7 días para cambiar, sin abrir"}}
       ]

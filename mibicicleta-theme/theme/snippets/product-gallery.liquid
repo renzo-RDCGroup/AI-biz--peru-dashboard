@@ -90,14 +90,14 @@
       {%- endfor -%}
     </ul>
     {%- if g_count > 1 -%}
-      <button type="button" class="btn btn--icon carousel__prev product-gallery__arrow" aria-label="{{ 'general.carousel.previous' | t }}">{% render 'icon', name: 'chevron-left' %}</button>
-      <button type="button" class="btn btn--icon carousel__next product-gallery__arrow" aria-label="{{ 'general.carousel.next' | t }}">{% render 'icon', name: 'chevron-right' %}</button>
-      <div class="carousel__controls product-gallery__dots"><div class="carousel__dots"></div></div>
+      <button type="button" class="btn btn--icon carousel__prev product-gallery__arrow js-only" aria-label="{{ 'general.carousel.previous' | t }}">{% render 'icon', name: 'chevron-left' %}</button>
+      <button type="button" class="btn btn--icon carousel__next product-gallery__arrow js-only" aria-label="{{ 'general.carousel.next' | t }}">{% render 'icon', name: 'chevron-right' %}</button>
+      <div class="carousel__controls product-gallery__dots js-only"><div class="carousel__dots"></div></div>
     {%- endif -%}
   </carousel-slider>
 
   {%- if g_count > 1 -%}
-    <ul class="product-gallery__thumbs" role="list" aria-label="{{ 'products.product.gallery.thumbnails' | t }}">
+    <ul class="product-gallery__thumbs js-only" role="list" aria-label="{{ 'products.product.gallery.thumbnails' | t }}">
       {%- for media in product.media -%}
         <li class="product-gallery__thumb-item">
           <button
@@ -120,7 +120,7 @@
   {%- endif -%}
 
   {%- if lightbox and g_count > 0 -%}
-    <dialog class="modal modal--fullscreen product-lightbox" aria-label="{{ 'products.product.gallery.lightbox' | t }}" data-lightbox>
+    <dialog class="modal modal--fullscreen product-lightbox" tabindex="-1" aria-label="{{ 'products.product.gallery.lightbox' | t }}" data-lightbox>
       <button type="button" class="btn btn--icon modal__close product-lightbox__close" data-lightbox-close aria-label="{{ 'general.close' | t }}">{% render 'icon', name: 'close' %}</button>
       <ul class="product-lightbox__list" role="list">
         {%- for media in product.media -%}

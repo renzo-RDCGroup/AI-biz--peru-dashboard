@@ -1,17 +1,21 @@
 {%- comment -%}
-  Product recommendations (related | complementary). Renders an empty <product-recommendations>
-  shell on the page; the section script below fetches
+  Product recommendations (related | complementary; product template only). The product page
+  renders an empty <product-recommendations> shell; the section script below fetches
   {{ routes.product_recommendations_url }}?section_id=…&product_id=…&limit=…&intent=…
-  when it nears the viewport and swaps in the carousel. Nothing shows when Shopify has no
-  recommendations (complementary needs the Search & Discovery app) or outside product pages.
+  once the page is idle and swaps in the carousel. That response is built only from the
+  documented `recommendations` object (`product` may not exist there). Nothing shows when
+  Shopify has no recommendations (complementary needs the Search & Discovery app).
 {%- endcomment -%}
-{%- if product != blank -%}
-  {%- liquid
+{%- liquid
+  assign rec_url = ''
+  if product != blank
     assign rec_url = routes.product_recommendations_url | append: '?section_id=' | append: section.id | append: '&product_id=' | append: product.id | append: '&limit=' | append: section.settings.limit | append: '&intent=' | append: section.settings.intent
-    assign heading_id = 'Recs-' | append: section.id
-  -%}
-  <product-recommendations class="product-recs scheme-{{ section.settings.scheme }}" data-url="{{ rec_url }}">
-    {%- if recommendations.performed and recommendations.products_count > 0 -%}
+  endif
+  assign heading_id = 'Recs-' | append: section.id
+-%}
+{%- if rec_url != '' or recommendations.performed? -%}
+  <product-recommendations class="product-recs scheme-{{ section.settings.scheme }}"{% if rec_url != '' %} data-url="{{ rec_url }}"{% endif %}>
+    {%- if recommendations.performed? and recommendations.products_count > 0 -%}
       <div class="section" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;">
         <div class="page-width">
           <carousel-slider
@@ -63,9 +67,10 @@
 {% endstylesheet %}
 
 {% javascript %}
-  /* <product-recommendations>: lazy-loads this section via the Section Rendering API when it nears
-     the viewport; stays hidden when Shopify returns no products. Compiled section JS may run
-     before global.js, so it boots on DOMContentLoaded when window.MiBici isn't ready yet. */
+  /* <product-recommendations>: loads this section from the recommendations endpoint once the
+     page is idle (after `load`), so the carousel is in place before the shopper scrolls to it
+     (no late layout shift of the USP strip / footer); stays hidden when Shopify returns no
+     products. Boots on DOMContentLoaded: compiled section JS may run before global.js. */
   (function () {
     function boot() {
       if (!window.customElements || customElements.get('product-recommendations')) return;
@@ -84,13 +89,10 @@
               })
               .catch(() => { this.hidden = true; });
           };
-          if (!('IntersectionObserver' in window)) { load(); return; }
-          const io = new IntersectionObserver((entries) => {
-            if (!entries[0].isIntersecting) return;
-            io.disconnect();
-            load();
-          }, { rootMargin: '0px 0px 600px 0px' });
-          io.observe(this);
+          const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 200));
+          const kick = () => idle(load, { timeout: 2000 });
+          if (document.readyState === 'complete') kick();
+          else window.addEventListener('load', kick, { once: true });
         }
       }
       customElements.define('product-recommendations', ProductRecommendations);
@@ -119,8 +121,20 @@
       ],
       "default": "related"
     },
+    {
+      "type": "select",
+      "id": "scheme",
+      "label": "Esquema de color",
+      "options": [
+        { "value": "light", "label": "Claro" },
+        { "value": "soft", "label": "Gris suave" },
+        { "value": "brand", "label": "Amarillo" },
+        { "value": "dark", "label": "Oscuro" }
+      ],
+      "default": "light"
+    },
     { "type": "text", "id": "heading", "label": "Título", "default": "También te puede servir" },
-    { "type": "checkbox", "id": "heading_dot", "label": "Punto rojo en el título", "default": true },
+    { "type": "checkbox", "id": "heading_dot", "label": "Punto rojo en el título", "info": "Requiere «Punto rojo al final de los títulos» en Configuración del tema › Tipografía.", "default": true },
     { "type": "range", "id": "limit", "label": "Máximo de productos", "min": 2, "max": 10, "step": 1, "default": 8 },
     {
       "type": "select",
@@ -132,21 +146,11 @@
       ],
       "default": "4"
     },
-    {
-      "type": "select",
-      "id": "scheme",
-      "label": "Esquema de color",
-      "options": [
-        { "value": "light", "label": "Claro" },
-        { "value": "soft", "label": "Gris suave" },
-        { "value": "brand", "label": "Amarillo" },
-        { "value": "dark", "label": "Negro" }
-      ],
-      "default": "light"
-    },
-    { "type": "range", "id": "padding_top", "label": "Espacio superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
-    { "type": "range", "id": "padding_bottom", "label": "Espacio inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 }
+    { "type": "header", "content": "Espaciado" },
+    { "type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 }
   ],
+  "enabled_on": { "templates": ["product"] },
   "presets": [
     { "name": "Recomendaciones" }
   ]

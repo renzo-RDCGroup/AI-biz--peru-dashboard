@@ -6,6 +6,7 @@
   prefers-reduced-motion.
   mode "rotate": one message at a time with prev/next; any interaction stops the rotation.
   Blocks "message": text, optional link, optional discount code (copied on click).
+  [envio_gratis] in a message becomes the free-shipping amount of Theme settings › Carrito.
 {%- endcomment -%}
 {%- if section.blocks.size > 0 -%}
   {{ 'section-announcement.css' | asset_url | stylesheet_tag }}
@@ -18,6 +19,7 @@
       assign copies = 2
     endif
     assign copied_label = 'general.copied' | t
+    assign fs_amount = settings.free_shipping_threshold | times: 100 | money_without_trailing_zeros
   -%}
 
   <div class="announcement scheme-{{ section.settings.scheme | default: 'dark' }}{% if section.settings.show_dots %} announcement--dots{% endif %}">
@@ -42,6 +44,13 @@
               {%- for block in section.blocks -%}
                 {%- liquid
                   assign code = block.settings.code | strip
+                  assign text = block.settings.text | escape
+                  if text contains '[envio_gratis]'
+                    if settings.free_shipping_threshold <= 0
+                      continue
+                    endif
+                    assign text = text | replace: '[envio_gratis]', fs_amount
+                  endif
                   assign tab = ''
                   if copy > 1
                     assign tab = ' tabindex="-1"'
@@ -50,10 +59,10 @@
                 <li class="announcement__item" {% if copy == 1 %}{{ block.shopify_attributes }}{% endif %} data-index="{{ forloop.index0 }}">
                   {%- if block.settings.link != blank -%}
                     <a class="announcement__text announcement__link" href="{{ block.settings.link }}"{{ tab }}>
-                      {{- block.settings.text | escape -}}
+                      {{- text -}}
                     </a>
                   {%- else -%}
-                    <span class="announcement__text">{{ block.settings.text | escape }}</span>
+                    <span class="announcement__text">{{ text }}</span>
                   {%- endif -%}
                   {%- if code != blank -%}
                     <button type="button" class="announcement__code" data-copy-code="{{ code | escape }}" aria-label="{{ 'header.announcement.copy_code' | t: code: code }}"{{ tab }}>
@@ -100,7 +109,7 @@
         { "value": "light", "label": "Claro" },
         { "value": "soft", "label": "Gris suave" },
         { "value": "brand", "label": "Amarillo" },
-        { "value": "dark", "label": "Negro" }
+        { "value": "dark", "label": "Oscuro" }
       ],
       "default": "dark"
     },
@@ -113,7 +122,7 @@
         { "value": "rotate", "label": "Un mensaje a la vez" }
       ],
       "default": "marquee",
-      "info": "Con \"reducir movimiento\" activado en el dispositivo, los mensajes se muestran quietos."
+      "info": "Con «reducir movimiento» activado en el dispositivo, los mensajes se muestran quietos."
     },
     {
       "type": "range",
@@ -123,7 +132,8 @@
       "max": 120,
       "step": 5,
       "unit": "s",
-      "default": 40
+      "default": 40,
+      "visible_if": "{{ section.settings.mode == 'marquee' }}"
     },
     {
       "type": "range",
@@ -133,13 +143,15 @@
       "max": 10,
       "step": 1,
       "unit": "s",
-      "default": 5
+      "default": 5,
+      "visible_if": "{{ section.settings.mode == 'rotate' }}"
     },
     {
       "type": "checkbox",
       "id": "show_dots",
       "label": "Separar mensajes con punto rojo",
-      "default": true
+      "default": true,
+      "visible_if": "{{ section.settings.mode == 'marquee' }}"
     }
   ],
   "blocks": [
@@ -151,7 +163,8 @@
           "type": "text",
           "id": "text",
           "label": "Texto",
-          "default": "Envío gratis a todo el Perú desde S/ 220"
+          "default": "Envío gratis a todo el Perú desde [envio_gratis]",
+          "info": "Escribe [envio_gratis] para mostrar el monto de Configuración del tema › Carrito: se actualiza solo. Si el monto es 0, ese mensaje no se muestra."
         },
         {
           "type": "url",

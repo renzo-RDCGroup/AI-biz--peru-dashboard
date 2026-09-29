@@ -7,6 +7,7 @@
 {%- liquid
   assign sort_id = 'SortBy-' | append: section_id
   assign current_sort = results.sort_by | default: results.default_sort_by
+  assign known_sorts = 'manual,best-selling,title-ascending,title-descending,price-ascending,price-descending,created-ascending,created-descending,relevance' | split: ','
 -%}
 <form class="sort-by" action="{{ results_url }}" method="get" data-sort-form>
   {%- if terms != blank -%}
@@ -32,7 +33,15 @@
     {%- render 'icon', name: 'sort' -%}
     <select id="{{ sort_id }}" name="sort_by" data-sort-select data-default="{{ results.default_sort_by | escape }}">
       {%- for option in results.sort_options -%}
-        <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>{{ option.name | escape }}</option>
+        {%- liquid
+          # Short labels (fit the mobile pill); unknown values keep Shopify's own name.
+          assign label = option.name
+          if known_sorts contains option.value
+            assign label_key = 'filters.sort.options.' | append: option.value | replace: '-', '_'
+            assign label = label_key | t
+          endif
+        -%}
+        <option value="{{ option.value | escape }}"{% if option.value == current_sort %} selected{% endif %}>{{ label | escape }}</option>
       {%- endfor -%}
     </select>
   </div>

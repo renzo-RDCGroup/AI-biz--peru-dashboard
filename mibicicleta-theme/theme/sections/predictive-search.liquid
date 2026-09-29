@@ -65,10 +65,42 @@
             <p class="psearch__heading" id="ps-h-collections" aria-hidden="true">{{ 'search.predictive.collections' | t }}</p>
             <ul class="psearch__list" role="none">
               {%- for collection in collections limit: 4 -%}
-                {%- assign opt = opt | plus: 1 -%}
+                {%- liquid
+                  assign opt = opt | plus: 1
+                  # Same category icons as the menu drawer / desktop dropdowns (handle + title).
+                  assign key = collection.handle | append: ' ' | append: collection.title | handle
+                  assign ps_icon = 'grid'
+                  if key contains 'rockbros' or key contains 'neco'
+                    assign ps_icon = 'medal'
+                  elsif key contains 'componente' or key contains 'asiento' or key contains 'sillin'
+                    assign ps_icon = 'seat'
+                  elsif key contains 'luz' or key contains 'luces' or key contains 'linterna'
+                    assign ps_icon = 'light'
+                  elsif key contains 'llanta' or key contains 'camara'
+                    assign ps_icon = 'tire'
+                  elsif key contains 'pinon' or key contains 'transmision' or key contains 'cadena'
+                    assign ps_icon = 'gear'
+                  elsif key contains 'espejo'
+                    assign ps_icon = 'mirror'
+                  elsif key contains 'accesorio'
+                    assign ps_icon = 'bag'
+                  elsif key contains 'casco'
+                    assign ps_icon = 'helmet'
+                  elsif key contains 'pedal'
+                    assign ps_icon = 'pedal'
+                  elsif key contains 'grip' or key contains 'puno'
+                    assign ps_icon = 'grip'
+                  elsif key contains 'tapabarro'
+                    assign ps_icon = 'mudguard'
+                  elsif key contains 'lente'
+                    assign ps_icon = 'glasses'
+                  elsif key contains 'scooter'
+                    assign ps_icon = 'scooter'
+                  endif
+                -%}
                 <li role="none">
                   <a class="psearch__collection" id="ps-opt-{{ opt }}" role="option" aria-selected="false" tabindex="-1" href="{{ collection.url }}">
-                    <span class="psearch__collection-icon">{% render 'icon', name: 'grid' %}</span>
+                    <span class="psearch__collection-icon">{% render 'icon', name: ps_icon %}</span>
                     <span>{{ collection.title | escape }}</span>
                   </a>
                 </li>
@@ -87,13 +119,13 @@
                 {%- liquid
                   assign opt = opt | plus: 1
                   assign img = product.featured_image
-                  assign img_alt = img.alt | default: product.title
                 -%}
                 <li role="none">
                   <a class="psearch__product" id="ps-opt-{{ opt }}" role="option" aria-selected="false" tabindex="-1" href="{{ product.url }}">
+                    {%- comment -%} Decorative thumb: the option already reads the title. {%- endcomment -%}
                     <span class="psearch__thumb">
                       {%- if img != blank -%}
-                        {{ img | image_url: width: 160 | image_tag: loading: 'lazy', widths: '80, 160', sizes: '64px', alt: img_alt }}
+                        {{ img | image_url: width: 160 | image_tag: loading: 'lazy', widths: '80, 160', sizes: '64px', alt: '' }}
                       {%- else -%}
                         {%- render 'logo', variant: 'mark', tone: 'mono-dark', label: '', class: 'psearch__noimg' -%}
                       {%- endif -%}

@@ -82,8 +82,17 @@
 
     <div class="collection-banner__visual" aria-hidden="true">
       {%- if has_image -%}
+        {%- liquid
+          # object-fit: cover crops wide photos: ask for box width × (image ratio ÷ box ratio).
+          # Boxes: 84px square · 220px 4:3 (≥750) · ≤440px 16:10 (≥990).
+          assign ar = collection.image.aspect_ratio | default: 1
+          assign w_sm = ar | times: 84 | at_least: 84 | ceil
+          assign w_md = ar | divided_by: 1.3333 | times: 220 | at_least: 220 | ceil
+          assign w_lg = ar | divided_by: 1.6 | times: 440 | at_least: 440 | ceil
+          assign img_sizes = '(min-width: 990px) ' | append: w_lg | append: 'px, (min-width: 750px) ' | append: w_md | append: 'px, ' | append: w_sm | append: 'px'
+        -%}
         <div class="collection-banner__media media">
-          {%- render 'image', image: collection.image, widths: '160,240,360,480,640,800,960', sizes: '(min-width: 990px) 480px, (min-width: 750px) 280px, 96px', lazy: false, priority: true, alt: '' -%}
+          {%- render 'image', image: collection.image, widths: '160,240,360,480,640,800,960,1200', sizes: img_sizes, lazy: false, priority: true, alt: '' -%}
         </div>
       {%- else -%}
         <span class="collection-banner__icon beacon">{% render 'icon', name: icon_name %}</span>
@@ -117,7 +126,7 @@
   "settings": [
     {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "cream", "label": "Amarillo suave"}, {"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "cream"},
     {"type": "checkbox", "id": "show_breadcrumbs", "label": "Mostrar ruta de navegación", "default": true},
-    {"type": "checkbox", "id": "show_count", "label": "Mostrar cantidad de productos", "default": true},
+    {"type": "checkbox", "id": "show_count", "label": "Mostrar cantidad de productos", "info": "Total de la colección, sin filtros. La cantidad filtrada ya aparece sobre los productos.", "default": true},
     {"type": "checkbox", "id": "show_description", "label": "Mostrar descripción", "default": true},
     {"type": "checkbox", "id": "show_image", "label": "Mostrar imagen de la colección", "info": "Sin imagen se muestra el ícono de la categoría con la marca «mi».", "default": true},
     {"type": "header", "content": "Categorías"},

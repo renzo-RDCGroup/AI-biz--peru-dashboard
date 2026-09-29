@@ -19,6 +19,9 @@
     "reading_time": {
       "one": "{{ count }} min de lectura",
       "other": "{{ count }} min de lectura"
+    },
+    "custom_liquid": {
+      "empty": "Pega tu código Liquid o HTML en la configuración de esta sección."
     }
   },
   "contact": {
@@ -44,7 +47,7 @@
   },
   "blog": {
     "empty_title": "Aún no hay artículos",
-    "empty_text": "Estamos preparando guías y novedades. Mientras tanto, date una vuelta por el catálogo.",
+    "empty_text": "Aún no publicamos artículos. Mientras tanto, date una vuelta por el catálogo.",
     "empty_cta": "Ver productos",
     "read_more": "Leer artículo",
     "by": "Por {{ author }}",
@@ -98,7 +101,7 @@
     "disabled": "Esta tarjeta está desactivada",
     "how_to": "Ingresa este código en el checkout para pagar con tu saldo.",
     "qr_alt": "Código QR de la tarjeta de regalo",
-    "qr_help": "Muestra este código QR en caja",
+    "qr_help": "Código QR de tu tarjeta de regalo",
     "apple_wallet": "Agregar a Apple Wallet",
     "message": "Mensaje",
     "shop_cta": "Ir a la tienda",
@@ -108,6 +111,6 @@
     "eyebrow": "Error 404",
     "search_label": "Buscar en la tienda",
     "search_submit": "Buscar",
-    "categories": "Categorías"
+    "categories": "Explora por categoría"
   }
 }

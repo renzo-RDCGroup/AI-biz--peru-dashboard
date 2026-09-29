@@ -77,10 +77,6 @@
 .pill-search__input:focus-visible { outline: none; }
 .pill-search__btn { flex: none; min-height: 44px; padding-inline: 20px; }
 @media (max-width: 389.98px) { .pill-search__btn { padding-inline: 14px; } }
-/* base.css resets ul[role=list] margin/padding (0,1,1), which cancels .chip-row--bleed on lists. */
-@media (max-width: 989.98px) {
-  :is(.not-found__chips, .blog__topics ul).chip-row--bleed { margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); }
-}
 
 /* ---------- 404 ----------------------------------------------------------- */
 .not-found__inner { position: relative; display: grid; gap: 12px; }
@@ -120,7 +116,14 @@
     gap: 56px;
     min-height: 520px;
   }
-  .not-found__code { justify-self: start; }
+  /* Size the numeral to the space left of the 580px body column + 56px gap ("404." ≈ 1.82em),
+     so it never runs into the chips at 990–1100px; capped at the base 17.5rem. */
+  .not-found__code {
+    justify-self: start;
+    max-width: 100%;
+    overflow-x: clip;
+    font-size: min(17.5rem, calc((100vw - 2 * var(--gutter) - 636px) / 1.9));
+  }
 }
 
 /* ---------- Page content -------------------------------------------------- */
@@ -163,6 +166,8 @@
 .contact__list a { font-weight: 700; text-decoration: none; }
 .contact__list a:hover { text-decoration: underline; text-decoration-color: var(--color-brand); text-decoration-thickness: 2px; }
 .contact__highlight { display: flex; align-items: center; gap: 14px; }
+/* The red dot is kept for headings; in a stack of icon rows it reads like notification badges. */
+.contact__highlight .pg-beacon::after { content: none; }
 .contact__hl-title { font: 800 var(--fs-base)/1.25 var(--font-heading); }
 .contact__hl-text { margin-top: 2px; color: var(--scheme-muted); font-size: var(--fs-sm); line-height: 1.4; }
 
@@ -251,13 +256,13 @@
 .blog-empty__text { max-width: 42ch; margin-bottom: 8px; color: var(--scheme-muted); }
 
 /* ---------- Article ------------------------------------------------------- */
-.article__header { padding-block: 20px 28px; }
+.article__header { padding-block: var(--article-pad-top, 20px) 28px; }
 .article__crumbs { margin-bottom: 24px; }
 .article__header .eyebrow { margin-bottom: 12px; }
 .article__title { font-size: var(--fs-3xl); font-weight: var(--fw-display); letter-spacing: -.02em; }
 .article__meta { margin-top: 16px; color: var(--scheme-muted); font-size: var(--fs-sm); }
 .article__hero .media { --ratio: 1.333; border-radius: var(--radius-lg); }
-.article__main { padding-block: 32px 56px; }
+.article__main { padding-block: 32px var(--article-pad-bottom, 56px); }
 .article__content { font-size: 1.0625rem; line-height: 1.75; }
 .article__main .article__tags { --cluster-gap: 8px; margin-top: 32px; }
 .article__foot {
@@ -275,7 +280,7 @@
 .article__back:hover { text-decoration: underline; text-decoration-color: var(--color-brand); text-decoration-thickness: 2px; }
 .article__share { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .article__share-label { margin-right: 4px; color: var(--scheme-muted); font-size: var(--fs-sm); font-weight: 600; }
-.article__comments { padding-bottom: 56px; }
+.article__comments { padding-bottom: var(--article-pad-bottom, 56px); }
 .article__comments-title { margin-bottom: 20px; font-size: var(--fs-xl); }
 .comments { display: grid; gap: 12px; }
 .article__comments .comments { margin-bottom: 32px; }

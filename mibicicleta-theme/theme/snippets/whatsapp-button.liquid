@@ -13,6 +13,15 @@
 {%- liquid
   assign wa_style = style | default: 'button'
   assign wa_digits = settings.whatsapp_number | strip | remove: ' ' | remove: '+' | remove: '-' | remove: '(' | remove: ')' | remove: '.'
+  # "0051…" → "51…"; a bare 9-digit Peruvian mobile ("987 654 321") gets the 51 country code.
+  assign wa_head = wa_digits | slice: 0, 2
+  if wa_head == '00'
+    assign wa_digits = wa_digits | remove_first: '00'
+  endif
+  assign wa_head = wa_digits | slice: 0
+  if wa_digits.size == 9 and wa_head == '9'
+    assign wa_digits = '51' | append: wa_digits
+  endif
   assign wa_show = true
   if wa_digits == blank
     assign wa_show = false
@@ -26,7 +35,9 @@
     assign wa_message = message | default: settings.whatsapp_message
     assign wa_url = 'https://wa.me/' | append: wa_digits
     if wa_message != blank
-      assign wa_text_param = wa_message | url_encode
+      # url_encode turns spaces into "+" (form encoding); wa.me expects %20. A literal "+" is
+      # already %2B at this point, so only encoded spaces are replaced.
+      assign wa_text_param = wa_message | url_encode | replace: '+', '%20'
       assign wa_url = wa_url | append: '?text=' | append: wa_text_param
     endif
     assign wa_label = label | default: ''

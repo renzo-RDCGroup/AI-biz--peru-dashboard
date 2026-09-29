@@ -5,10 +5,17 @@
      section_id: section.id, form_id: product_form_id, buy_id: buy_id, has_description: true %}
   Hooks for assets/product.js: [data-price] [data-save] [data-badge] [data-stock] [data-sku]
   [data-add-button] [data-buy-now] [data-read-more] <pickup-availability> <share-button>.
+  Trust texts and collapsible content replace [envio_gratis] with the free-shipping amount
+  (same token as usp-strip/faq); with a threshold of 0 that tile / row is not shown.
 {%- endcomment -%}
 {%- liquid
   assign current = variant | default: product.selected_or_first_available_variant
   assign bs = block.settings
+  assign fs_token = '[envio_gratis]'
+  assign fs_amount = ''
+  if settings.free_shipping_threshold > 0
+    assign fs_amount = settings.free_shipping_threshold | times: 100 | money_without_trailing_zeros
+  endif
   assign on_sale = false
   if current.compare_at_price > current.price
     assign on_sale = true
@@ -91,14 +98,30 @@
     </p>
 
   {%- when 'short_description' -%}
+    {%- comment -%} Word-boundary teaser; skipped when the (open) description block would repeat it whole. {%- endcomment -%}
     {%- liquid
       assign excerpt_len = bs.length | default: 160
       assign plain = product.description | replace: '<', ' <' | strip_html | strip_newlines | split: ' ' | join: ' ' | strip
+      assign ex = plain
+      assign ex_more = false
+      if plain.size > excerpt_len
+        assign ex_more = true
+        assign ex = plain | truncate: excerpt_len, ''
+        assign ex_cut = ex | split: ' ' | last
+        assign ex = ex | remove_last: ex_cut | strip
+        assign ex_end = ex | slice: -1
+        if ex_end == ',' or ex_end == '.' or ex_end == ';' or ex_end == ':'
+          assign ex = ex | remove_last: ex_end
+        endif
+        assign ex = ex | append: '…'
+      elsif has_description
+        assign ex = ''
+      endif
     -%}
-    {%- if plain != blank -%}
+    {%- if ex != blank -%}
       <p class="product__excerpt">
-        {{- plain | truncate: excerpt_len -}}
-        {%- if plain.size > excerpt_len and has_description %} <a class="product__more" href="#Description-{{ section_id }}" data-read-more>{{ 'products.product.read_more' | t }}</a>{% endif -%}
+        {{- ex -}}
+        {%- if ex_more and has_description %} <a class="product__more" href="#Description-{{ section_id }}" data-read-more>{{ 'products.product.read_more' | t }}</a>{% endif -%}
       </p>
     {%- endif -%}
 
@@ -137,7 +160,7 @@
           </button>
         </div>
         {%- if bs.show_buy_now -%}
-          <button type="submit" name="add" class="btn btn--ink btn--lg btn--block product-form__buy-now" data-redirect="checkout" data-buy-now{% unless current.available %} hidden{% endunless %}>
+          <button type="submit" name="add" class="btn btn--ink btn--lg btn--block product-form__buy-now js-only" data-redirect="checkout" data-buy-now{% unless current.available %} hidden{% endunless %}>
             {{- 'products.product.buy_now' | t -}}
           </button>
         {%- endif -%}
@@ -146,10 +169,39 @@
         {%- endif -%}
         <p class="form-message form-message--error" data-form-error role="alert" hidden></p>
       {%- endform -%}
+      {%- liquid
+        assign alt_col = nil
+        for c in product.collections
+          unless c.handle == 'frontpage' or c.handle == 'destacados'
+            assign alt_col = c
+            break
+          endunless
+        endfor
+      -%}
+      {%- if alt_col -%}
+        <a class="btn btn--outline btn--block product-form__alt" href="{{ alt_col.url }}">
+          {{- 'products.product.sold_out_more' | t: collection: alt_col.title }} {% render 'icon', name: 'arrow-right' -%}
+        </a>
+      {%- endif -%}
     </product-form>
 
   {%- when 'free_shipping' -%}
-    {%- render 'free-shipping-bar', total: cart.total_price, style: 'inline', class: 'product__free-ship' -%}
+    {%- if cart.item_count == 0 and settings.free_shipping_threshold > 0 -%}
+      {%- comment -%} Empty cart: a static promise instead of a 0% bar (stays true after an add). {%- endcomment -%}
+      {%- assign fs_nb = fs_amount | replace: ' ', '&nbsp;' -%}
+      <p class="product__free-ship product__free-ship--teaser">
+        <span class="delivery__icon">{% render 'icon', name: 'bike' %}</span>
+        <span>
+          {%- if settings.free_shipping_zone != blank -%}
+            {{- 'products.product.free_shipping_teaser_html' | t: zone: settings.free_shipping_zone, amount: fs_nb -}}
+          {%- else -%}
+            {{- 'products.product.free_shipping_teaser_all_html' | t: amount: fs_nb -}}
+          {%- endif -%}
+        </span>
+      </p>
+    {%- else -%}
+      {%- render 'free-shipping-bar', total: cart.total_price, style: 'inline', class: 'product__free-ship' -%}
+    {%- endif -%}
 
   {%- when 'delivery_estimate' -%}
     {%- render 'delivery-estimate', heading: bs.heading -%}
@@ -162,7 +214,8 @@
     {%- endif -%}
 
   {%- when 'whatsapp' -%}
-    {%- assign wa_msg = 'products.product.whatsapp_message' | t: title: product.title -%}
+    {%- comment -%} Placeholder + replace: t would HTML-escape the title (20" → &quot;) before url_encode. {%- endcomment -%}
+    {%- assign wa_msg = 'products.product.whatsapp_message' | t: title: '[title]' | replace: '[title]', product.title -%}
     {%- render 'whatsapp-button', style: 'card', label: bs.heading, text: bs.text, message: wa_msg, class: 'product__whatsapp' -%}
 
   {%- when 'trust' -%}
@@ -173,11 +226,14 @@
           assign t_text_key = 'text_' | append: i
           assign t_icon = bs[t_icon_key]
           assign t_text = bs[t_text_key]
+          if t_text contains fs_token and fs_amount == ''
+            assign t_text = ''
+          endif
         -%}
         {%- if t_text != blank -%}
           <li class="trust__item">
             <span class="trust__icon">{% render 'icon', name: t_icon %}</span>
-            <span class="trust__text">{{ t_text | escape | replace: 'S/ ', 'S/&nbsp;' }}</span>
+            <span class="trust__text">{{ t_text | escape | replace: fs_token, fs_amount | replace: 'S/ ', 'S/&nbsp;' }}</span>
           </li>
         {%- endif -%}
       {%- endfor -%}
@@ -188,7 +244,13 @@
     {%- render 'product-accordion', id: desc_id, heading: bs.heading, icon: bs.icon, content: product.description, open: bs.open -%}
 
   {%- when 'collapsible' -%}
-    {%- assign c_content = bs.content | default: bs.page.content -%}
+    {%- liquid
+      assign c_content = bs.content | default: bs.page.content
+      if c_content contains fs_token and fs_amount == ''
+        assign c_content = ''
+      endif
+      assign c_content = c_content | replace: fs_token, fs_amount
+    -%}
     {%- render 'product-accordion', heading: bs.heading, icon: bs.icon, content: c_content, open: bs.open -%}
 
   {%- when 'share' -%}

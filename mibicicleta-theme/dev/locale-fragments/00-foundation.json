@@ -11,7 +11,7 @@
     "home": "Inicio",
     "search": "Búsqueda",
     "cart": "Carrito",
-    "collections": "Colecciones",
+    "collections": "Categorías",
     "not_found": "Página no encontrada",
     "breadcrumbs": "Estás aquí",
     "payment_methods": "Métodos de pago",
@@ -84,12 +84,14 @@
       "adding": "Agregando…",
       "added": "¡Listo! Lo agregamos a tu carrito.",
       "error": "No pudimos actualizar tu carrito. Inténtalo de nuevo.",
+      "network_error": "No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.",
       "updated": "Carrito actualizado",
       "items_one": "{{ n }} producto",
       "items_other": "{{ n }} productos"
     }
   },
   "shipping": {
+    "intro_html": "<strong>Envío gratis</strong> desde {{ amount }}.",
     "remaining_html": "¡Te faltan <strong>{{ amount }}</strong> para el envío gratis!",
     "reached_html": "¡Genial! Tu pedido tiene <strong>envío gratis</strong>.",
     "zone": "Válido para {{ zone }}.",

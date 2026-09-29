@@ -4,7 +4,7 @@
       "type": "main-search",
       "settings": {
         "scheme": "light",
-        "placeholder": "Busca por código, medida o nombre…",
+        "placeholder": "Código, medida o nombre",
         "suggestions": "luces, llantas, espejos, asientos, pedales, piñones",
         "products_per_page": 24,
         "columns_desktop": "4",

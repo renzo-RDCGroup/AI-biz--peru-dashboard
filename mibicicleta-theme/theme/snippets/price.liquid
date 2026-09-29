@@ -10,6 +10,7 @@
     class: ''
   %}
   Output: .price[.price--sale][.price--soldout] > .price__current (+ .price__from) · s.price__compare · .price__save
+  The visually-hidden labels keep their own spaces, so names never read "Precio de ofertaS/ 32.00".
 {%- endcomment -%}
 {%- liquid
   assign price_size = size | default: 'md'
@@ -44,14 +45,14 @@
 -%}
 <div class="price price--{{ price_size }}{% if on_sale %} price--sale{% endif %}{% if sold_out %} price--soldout{% endif %}{% if class != blank %} {{ class }}{% endif %}" data-price{% if show_save == false %} data-show-save="false"{% endif %}>
   {%- if on_sale -%}
-    <span class="visually-hidden">{{ 'products.price.sale' | t }}</span>
+    <span class="visually-hidden">{{ 'products.price.sale' | t }} </span>
   {%- endif -%}
   <span class="price__current">
     {%- if is_from -%}<span class="price__from">{{ 'products.price.from' | t }}</span> {% endif -%}
     {{- price_now | money -}}
   </span>
   {%- if on_sale -%}
-    <span class="visually-hidden">{{ 'products.price.regular' | t }}</span>
+    <span class="visually-hidden"> {{ 'products.price.regular' | t }} </span>
     <s class="price__compare">{{ price_was | money }}</s>
     {%- if show_save != false -%}
       <span class="price__save">-{{ save_pct }}%</span>

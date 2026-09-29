@@ -15,7 +15,7 @@
   assign panel_id = sid | append: '-results'
 -%}
 <predictive-search class="header-search{% if class != blank %} {{ class }}{% endif %}" data-status-template="{{ 'search.predictive.count' | t: count: 0 | replace: '0', '[count]' | escape }}" data-status-one="{{ 'search.predictive.count' | t: count: 1 | escape }}" data-status-none="{{ 'search.predictive.none' | t | escape }}">
-  <form action="{{ routes.search_url }}" method="get" role="search" class="header-search__form">
+  <form action="{{ routes.search_url }}" method="get" role="search" class="header-search__form" aria-label="{{ 'search.predictive.label' | t }}">
     <label class="visually-hidden" for="{{ sid }}-input">{{ 'search.predictive.label' | t }}</label>
     <input
       class="header-search__input"

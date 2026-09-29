@@ -33,6 +33,9 @@
       this.listen(doc, 'click', (e) => {
         if (!(e.target instanceof Element) || !e.target.closest('[data-nav-item]')) this.closeAll();
       });
+      // Esc anywhere dismisses a hover-opened panel (WCAG 1.4.13). Keyboard-opened panels are
+      // closed first by the nav's own handler, which returns focus to the chevron.
+      this.listen(doc, 'keydown', (e) => { if (e.key === 'Escape') this.closeAll(); });
       this.listen(doc, 'drawer:open', () => this.closeAll());
       this.listen(doc, 'cart:updated', (e) => this.onCart(e));
       if (desktop.addEventListener) this.listen(desktop, 'change', () => this.closeAll());

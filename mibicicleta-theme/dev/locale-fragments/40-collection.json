@@ -16,17 +16,19 @@
       "grid_heading": "Productos de {{ title }}"
     },
     "empty": {
-      "title": "Esta colección aún no tiene productos",
+      "title": "Esta categoría aún no tiene productos",
       "text": "Mientras tanto, explora el resto del catálogo.",
       "cta": "Ver todo el catálogo"
     },
     "load_more": {
       "button": "Cargar más productos",
-      "status": "Mostrando {{ shown }} de {{ total }}"
+      "status": "Mostrando {{ shown }} de {{ total }}",
+      "status_range": "Mostrando {{ from }}–{{ shown }} de {{ total }}",
+      "previous": "Ver productos anteriores"
     },
     "list": {
-      "view": "Ver colección {{ title }}",
-      "empty": "Aún no hay colecciones para mostrar."
+      "view": "Ver categoría {{ title }}",
+      "empty": "Aún no hay categorías para mostrar."
     }
   },
   "filters": {
@@ -65,7 +67,18 @@
     },
     "sort": {
       "label": "Ordenar por",
-      "submit": "Ordenar"
+      "submit": "Ordenar",
+      "options": {
+        "manual": "Destacados",
+        "best_selling": "Más vendidos",
+        "title_ascending": "Nombre: A–Z",
+        "title_descending": "Nombre: Z–A",
+        "price_ascending": "Menor precio",
+        "price_descending": "Mayor precio",
+        "created_ascending": "Más antiguos",
+        "created_descending": "Más nuevos",
+        "relevance": "Relevancia"
+      }
     },
     "empty": {
       "title": "Ningún producto coincide con estos filtros",

@@ -26,10 +26,10 @@
   "class": "apps-wrapper",
   "settings": [
     {"type": "checkbox", "id": "include_margins", "label": "Usar los márgenes del tema", "default": true},
-    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
+    {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light", "visible_if": "{{ section.settings.include_margins }}"},
     {"type": "header", "content": "Espaciado"},
-    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40},
-    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40}
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40, "visible_if": "{{ section.settings.include_margins }}"},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40, "visible_if": "{{ section.settings.include_margins }}"}
   ],
   "blocks": [
     {"type": "@app"}

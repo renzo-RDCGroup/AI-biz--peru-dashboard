@@ -14,6 +14,10 @@
 .cart-drawer__body { display: flex; flex-direction: column; gap: 18px; padding: 16px; }
 .cart-drawer__footer { display: grid; gap: 4px; padding: 14px 16px calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 24px rgba(0, 0, 0, .06); }
 .cart-drawer__continue { justify-self: center; min-height: 44px; font-size: var(--fs-sm); }
+/* Closed: contents skipped, so lazy thumbnails wait for open; still painted while sliding out. */
+.cart-drawer:not([open]) .cart-drawer__panel { content-visibility: hidden; }
+.cart-drawer__panel { transition: transform var(--drawer-dur) var(--ease), content-visibility 0s linear var(--drawer-dur) allow-discrete; }
+.cart-drawer[open] .cart-drawer__panel { transition-delay: 0s; }
 @media (min-width: 750px) {
   .cart-drawer__header { padding-left: 24px; }
   .cart-drawer__body { gap: 20px; padding: 20px 24px; }
@@ -26,8 +30,10 @@
 .cart-ship .free-ship { transition: background-color .5s var(--ease); }
 .cart-ship .free-ship__zone { display: block; font-size: var(--fs-xs); }
 .cart-ship .free-ship__marker { z-index: 1; }
+/* The bike stops short of the flag until the goal is reached. */
+.cart-ship .free-ship:not(.is-complete) .free-ship__marker { left: min(var(--progress), calc(100% - 24px)); }
 .cart-ship .free-ship.is-complete { background: #E7F4EB; }
-.cart-ship .free-ship.is-complete strong { color: var(--color-success); }
+.cart-ship .free-ship.is-complete strong { color: #12692F; } /* 6:1 on the tint; --color-success is 4.4:1 */
 .cart-ship .free-ship.is-complete .free-ship__text::before {
   content: "";
   display: inline-block;
@@ -172,7 +178,7 @@
 .cart-totals__row--subtotal .cart-totals__label { font: 800 var(--fs-md)/1.2 var(--font-heading); }
 .cart-totals__row--subtotal .cart-totals__value { font-size: var(--fs-xl); letter-spacing: -.01em; }
 .cart-totals__meta { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 6px 12px; }
-.cart-totals__savings { flex: none; display: inline-flex; margin-left: auto; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border-radius: var(--radius-pill); background: #E8F5EC; color: var(--color-success); font-size: var(--fs-xs); font-weight: 600; }
+.cart-totals__savings { flex: none; display: inline-flex; margin-left: auto; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border-radius: var(--radius-pill); background: #E8F5EC; color: #12692F; font-size: var(--fs-xs); font-weight: 600; }
 .cart-totals__savings .icon { --icon-size: 15px; }
 .cart-totals__savings strong { font-weight: 800; }
 .cart-totals__note { flex: 1 1 180px; font-size: var(--fs-xs); line-height: 1.4; color: var(--scheme-muted); }

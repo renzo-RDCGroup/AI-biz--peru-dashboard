@@ -23,9 +23,11 @@
 .product-card__link { position: absolute; inset: 0; display: block; }
 .product-card__media img { transition: opacity .35s var(--ease), transform .6s var(--ease); }
 .product-card__media.media--contain img { padding: 7%; }
-.product-card__img--secondary { opacity: 0; }
+/* display:none on touch/small screens, so the lazy hover image is never downloaded there. */
+.product-card__img--secondary { display: none; opacity: 0; }
 
 @media (hover: hover) and (min-width: 990px) {
+  .product-card--has-secondary .product-card__img--secondary { display: block; }
   .product-card:hover .product-card__img--primary { transform: scale(1.04); }
   .product-card--has-secondary:hover .product-card__img--primary { opacity: 0; }
   .product-card--has-secondary:hover .product-card__img--secondary { opacity: 1; }
@@ -66,6 +68,9 @@
 .product-card__quick .icon--check { display: none; }
 .product-card__quick .is-added .icon--check { display: inline-block; }
 .product-card__quick .is-added .icon--bag-plus { display: none; }
+/* Multi-variant: goes to the product page, so it must not look like the yellow add button. */
+.product-card__quick .product-card__quick-link { --btn-bg: #fff; --btn-fg: var(--color-ink); --btn-border: var(--color-border); }
+.product-card__quick .product-card__quick-link:hover { --btn-border: var(--color-ink); }
 .product-card__quick .form-message {
   position: absolute;
   right: 0;

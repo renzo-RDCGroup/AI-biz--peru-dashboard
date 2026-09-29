@@ -394,6 +394,17 @@ await test('recommendations: section rendered with recommendations object', asyn
   assert.equal(attr(r.text, 'recs', 'data-intent'), 'related');
   assert.ok(Number(attr(r.text, 'recs', 'data-count')) > 0);
   assert.doesNotMatch(pick(r.text, 'recs'), new RegExp(`>${LINTERNA.handle}<`));
+  // Only `recommendations` is documented for this render: `product` stays nil (worst case).
+  assert.equal(attr(r.text, 'recs', 'data-performed-q'), 'true');
+  assert.equal(attr(r.text, 'recs', 'data-performed'), 'true');
+  assert.equal(attr(r.text, 'recs', 'data-product'), '');
+  // Outside the endpoint (page render, plain Section Rendering API) it isn't performed.
+  const page = await get(`/products/${LINTERNA.handle}`);
+  assert.equal(attr(page.text, 'recs', 'data-performed-q'), 'false');
+  assert.equal(attr(page.text, 'recs', 'data-count'), '0');
+  assert.equal(attr(page.text, 'recs', 'data-product'), LINTERNA.handle);
+  const sra = await get(`/products/${LINTERNA.handle}?section_id=${id}`);
+  assert.equal(attr(sra.text, 'recs', 'data-performed-q'), 'false');
   const j = (await get(`/recommendations/products.json?product_id=${LINTERNA.id}&limit=2`)).json();
   assert.equal(j.products.length, 2);
 });
@@ -407,7 +418,7 @@ await test('contact form: posted_successfully?, POST /contact redirect, simulate
   assert.match(errs.text, /<div class="errors"><ul><li>Correo electrónico no es válido\.<\/li><\/ul><\/div>/);
   const postR = await get('/contact', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', referer: `${base}/pages/contact` }, body: 'form_type=contact&contact%5Bemail%5D=a%40b.pe' });
   assert.equal(postR.status, 302);
-  assert.equal(postR.headers.get('location'), '/pages/contact?contact_posted=true#contact_form');
+  assert.equal(postR.headers.get('location'), '/pages/contact?contact_posted=true');
 });
 
 await test('404 status for unknown paths, /password uses password layout, {% layout none %}', async () => {

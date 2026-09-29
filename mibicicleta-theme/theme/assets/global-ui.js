@@ -261,14 +261,20 @@
 
   /* ---------- Header height → --header-height ------------------------- */
   let headerObserver = null;
+  let lastH = null;
+  let lastG = null;
   M.measureHeader = function () {
     const header = doc.querySelector('[data-header]') || doc.querySelector('.shopify-section-group-header-group header, header');
     const groups = doc.querySelectorAll('.shopify-section-group-header-group');
+    // Read everything first, then write only what changed: a :root custom property write between
+    // two layout reads forces a full-document style recalc.
     const set = () => {
-      if (header) root.style.setProperty('--header-height', Math.round(header.getBoundingClientRect().height) + 'px');
+      const h = header ? Math.round(header.getBoundingClientRect().height) : null;
       let total = 0;
       groups.forEach((g) => { total += g.getBoundingClientRect().height; });
-      if (total) root.style.setProperty('--header-group-height', Math.round(total) + 'px');
+      total = Math.round(total);
+      if (h !== null && h !== lastH) { lastH = h; root.style.setProperty('--header-height', h + 'px'); }
+      if (total && total !== lastG) { lastG = total; root.style.setProperty('--header-group-height', total + 'px'); }
     };
     set();
     if (headerObserver) headerObserver.disconnect();
@@ -281,8 +287,8 @@
 
   /* ---------- Boot ----------------------------------------------------- */
   function init() {
+    M.initReveal(); // layout reads before measureHeader's writes (no second forced recalc)
     M.measureHeader();
-    M.initReveal();
   }
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', init);
   else init();
@@ -291,7 +297,25 @@
 
   // Theme editor: re-run per-section setup when a section is re-rendered.
   doc.addEventListener('shopify:section:load', (e) => {
-    M.measureHeader();
     M.initReveal(e.target);
+    M.measureHeader();
   });
+
+  // Theme editor: a selected block must be visible. Open the <details> the block is or contains
+  // (FAQ questions, product collapsible rows, mobile footer columns) and close it again on
+  // deselect only if we opened it. The brand marquee holds itself (home.js).
+  if (M.settings.designMode) {
+    const detailsOf = (e) => {
+      const t = e.target;
+      return t instanceof Element ? (t.matches('details') ? t : t.querySelector('details')) : null;
+    };
+    doc.addEventListener('shopify:block:select', (e) => {
+      const d = detailsOf(e);
+      if (d && !d.open) { d.open = true; d.setAttribute('data-editor-opened', ''); }
+    });
+    doc.addEventListener('shopify:block:deselect', (e) => {
+      const d = detailsOf(e);
+      if (d && d.hasAttribute('data-editor-opened')) { d.open = false; d.removeAttribute('data-editor-opened'); }
+    });
+  }
 })();

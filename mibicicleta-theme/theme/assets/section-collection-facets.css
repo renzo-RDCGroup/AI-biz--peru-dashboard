@@ -92,7 +92,7 @@
 .facet__price-label { display: block; margin-bottom: 6px; font-size: var(--fs-xs); font-weight: 600; color: var(--scheme-muted); }
 .facet__price-input { position: relative; }
 .facet__price-input span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: var(--fs-sm); font-weight: 600; color: var(--color-muted); pointer-events: none; }
-.facet__price-input .input::placeholder { color: #8A8A82; }
+.facet__price-input .input::placeholder { color: var(--color-muted); opacity: 1; }
 .facet__price-input .input { min-height: 44px; padding: 8px 10px 8px 38px; border-radius: var(--radius-pill); -moz-appearance: textfield; }
 .facet__price-input .input::-webkit-inner-spin-button,
 .facet__price-input .input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -153,6 +153,10 @@
   .search-form__submit-label { display: none; }
   .search-form__submit-icon { display: inline-block; }
 }
+/* Mobile results: the header search row already holds the query, so drop the duplicate pill. */
+@media (max-width: 749.98px) {
+  body:has(.header__search) .search-page:has(.results-toolbar) .search-head .search-form { display: none; }
+}
 @media (min-width: 750px) {
   .search-head { padding-block: 28px 40px; }
   .search-form { min-height: 68px; }
@@ -191,5 +195,5 @@
 }
 .search-cat:hover { border-color: currentColor; }
 .search-cat__icon { width: 40px; height: 40px; }
-.search-cat__icon::after { box-shadow: 0 0 0 2px var(--scheme-bg); }
+.search-cat__icon::after { content: none; } /* no red dot per pill */
 

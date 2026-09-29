@@ -41,7 +41,12 @@
             endif
             assign img_sizes = '(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw'
             if style == 'contain-right'
-              assign img_sizes = '(min-width: 750px) 30vw, 70vw'
+              # Circle = square crop (object-fit: cover): a landscape photo needs its aspect
+              # ratio × the circle's width to stay sharp.
+              assign crop = img.aspect_ratio | default: 1 | at_least: 1
+              assign vw_d = crop | times: 30 | ceil
+              assign vw_m = crop | times: 70 | ceil
+              assign img_sizes = '(min-width: 750px) ' | append: vw_d | append: 'vw, ' | append: vw_m | append: 'vw'
             endif
           -%}
           <article class="promo scheme-{{ card_scheme }} has-watermark{% if img != blank %} promo--image promo--{{ style }}{% else %} promo--type{% endif %}" data-reveal style="--reveal-delay: {{ forloop.index0 | times: 90 }}ms;" {{ block.shopify_attributes }}>
@@ -101,7 +106,7 @@
       "type": "banner",
       "name": "Banner",
       "settings": [
-        {"type": "select", "id": "scheme", "label": "Color", "options": [{"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Negro"}, {"value": "light", "label": "Blanco"}, {"value": "soft", "label": "Gris suave"}], "default": "brand"},
+        {"type": "select", "id": "scheme", "label": "Color", "info": "Con imagen en «Fondo completo» la tarjeta usa texto blanco sobre la foto y este color no se aplica.", "options": [{"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Negro"}, {"value": "light", "label": "Blanco"}, {"value": "soft", "label": "Gris suave"}], "default": "brand"},
         {"type": "image_picker", "id": "image", "label": "Imagen (opcional)", "info": "Sin imagen: tarjeta tipográfica con la marca «mi» de fondo."},
         {"type": "select", "id": "image_style", "label": "Estilo de imagen", "options": [{"value": "contain-right", "label": "Círculo a la derecha"}, {"value": "cover", "label": "Fondo completo"}], "default": "contain-right"},
         {"type": "select", "id": "icon", "label": "Sello con ícono", "options": [{"value": "none", "label": "Ninguno"}, {"value": "medal", "label": "Medalla"}, {"value": "shield", "label": "Escudo"}, {"value": "truck", "label": "Camión"}, {"value": "light", "label": "Luz"}, {"value": "mirror", "label": "Espejo"}, {"value": "helmet", "label": "Casco"}, {"value": "tire", "label": "Llanta"}, {"value": "bolt", "label": "Rayo"}, {"value": "tag", "label": "Etiqueta"}], "default": "none"},
@@ -121,6 +126,7 @@
         {"type": "banner"}
       ]
     }
-  ]
+  ],
+  "disabled_on": {"groups": ["header", "footer"]}
 }
 {% endschema %}

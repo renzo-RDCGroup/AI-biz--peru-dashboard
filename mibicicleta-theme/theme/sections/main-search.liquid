@@ -1,8 +1,7 @@
 {%- comment -%}
-  Search results: soft-yellow head (breadcrumbs, h1, big pill search form, "N resultados para «q»"),
-  then the same toolbar / filters / grid as main-collection for product results (pages and
-  articles listed compactly below). No results / no query: suggestion chips (setting),
-  category pills, WhatsApp card (only when a number is set) and suggested products. Filtering, sort and "Cargar más": facets.js.
+  Search: soft-yellow head (crumbs, h1 count, pill form), then main-collection's toolbar / filters /
+  grid for products (pages + articles listed below). No results: suggestion chips, category pills,
+  WhatsApp card (only with a number) and suggested products. facets.js: filters, sort, load more.
 {%- endcomment -%}
 {{ 'section-collection.css' | asset_url | stylesheet_tag }}
 {{ 'section-collection-facets.css' | asset_url | stylesheet_tag }}
@@ -26,17 +25,13 @@
   {%- for term in suggestions -%}
     {%- assign term_clean = term | strip -%}
     {%- if term_clean != blank -%}
-      <li><a class="chip" href="{{ routes.search_url }}?q={{ term_clean | url_encode }}&amp;options%5Bprefix%5D=last">{{ term_clean | escape }}</a></li>
+      <li><a class="chip" href="{{ routes.search_url }}?q={{ term_clean | url_encode }}&amp;options%5Bprefix%5D=last">{{ term_clean | capitalize | escape }}</a></li>
     {%- endif -%}
   {%- endfor -%}
 {%- endcapture -%}
 
 {%- paginate search.results by per_page -%}
   {%- liquid
-    assign has_filters = false
-    if ps.enable_filtering and search.performed and search.filters.size > 0
-      assign has_filters = true
-    endif
     assign active_count = 0
     for filter in search.filters
       if filter.type == 'price_range'
@@ -59,6 +54,15 @@
         assign product_count = product_count | plus: 1
       endif
     endfor
+    # Toolbar + filters only when products are involved (not for pages-only results).
+    assign has_products = false
+    if product_count > 0 or active_count > 0 or paginate.pages > 1
+      assign has_products = true
+    endif
+    assign has_filters = false
+    if has_products and ps.enable_filtering and search.performed and search.filters.size > 0
+      assign has_filters = true
+    endif
     assign shown = paginate.current_offset | plus: search.results.size
     assign show_results = false
     if search.performed and results_count > 0
@@ -86,7 +90,7 @@
             {{- 'search.results.empty_title' | t: terms: terms -}}
           {%- endif -%}
         </h1>
-        <form class="search-form" action="{{ routes.search_url }}" method="get" role="search">
+        <form class="search-form" action="{{ routes.search_url }}" method="get" role="search" aria-label="{{ 'search.results.label' | t }}">
           <label class="visually-hidden" for="{{ input_id }}">{{ 'search.results.label' | t }}</label>
           {%- render 'icon', name: 'search', class: 'search-form__icon' -%}
           <input class="search-form__input" type="search" id="{{ input_id }}" name="q" value="{{ terms | escape }}" placeholder="{{ ps.placeholder | escape }}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
@@ -111,8 +115,10 @@
     </div>
 
     {%- if show_results -%}
-      {%- assign count_label = 'search.results.count' | t: count: results_count -%}
-      {%- render 'facets', context: 'toolbar', results: search, results_url: routes.search_url, section_id: section.id, terms: terms, layout: layout, has_filters: has_filters, sorting: ps.enable_sorting, count_label: count_label, active_count: active_count, clear_url: clear_url -%}
+      {%- if has_products -%}
+        {%- assign count_label = 'search.results.count' | t: count: results_count -%}
+        {%- render 'facets', context: 'toolbar', results: search, results_url: routes.search_url, section_id: section.id, terms: terms, layout: layout, has_filters: has_filters, sorting: ps.enable_sorting, count_label: count_label, active_count: active_count, clear_url: clear_url -%}
+      {%- endif -%}
 
       <div class="page-width results__layout">
         {%- if has_filters -%}
@@ -129,6 +135,7 @@
 
           <div class="results__body" data-swap="results">
             {%- if results_count > 0 -%}
+              {%- render 'facets', context: 'prev', paginate: paginate, paging: ps.paging -%}
               <ul class="product-grid results-grid{% if ps.columns_mobile == '1' %} results-grid--mobile-1{% endif %}" role="list" id="ProductGrid-{{ section.id }}" data-results-grid{% if product_count == 0 %} hidden{% endif %}>
                 {%- for item in search.results -%}
                   {%- if item.object_type == 'product' -%}
@@ -188,7 +195,7 @@
       <div class="page-width search-empty">
         {%- if empty_menu.links.size > 0 -%}
           <div class="search-empty__block">
-            <h2 class="search-empty__title">{{ 'search.results.categories' | t }}</h2>
+            <h2 class="search-empty__title heading-dot">{{ 'search.results.categories' | t }}</h2>
             <ul class="chip-row chip-row--bleed search-cats" role="list">
               {%- for link in empty_menu.links -%}
                 {%- liquid
@@ -249,7 +256,7 @@
     {"type": "select", "id": "paging", "label": "Paginación", "options": [{"value": "load_more", "label": "Botón «Cargar más»"}, {"value": "pages", "label": "Páginas numeradas"}], "default": "load_more"},
     {"type": "header", "content": "Filtros y orden"},
     {"type": "checkbox", "id": "enable_filtering", "label": "Mostrar filtros", "info": "Los filtros se configuran en la app Search & Discovery de Shopify.", "default": true},
-    {"type": "select", "id": "filter_layout", "label": "Filtros en escritorio", "options": [{"value": "sidebar", "label": "Barra lateral"}, {"value": "drawer", "label": "Panel desplegable"}], "default": "sidebar"},
+    {"type": "select", "id": "filter_layout", "label": "Filtros en escritorio", "visible_if": "{{ section.settings.enable_filtering }}", "options": [{"value": "sidebar", "label": "Barra lateral"}, {"value": "drawer", "label": "Panel desplegable"}], "default": "sidebar"},
     {"type": "checkbox", "id": "enable_sorting", "label": "Mostrar «Ordenar por»", "default": true},
     {"type": "header", "content": "Sin resultados"},
     {"type": "checkbox", "id": "show_whatsapp", "label": "Mostrar tarjeta de WhatsApp", "info": "Solo aparece si configuraste el número en Configuración del tema › Contacto.", "default": true},

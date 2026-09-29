@@ -63,8 +63,18 @@
       o.body = JSON.stringify(o.body);
       o.headers['Content-Type'] = 'application/json';
     }
-    const res = await fetch(url, o);
-    const text = await res.text();
+    let res, text;
+    try {
+      res = await fetch(url, o);
+      text = await res.text();
+    } catch (e) {
+      // Offline / dropped connection: never show the browser's English "Failed to fetch".
+      if (e && e.name === 'AbortError') throw e;
+      const err = new Error(M.strings.networkError || M.strings.cartError || 'Error');
+      err.status = 0;
+      err.network = true;
+      throw err;
+    }
     let data = null;
     try { data = text ? JSON.parse(text) : null; } catch (e) { data = text; }
     const badStatus = data && typeof data === 'object' && Number(data.status) >= 400;
@@ -158,10 +168,10 @@
   M.priceHTML = function (price, compare, opts) {
     const s = M.strings;
     const onSale = compare > price;
-    let html = onSale ? '<span class="visually-hidden">' + (s.priceSale || '') + '</span>' : '';
+    let html = onSale ? '<span class="visually-hidden">' + (s.priceSale || '') + ' </span>' : '';
     html += '<span class="price__current">' + M.formatMoney(price) + '</span>';
     if (onSale) {
-      html += '<span class="visually-hidden">' + (s.priceRegular || '') + '</span><s class="price__compare">' + M.formatMoney(compare) + '</s>';
+      html += '<span class="visually-hidden"> ' + (s.priceRegular || '') + ' </span><s class="price__compare">' + M.formatMoney(compare) + '</s>';
       if (!opts || opts.showSave !== false) html += '<span class="price__save">-' + Math.round(((compare - price) * 100) / compare) + '%</span>';
     }
     return html;
@@ -213,8 +223,19 @@
         }
         try {
           const data = await M.fetchJSON(jsUrl('cart_add', '/cart/add'), { method: 'POST', body });
-          const cart = await M.cart.get();
-          const result = { cart, sections: (data && data.sections) || {}, source: 'add' };
+          const sections = (data && data.sections) || {};
+          // Count + total come from the bundled section HTML (data-cart-item-count /
+          // data-cart-total-price), which saves a second round trip. Without them, GET /cart.js.
+          let cart = null;
+          Object.keys(sections).some((k) => {
+            const html = sections[k] || '';
+            const n = /data-cart-item-count="(\d+)"/.exec(html);
+            const t = /data-cart-total-price="(\d+)"/.exec(html);
+            if (n && t) cart = { item_count: +n[1], total_price: +t[1], partial: true };
+            return !!cart;
+          });
+          if (!cart) cart = await M.cart.get();
+          const result = { cart, sections, source: 'add' };
           if (data && Array.isArray(data.items)) result.items = data.items;
           else result.item = data;
           emit('cart:updated', result);
@@ -281,9 +302,11 @@
       }
       const text = el.querySelector('[data-free-shipping-text]');
       if (!text) return;
-      let html = remaining > 0
-        ? (s.freeShippingRemaining || '').replace('[amount]', M.formatMoney(remaining))
-        : s.freeShippingReached || '';
+      let html = sum === 0 && s.freeShippingIntro
+        ? s.freeShippingIntro
+        : remaining > 0
+          ? (s.freeShippingRemaining || '').replace('[amount]', M.formatMoney(remaining))
+          : s.freeShippingReached || '';
       if (M.settings.freeShippingZone && s.freeShippingZone) html += ' <span class="free-ship__zone">' + s.freeShippingZone + '</span>';
       text.innerHTML = html;
     });

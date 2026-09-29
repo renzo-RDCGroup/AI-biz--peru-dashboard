@@ -1,7 +1,7 @@
 {%- comment -%}
   /collections: grid of collection cards (image, or the category icon on yellow with a red dot),
   title, product count. Blocks "collection" pick and order the cards; without blocks every
-  collection is listed (sorted by the "sort" setting), skipping the internal "frontpage".
+  collection with products is listed (sorted by the "sort" setting), skipping "frontpage".
 {%- endcomment -%}
 {{ 'section-collection.css' | asset_url | stylesheet_tag }}
 
@@ -57,6 +57,9 @@
           if c == blank or c.handle == 'frontpage'
             continue
           endif
+          if section.blocks.size == 0 and c.all_products_count == 0
+            continue
+          endif
           assign rendered = rendered | plus: 1
           assign icon_name = 'bike'
           for pair in icon_map
@@ -75,14 +78,22 @@
           <a class="collection-card" href="{{ c.url }}">
             <span class="collection-card__media{% if c.image == blank %} collection-card__media--icon{% endif %}">
               {%- if c.image != blank -%}
-                {%- render 'image', image: c.image, widths: '240,360,480,640,800', sizes: '(min-width: 1200px) 300px, (min-width: 750px) 30vw, 50vw', lazy: card_lazy, alt: '' -%}
+                {%- liquid
+                  # object-fit: cover crops wide photos in the card box: scale sizes by (image ÷ box ratio).
+                  assign crop = c.image.aspect_ratio | default: ratio | divided_by: ratio | at_least: 1
+                  assign w_xl = crop | times: 312 | ceil
+                  assign w_md = crop | times: 30 | ceil
+                  assign w_sm = crop | times: 50 | ceil
+                  assign img_sizes = '(min-width: 1200px) ' | append: w_xl | append: 'px, (min-width: 750px) ' | append: w_md | append: 'vw, ' | append: w_sm | append: 'vw'
+                -%}
+                {%- render 'image', image: c.image, widths: '240,360,480,640,800,960,1200', sizes: img_sizes, lazy: card_lazy, alt: '' -%}
               {%- else -%}
                 <span class="collection-card__icon beacon">{% render 'icon', name: icon_name %}</span>
               {%- endif -%}
             </span>
             <span class="collection-card__body">
               <span class="collection-card__title">{{ c.title | escape }}</span>
-              {%- if ps.show_count -%}
+              {%- if ps.show_count and c.all_products_count > 0 -%}
                 <span class="collection-card__count">{{ 'collections.product_count' | t: count: c.all_products_count }}</span>
               {%- endif -%}
             </span>

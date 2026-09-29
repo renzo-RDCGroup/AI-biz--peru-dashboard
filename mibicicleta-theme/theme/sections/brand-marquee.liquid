@@ -3,13 +3,15 @@
   Two identical groups scroll by -50% for a seamless loop; each group repeats the brands so it
   is wider than any screen. Only the very first copy is exposed to assistive tech and keyboard.
   Pauses on hover/focus and with the pause button; static, wrapped list under reduced motion.
+  Keyboard focus / editor block select stop the ribbon and scroll the real link into view (home.js).
 {%- endcomment -%}
 {{ 'section-home-2.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'home.js' | asset_url }}" defer></script>
 
 {%- liquid
   assign count = section.blocks.size
-  assign reps = 12 | divided_by: count | at_least: 2 | at_most: 12
+  assign divisor = count | at_least: 1
+  assign reps = 12 | divided_by: divisor | at_least: 2 | at_most: 12
   assign title_id = 'MarqueeTitle-' | append: section.id
 -%}
 
@@ -40,7 +42,7 @@
                     assign name = block.settings.name | strip
                     assign logo = block.settings.logo
                   -%}
-                  <li class="brand-marquee__item{% unless primary %} brand-marquee__item--dup{% endunless %}{% if primary and forloop.last %} brand-marquee__item--last{% endif %}"{% if primary %} {{ block.shopify_attributes }}{% elsif copy == 1 %} aria-hidden="true"{% endif %}>
+                  <li class="brand-marquee__item{% unless primary %} brand-marquee__item--dup{% endunless %}"{% if primary %} {{ block.shopify_attributes }}{% elsif copy == 1 %} aria-hidden="true"{% endif %}>
                     {%- if block.settings.link != blank -%}
                       <a class="brand-marquee__link" href="{{ block.settings.link }}"{% unless primary %} tabindex="-1"{% endunless %}>
                     {%- endif -%}

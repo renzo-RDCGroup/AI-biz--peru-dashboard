@@ -11,8 +11,8 @@
     placeholder: 1,                     placeholder image 1–6 for blank products
     class: ''
   %}
-  Quick add: single-variant available product → <product-form> AJAX add;
-  multi-variant → link "Elegir opciones"; sold out → nothing.
+  Quick add: single-variant available product → yellow <product-form> AJAX add (bag-plus);
+  multi-variant → white arrow link "Elegir opciones" to the product page; sold out → nothing.
   Sale: the image badge shows "-NN%" (best variant); the price row shows sale + struck compare price
   without its own pill, so narrow 2-column cards never wrap the price onto two lines.
 {%- endcomment -%}
@@ -109,8 +109,8 @@
           </product-form>
         {%- else -%}
           <div class="product-card__quick">
-            <a class="btn btn--icon btn--brand product-card__quick-link" href="{{ product.url }}" aria-label="{{ 'products.card.choose_options' | t: title: product.title }}">
-              {%- render 'icon', name: 'bag-plus' -%}
+            <a class="btn btn--icon product-card__quick-link" href="{{ product.url }}" aria-label="{{ 'products.card.choose_options' | t: title: product.title }}">
+              {%- render 'icon', name: 'arrow-right' -%}
             </a>
           </div>
         {%- endif -%}

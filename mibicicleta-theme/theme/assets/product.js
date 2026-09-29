@@ -1,5 +1,4 @@
-/* Mi Bici 2026 — product.js: <product-info> (variant updates, emits variant:change), <variant-picker>,
-   <product-gallery>, <sticky-atc>, <delivery-estimate>, <pickup-availability>, <share-button>. */
+/* Mi Bici 2026 — product.js (PDP custom elements) */
 (function () {
   'use strict';
 
@@ -32,7 +31,6 @@
       return this.variants.find((v) => v.options.every((o, i) => o === opts[i])) || null;
     }
 
-    // Mark values sold out / missing given the other selected options.
     refresh(opts) {
       const soldLabel = this.dataset.labelSoldOut || '';
       const naLabel = this.dataset.labelUnavailable || '';
@@ -127,6 +125,8 @@
         if (label) label.textContent = ok ? btn.dataset.labelAdd || s.addToCart : v ? s.soldOut : s.unavailable;
       });
       all('[data-buy-now]', this).forEach((btn) => { btn.hidden = !ok; });
+      all('[data-form-error]', this).forEach((el) => { el.hidden = true; });
+      M.announce(v ? v.title + ': ' + M.formatMoney(v.price) + (ok ? '' : ', ' + s.soldOut) : s.unavailable);
 
       const qty = form && form.querySelector('.qty__input');
       if (qty) {
@@ -138,16 +138,17 @@
         if (stepper && stepper.sync) stepper.sync();
       }
 
-      all('[data-sticky-variant]', this).forEach((el) => { if (v) el.textContent = v.title; });
+      this.classList.toggle('is-unavailable', !v);
+      all('[data-sticky-variant]', this).forEach((el) => { el.textContent = v ? v.title : this.picker.selected().join(' / '); });
 
       if (v && v.media) {
         const gallery = this.querySelector('product-gallery');
         if (gallery && gallery.showMedia) gallery.showMedia(v.media);
+        const si = v.thumb && this.querySelector('[data-sticky-media] img');
+        if (si) { si.srcset = v.thumb; si.src = v.thumb; }
       }
 
-      if (v && this.dataset.url) {
-        history.replaceState(history.state, '', this.dataset.url + '?variant=' + v.id);
-      }
+      if (this.dataset.url) history.replaceState(history.state, '', this.dataset.url + (v ? '?variant=' + v.id : ''));
       all('pickup-availability', this).forEach((el) => el.update && el.update(v));
       M.emit('variant:change', { sectionId: this.sectionId, variant: v });
     }
@@ -249,6 +250,7 @@
       const item = this.dialog.querySelector('[data-lightbox-item="' + index + '"]');
       requestAnimationFrame(() => {
         if (item) this.dialog.scrollTop = item.offsetTop - 64;
+        this.dialog.focus({ preventScroll: true });
       });
     }
   }
@@ -256,7 +258,6 @@
 
   /* <sticky-atc> */
   class StickyAtc extends HTMLElement {
-    // Scroll check (not IntersectionObserver): a jump past the buttons must still show the bar.
     connectedCallback() {
       if (this._ready) return;
       const target = doc.getElementById(this.dataset.target);
@@ -354,7 +355,7 @@
   }
   M.define('delivery-estimate', DeliveryEstimate);
 
-  /* <pickup-availability>: injects sections/pickup-availability.liquid */
+  /* <pickup-availability> (section pickup-availability) */
   class PickupAvailability extends HTMLElement {
     connectedCallback() {
       if (this._ready) return;
@@ -378,7 +379,7 @@
         .catch(() => this.set(''));
     }
 
-    /* The drawer goes to <body>: the sticky info column would trap its z-index. */
+    // Drawer moves to <body> (sticky column traps z-index)
     set(html) {
       const old = doc.getElementById('PickupDrawer');
       if (old) old.remove();
@@ -411,6 +412,7 @@
         const msg = this.querySelector('[data-share-msg]');
         if (!msg) return;
         msg.hidden = false;
+        M.announce(msg.textContent);
         clearTimeout(this._t);
         this._t = setTimeout(() => { msg.hidden = true; }, 2500);
       }).catch(() => {});

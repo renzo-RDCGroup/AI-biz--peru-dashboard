@@ -672,3 +672,29 @@ Pluralization: `{ "one": "…", "other": "…" }` + `count:`.
 * Your locale fragment contains every key you use.
 * Mobile (390px) and desktop (1440px) layouts considered; no horizontal overflow at 360px.
 * Final report: files written, contracts relied on, anything you could not do, assumptions.
+
+## 13. Decisions recorded after the QA round (supersede the sections above)
+* **Fonts (§6.1)**: Google Fonts load non-blocking (`preload` + `onload` swap + `<noscript>`) with
+  metric-matched local fallbacks to avoid layout shift. See `dev/FOUNDATION_NOTES.md` §0.
+* **Free-shipping amount token**: shopper-facing texts write `[envio_gratis]`; `usp-strip`, `faq`,
+  `announcement-bar` and the product page replace it with `settings.free_shipping_threshold` as
+  money and hide the text when the threshold is 0. Changing the threshold in Theme settings now
+  updates every mention — no hand-edited "S/ 220" strings remain in shipped templates.
+* **Cart note (§6.2)**: `cart_checkout_note` default is "El envío se calcula en el checkout."; the
+  taxes line is rendered conditionally by `cart-totals` from the shop's tax setting.
+* **`cart:updated` (§6.5)**: for `source: 'add'` global.js no longer fetches `/cart.js`; the event
+  carries a partial cart built from the re-rendered sections' `data-cart-item-count` /
+  `data-cart-total-price` attributes (one request per add instead of two).
+* **Product trust tiles (§7)**: "Productos originales" · "Envíos a todo el Perú" (the amount lives
+  in the free-shipping teaser right above) · "Cambios en 7 días, sin abrir".
+* **Header**: the shipped header group uses sticky mode `on-scroll-up` (schema default stays
+  `always`); sticky UI below it follows `--header-height`, which is 0 while the header is hidden.
+* **Product recommendations**: the section no longer depends on `product` inside the
+  `/recommendations/products` response (only `recommendations.performed?`), matching Shopify's
+  documented contract; the harness now renders that endpoint without `product`.
+* **Carousel semantics**: `<li>` slides inside list tracks keep list semantics; group/"diapositiva
+  n de N" semantics apply only to `<div>` slide tracks (hero).
+* **Open items for the account owner**: `theme_info` documentation/support URLs point to
+  mibicicleta.pe until RDC Group provides real ones; the store's footer menu item "Contacto y
+  showroom" implies a physical showroom (not a verified fact) and the linked pages
+  `/pages/devoluciones` and `/pages/contacto` don't exist yet (only `/pages/contact`).

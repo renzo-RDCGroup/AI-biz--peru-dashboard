@@ -5,7 +5,8 @@
     prefix: 'CartDrawer'       unique id prefix
   %}
   Rows: cart-level discounts ("Descuentos − S/ x"), savings pill (compare-at + discounts, computed
-  from real prices), Subtotal, settings.cart_checkout_note, "Finalizar pedido".
+  from real prices), Subtotal, "Impuestos incluidos." (only when cart.taxes_included, i.e. the store's
+  prices include IGV) + settings.cart_checkout_note, "Finalizar pedido".
 {%- endcomment -%}
 {%- liquid
   # Savings = compare-at price differences + every discount applied to the cart.
@@ -37,10 +38,13 @@
     <span class="cart-totals__value">{{ cart.total_price | money }}</span>
   </div>
 
-  {%- if total_savings > 0 or settings.cart_checkout_note != blank -%}
+  {%- if total_savings > 0 or cart.taxes_included or settings.cart_checkout_note != blank -%}
     <div class="cart-totals__meta">
-      {%- if settings.cart_checkout_note != blank -%}
-        <p class="cart-totals__note">{{ settings.cart_checkout_note | escape }}</p>
+      {%- if cart.taxes_included or settings.cart_checkout_note != blank -%}
+        <p class="cart-totals__note">
+          {%- if cart.taxes_included %}{{ 'cart.totals.taxes_included' | t }} {% endif -%}
+          {{- settings.cart_checkout_note | escape -}}
+        </p>
       {%- endif -%}
       {%- if total_savings > 0 -%}
         <p class="cart-totals__savings">{% render 'icon', name: 'percent' %} <span>{{ 'cart.totals.savings_html' | t: amount: savings_money }}</span></p>

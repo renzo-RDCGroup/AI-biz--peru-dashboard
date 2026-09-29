@@ -2,6 +2,8 @@
   Contact form ({% form 'contact' %}: name, email, phone, message) in a soft card, with an
   optional aside built from blocks: WhatsApp card (only with a number), contact details (only
   the contact_* theme settings that are filled) and highlight rows (icon + verified copy).
+  "[envio_gratis]" in a highlight text prints settings.free_shipping_threshold as money (same
+  token as usp-strip/faq/product); with a threshold of 0 that text line is not shown.
   Success replaces the fields with a confirmation panel; errors list the fields with links.
 {%- endcomment -%}
 {{ 'section-pages.css' | asset_url | stylesheet_tag }}
@@ -34,6 +36,16 @@
   assign title_last = ss.heading | strip | slice: -1
   if title_last == '.' or title_last == '?' or title_last == '!' or title_last == ':' or title_last == '…'
     assign title_dot = false
+  endif
+  assign aside_dot = true
+  assign aside_last = ss.aside_heading | strip | slice: -1
+  if aside_last == '.' or aside_last == '?' or aside_last == '!' or aside_last == ':' or aside_last == '…'
+    assign aside_dot = false
+  endif
+  assign fs_token = '[envio_gratis]'
+  assign fs_amount = ''
+  if settings.free_shipping_threshold > 0
+    assign fs_amount = settings.free_shipping_threshold | times: 100 | money_without_trailing_zeros
   endif
 -%}
 
@@ -107,7 +119,7 @@
       {%- if aside_count > 0 -%}
         <div class="contact__aside">
           {%- if ss.aside_heading != blank -%}
-            <h2 class="contact__aside-title">{{ ss.aside_heading | escape }}</h2>
+            <h2 class="contact__aside-title{% if aside_dot %} heading-dot{% endif %}">{{ ss.aside_heading | escape }}</h2>
           {%- endif -%}
           {%- for block in section.blocks -%}
             {%- assign bs = block.settings -%}
@@ -142,11 +154,22 @@
                   </div>
                 {%- endif -%}
               {%- when 'highlight' -%}
+                {%- liquid
+                  assign hl_text = bs.text | escape
+                  if hl_text contains fs_token
+                    if fs_amount == blank
+                      assign hl_text = ''
+                    else
+                      assign hl_text = hl_text | replace: fs_token, fs_amount
+                    endif
+                  endif
+                  assign hl_text = hl_text | replace: 'S/ ', 'S/&nbsp;'
+                -%}
                 <div class="contact__block contact__highlight" {{ block.shopify_attributes }}>
                   <span class="pg-beacon">{% render 'icon', name: bs.icon %}</span>
                   <div>
                     {%- if bs.title != blank -%}<p class="contact__hl-title">{{ bs.title | escape }}</p>{%- endif -%}
-                    {%- if bs.text != blank -%}<p class="contact__hl-text">{{ bs.text | escape }}</p>{%- endif -%}
+                    {%- if hl_text != blank -%}<p class="contact__hl-text">{{ hl_text }}</p>{%- endif -%}
                   </div>
                 </div>
               {%- when 'text' -%}
@@ -166,11 +189,12 @@
 {
   "name": "Formulario de contacto",
   "class": "contact-section",
+  "disabled_on": {"groups": ["header", "footer"]},
   "settings": [
     {"type": "select", "id": "scheme", "label": "Esquema de color", "options": [{"value": "light", "label": "Claro"}, {"value": "soft", "label": "Gris suave"}, {"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Oscuro"}], "default": "light"},
     {"type": "text", "id": "heading", "label": "Título", "default": "Escríbenos"},
     {"type": "richtext", "id": "text", "label": "Texto", "default": "<p>¿Tienes una consulta sobre un producto, un pedido o una medida? Déjanos tu mensaje y te respondemos por correo.</p>"},
-    {"type": "checkbox", "id": "show_phone", "label": "Pedir teléfono (opcional)", "default": true},
+    {"type": "checkbox", "id": "show_phone", "label": "Mostrar campo de teléfono (opcional para el cliente)", "default": true},
     {"type": "text", "id": "aside_heading", "label": "Título de la columna lateral", "default": "Datos útiles"},
     {"type": "header", "content": "Espaciado"},
     {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40},
@@ -202,7 +226,7 @@
       "settings": [
         {"type": "select", "id": "icon", "label": "Ícono", "options": [{"value": "truck", "label": "Camión"}, {"value": "return", "label": "Cambios"}, {"value": "medal", "label": "Medalla"}, {"value": "shield", "label": "Escudo"}, {"value": "clock", "label": "Reloj"}, {"value": "store", "label": "Tienda"}, {"value": "map-pin", "label": "Ubicación"}, {"value": "wrench", "label": "Herramienta"}, {"value": "bike", "label": "Bicicleta"}, {"value": "card", "label": "Tarjeta"}, {"value": "info", "label": "Información"}], "default": "truck"},
         {"type": "text", "id": "title", "label": "Título", "default": "Envíos a todo el Perú"},
-        {"type": "text", "id": "text", "label": "Texto", "default": "Gratis desde S/ 220"}
+        {"type": "text", "id": "text", "label": "Texto", "info": "[envio_gratis] muestra el monto de envío gratis de Configuración del tema › Carrito (si es 0, este texto no se muestra).", "default": "Gratis desde [envio_gratis]"}
       ]
     },
     {
@@ -220,7 +244,7 @@
       "blocks": [
         {"type": "whatsapp"},
         {"type": "details"},
-        {"type": "highlight", "settings": {"icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde S/ 220"}},
+        {"type": "highlight", "settings": {"icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde [envio_gratis]"}},
         {"type": "highlight", "settings": {"icon": "return", "title": "Cambios y garantía", "text": "7 días para cambiar, sin abrir"}},
         {"type": "highlight", "settings": {"icon": "medal", "title": "Productos originales", "text": "Vendedor autorizado Rockbros"}}
       ]

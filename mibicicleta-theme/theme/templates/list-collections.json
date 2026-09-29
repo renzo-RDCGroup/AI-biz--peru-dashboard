@@ -12,7 +12,81 @@
         "show_count": true,
         "padding_top": 24,
         "padding_bottom": 64
-      }
+      },
+      "blocks": {
+        "luces": {
+          "type": "collection",
+          "settings": {
+            "collection": "luces"
+          }
+        },
+        "llantas_y_camaras": {
+          "type": "collection",
+          "settings": {
+            "collection": "llantas-y-camaras"
+          }
+        },
+        "pinones_y_transmision": {
+          "type": "collection",
+          "settings": {
+            "collection": "pinones-y-transmision"
+          }
+        },
+        "espejos": {
+          "type": "collection",
+          "settings": {
+            "collection": "espejos"
+          }
+        },
+        "asientos": {
+          "type": "collection",
+          "settings": {
+            "collection": "asientos"
+          }
+        },
+        "pedales": {
+          "type": "collection",
+          "settings": {
+            "collection": "pedales"
+          }
+        },
+        "grips": {
+          "type": "collection",
+          "settings": {
+            "collection": "grips"
+          }
+        },
+        "tapabarros": {
+          "type": "collection",
+          "settings": {
+            "collection": "tapabarros"
+          }
+        },
+        "cascos": {
+          "type": "collection",
+          "settings": {
+            "collection": "cascos"
+          }
+        },
+        "accesorios": {
+          "type": "collection",
+          "settings": {
+            "collection": "accesorios"
+          }
+        }
+      },
+      "block_order": [
+        "luces",
+        "llantas_y_camaras",
+        "pinones_y_transmision",
+        "espejos",
+        "asientos",
+        "pedales",
+        "grips",
+        "tapabarros",
+        "cascos",
+        "accesorios"
+      ]
     }
   },
   "order": [

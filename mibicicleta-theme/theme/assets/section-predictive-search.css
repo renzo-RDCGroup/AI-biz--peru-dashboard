@@ -45,6 +45,11 @@
 .header-search__clear { right: 46px; color: var(--color-muted); }
 .header-search__clear:hover { color: var(--color-ink); background: var(--color-surface); }
 .header-search__clear .icon { --icon-size: 18px; }
+/* 44px+ hit areas without changing the look (::after is the loading spinner): the submit
+   grows to the full field height, the clear button grows away from it (no overlap). */
+.header-search__submit::before,
+.header-search__clear::before { content: ""; position: absolute; inset: -4px; }
+.header-search__clear::before { inset: -4px 0 -4px -6px; }
 .header-search.is-loading .header-search__submit .icon { visibility: hidden; }
 .header-search.is-loading .header-search__submit::after {
   content: "";

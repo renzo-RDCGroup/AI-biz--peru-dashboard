@@ -141,7 +141,7 @@
         { "value": "light", "label": "Claro" },
         { "value": "soft", "label": "Gris suave" },
         { "value": "brand", "label": "Amarillo" },
-        { "value": "dark", "label": "Negro" }
+        { "value": "dark", "label": "Oscuro" }
       ],
       "default": "light"
     },
@@ -170,14 +170,16 @@
     {
       "type": "checkbox",
       "id": "show_search_bar",
-      "label": "Mostrar barra de búsqueda",
-      "default": true
+      "label": "Mostrar buscador en el encabezado",
+      "default": true,
+      "info": "Si lo desactivas, el encabezado no tendrá buscador ni en computadora ni en celular."
     },
     {
       "type": "text",
       "id": "search_placeholder",
       "label": "Texto de ejemplo en la búsqueda",
-      "default": "Busca por código, medida o nombre…"
+      "default": "Busca por código, medida o nombre…",
+      "visible_if": "{{ section.settings.show_search_bar }}"
     },
     {
       "type": "header",
@@ -200,7 +202,7 @@
     {
       "type": "checkbox",
       "id": "show_shipping_note",
-      "label": "Mostrar \"Envío gratis desde…\" junto al menú",
+      "label": "Mostrar «Envío gratis desde…» junto al menú",
       "default": true,
       "info": "Usa el monto de Configuración del tema › Carrito. Se oculta si el monto es 0."
     }

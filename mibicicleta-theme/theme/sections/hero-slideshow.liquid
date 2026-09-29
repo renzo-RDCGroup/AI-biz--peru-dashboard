@@ -2,8 +2,10 @@
   Hero slideshow (styles: assets/section-hero.css · slider: assets/carousel.js).
   Split layout ≥990: 45% colour panel (display heading + red dot + "mi" watermark) | 55% photo.
   Overlay layout ≥990: full-bleed photo with the panel as a floating card.
-  Mobile (both layouts): 4:3 photo on top, compact panel below.
+  Mobile (both layouts): 4:3 photo on top (16:9 on tablets), compact panel below.
   The first slide's image is the LCP image (eager + fetchpriority high).
+  Slides are plain <div>s: carousel.js gives them role=group + "diapositiva" + "N de M".
+  Focal points: --hero-fp (desktop image) / --hero-fp-m (mobile image) → object-position in CSS.
 {%- endcomment -%}
 {{ 'section-hero.css' | asset_url | stylesheet_tag }}
 
@@ -14,15 +16,24 @@
     assign autoplay = true
   endif
   assign carousel_label = 'home.hero.label' | t
+  # Tallest box height per height setting (min(Npx, vh)): drives the cover-crop `sizes`.
+  case section.settings.height
+    when 'sm'
+      assign hero_h = 520
+    when 'lg'
+      assign hero_h = 760
+    else
+      assign hero_h = 640
+  endcase
 -%}
 
 <section class="hero hero--h-{{ section.settings.height }} section" style="--pad-top: {{ section.settings.padding_top }}px; --pad-bottom: {{ section.settings.padding_bottom }}px;">
-  {%- if section.settings.page_heading -%}
+  {%- if section.settings.page_heading and template.name == 'index' -%}
     <h1 class="visually-hidden">{{ shop.name | escape }}</h1>
   {%- endif -%}
 
   <carousel-slider class="carousel hero__carousel"{% if autoplay %} data-autoplay="{{ section.settings.autoplay_speed }}"{% endif %} data-loop aria-label="{{ carousel_label | escape }}">
-    <ul class="carousel__track hero__track" role="list">
+    <div class="carousel__track hero__track">
       {%- for block in section.blocks -%}
         {%- liquid
           assign s = block.settings
@@ -33,22 +44,37 @@
           endif
           assign img = s.image
           assign img_m = s.image_mobile
-          assign img_sizes = '(min-width: 990px) 55vw, 100vw'
+          # ≥990 the photo is cropped to cover a (55vw or 100vw) × hero_h box: ask for the
+          # width the crop really needs, i.e. max(frac·vw, hero_h × aspect ratio).
+          assign frac = 55
           if s.layout == 'overlay'
-            assign img_sizes = '100vw'
+            assign frac = 100
+          endif
+          assign ar = img.aspect_ratio | default: 1.7778
+          assign need_px = hero_h | times: ar | ceil
+          assign cross_px = need_px | times: 100 | divided_by: frac | plus: 1
+          if cross_px > 990
+            assign img_sizes = '(min-width: ' | append: cross_px | append: 'px) ' | append: frac | append: 'vw, (min-width: 990px) ' | append: need_px | append: 'px, 100vw'
+          else
+            assign img_sizes = '(min-width: 990px) ' | append: frac | append: 'vw, 100vw'
           endif
           assign img_alt = img.alt | default: ''
           assign is_lcp = false
           if forloop.first
             assign is_lcp = true
           endif
-          assign img_style = ''
-          if img.presentation.focal_point != blank
-            assign img_style = 'object-position: ' | append: img.presentation.focal_point
-          endif
           assign heading_id = 'HeroHeading-' | append: section.id | append: '-' | append: forloop.index
+          assign show_b1 = false
+          if s.button_label != blank and s.button_link != blank
+            assign show_b1 = true
+          endif
+          assign show_b2 = false
+          if s.button2_label != blank and s.button2_link != blank
+            assign show_b2 = true
+          endif
         -%}
-        <li class="carousel__slide hero__slide hero__slide--{{ s.layout }} hero__slide--img-{{ s.image_position }} scheme-{{ panel }}" {{ block.shopify_attributes }}>
+        <div class="carousel__slide hero__slide hero__slide--{{ s.layout }} hero__slide--img-{{ s.image_position }} scheme-{{ panel }}"
+          {%- if img != blank %} style="--hero-fp: {{ img.presentation.focal_point | default: '50% 50%' }};{% if img_m != blank %} --hero-fp-m: {{ img_m.presentation.focal_point | default: '50% 50%' }};{% endif %}"{% endif %} {{ block.shopify_attributes }}>
           <div class="hero__media">
             {%- if img != blank -%}
               <picture>
@@ -62,11 +88,11 @@
                   >
                 {%- endif -%}
                 {%- if is_lcp and img_m == blank -%}
-                  {{- img | image_url: width: 2048 | image_tag: widths: '480,750,1000,1400,1800,2048', sizes: img_sizes, loading: 'eager', fetchpriority: 'high', preload: true, class: 'hero__img', alt: img_alt, style: img_style -}}
+                  {{- img | image_url: width: 2048 | image_tag: widths: '480,750,1000,1400,1800,2048', sizes: img_sizes, loading: 'eager', fetchpriority: 'high', preload: true, class: 'hero__img', alt: img_alt -}}
                 {%- elsif is_lcp -%}
-                  {{- img | image_url: width: 2048 | image_tag: widths: '480,750,1000,1400,1800,2048', sizes: img_sizes, loading: 'eager', fetchpriority: 'high', class: 'hero__img', alt: img_alt, style: img_style -}}
+                  {{- img | image_url: width: 2048 | image_tag: widths: '480,750,1000,1400,1800,2048', sizes: img_sizes, loading: 'eager', fetchpriority: 'high', class: 'hero__img', alt: img_alt -}}
                 {%- else -%}
-                  {{- img | image_url: width: 2048 | image_tag: widths: '480,750,1000,1400,1800,2048', sizes: img_sizes, loading: 'lazy', class: 'hero__img', alt: img_alt, style: img_style -}}
+                  {{- img | image_url: width: 2048 | image_tag: widths: '480,750,1000,1400,1800,2048', sizes: img_sizes, loading: 'lazy', class: 'hero__img', alt: img_alt -}}
                 {%- endif -%}
               </picture>
             {%- else -%}
@@ -86,20 +112,22 @@
                   assign h_dot = false
                 endif
               -%}
-              <h2 class="display hero__heading{% if h_dot %} heading-dot{% endif %}" id="{{ heading_id }}">{{ s.heading | escape }}</h2>
+              {%- if s.heading != blank -%}
+                <h2 class="display hero__heading{% if h_dot %} heading-dot{% endif %}" id="{{ heading_id }}">{{ s.heading | escape }}</h2>
+              {%- endif -%}
               {%- if s.text != blank -%}
                 <p class="hero__text">{{ s.text | escape | replace: 'S/ ', 'S/ ' }}</p>
               {%- endif -%}
-              {%- if s.button_label != blank or s.button2_label != blank -%}
+              {%- if show_b1 or show_b2 -%}
                 <div class="hero__buttons">
-                  {%- if s.button_label != blank -%}
-                    <a class="btn btn--primary btn--lg hero__btn"{% if s.button_link != blank %} href="{{ s.button_link }}"{% endif %}>
+                  {%- if show_b1 -%}
+                    <a class="btn btn--primary btn--lg hero__btn" href="{{ s.button_link }}">
                       {{- s.button_label | escape -}}
                       {%- render 'icon', name: 'arrow-right' -%}
                     </a>
                   {%- endif -%}
-                  {%- if s.button2_label != blank -%}
-                    <a class="btn btn--outline btn--lg hero__btn"{% if s.button2_link != blank %} href="{{ s.button2_link }}"{% endif %}>
+                  {%- if show_b2 -%}
+                    <a class="btn btn--outline btn--lg hero__btn" href="{{ s.button2_link }}">
                       {{- s.button2_label | escape -}}
                     </a>
                   {%- endif -%}
@@ -108,9 +136,9 @@
             </div>
             {%- render 'logo', variant: 'mark', tone: wm_tone, label: '', class: 'mi-watermark hero__watermark' -%}
           </div>
-        </li>
+        </div>
       {%- endfor -%}
-    </ul>
+    </div>
 
     {%- if slide_count > 1 -%}
       <div class="carousel__controls hero__controls scheme-light">
@@ -134,9 +162,9 @@
   "max_blocks": 6,
   "settings": [
     {"type": "checkbox", "id": "autoplay", "label": "Avance automático", "info": "Se pausa al pasar el mouse o enfocar, y nunca se activa si el visitante prefiere reducir el movimiento.", "default": true},
-    {"type": "range", "id": "autoplay_speed", "label": "Cambiar cada", "min": 3, "max": 10, "step": 1, "unit": "s", "default": 6},
+    {"type": "range", "id": "autoplay_speed", "label": "Cambiar cada", "min": 3, "max": 10, "step": 1, "unit": "s", "default": 6, "visible_if": "{{ section.settings.autoplay }}"},
     {"type": "select", "id": "height", "label": "Altura en escritorio", "options": [{"value": "sm", "label": "Baja"}, {"value": "md", "label": "Media"}, {"value": "lg", "label": "Alta"}], "default": "md"},
-    {"type": "checkbox", "id": "page_heading", "label": "Incluir título principal oculto (H1)", "info": "Añade el nombre de la tienda como H1 invisible para buscadores y lectores de pantalla. Úsalo solo en un carrusel por página.", "default": true},
+    {"type": "checkbox", "id": "page_heading", "label": "Incluir título principal oculto (H1)", "info": "Añade el nombre de la tienda como H1 invisible para buscadores y lectores de pantalla. Actívalo solo en la página de inicio (las demás páginas ya tienen su título H1); en otras plantillas no se aplica.", "default": false},
     {"type": "header", "content": "Espaciado"},
     {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0},
     {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0}
@@ -146,17 +174,17 @@
       "type": "slide",
       "name": "Diapositiva",
       "settings": [
-        {"type": "image_picker", "id": "image", "label": "Imagen", "info": "Horizontal, mínimo 2000 × 1200 px."},
-        {"type": "image_picker", "id": "image_mobile", "label": "Imagen para móvil (opcional)", "info": "Se recorta en formato 4:3."},
+        {"type": "image_picker", "id": "image", "label": "Imagen", "info": "Horizontal, mínimo 2000 × 1200 px. En «Panel de color + imagen» se recorta a los lados: usa el punto focal del selector de imagen para elegir qué parte se ve."},
+        {"type": "image_picker", "id": "image_mobile", "label": "Imagen para móvil (opcional)", "info": "Se recorta en formato 4:3 (16:9 en tabletas). Respeta su propio punto focal."},
         {"type": "select", "id": "layout", "label": "Diseño", "options": [{"value": "split", "label": "Panel de color + imagen"}, {"value": "overlay", "label": "Tarjeta sobre la imagen"}], "default": "split"},
         {"type": "select", "id": "panel_scheme", "label": "Color del panel", "options": [{"value": "brand", "label": "Amarillo"}, {"value": "dark", "label": "Negro"}, {"value": "light", "label": "Blanco"}], "default": "brand"},
         {"type": "select", "id": "image_position", "label": "Imagen a la", "options": [{"value": "right", "label": "Derecha"}, {"value": "left", "label": "Izquierda"}], "default": "right"},
-        {"type": "text", "id": "eyebrow", "label": "Antetítulo", "default": "Luces y seguridad"},
-        {"type": "text", "id": "heading", "label": "Título", "default": "Que te vean de día y de noche"},
-        {"type": "text", "id": "text", "label": "Texto", "default": "Luces delanteras, posteriores y linternas para cada ruta."},
-        {"type": "text", "id": "button_label", "label": "Botón principal", "default": "Ver luces"},
-        {"type": "url", "id": "button_link", "label": "Enlace del botón principal"},
-        {"type": "text", "id": "button2_label", "label": "Botón secundario"},
+        {"type": "text", "id": "eyebrow", "label": "Antetítulo"},
+        {"type": "text", "id": "heading", "label": "Título", "default": "Título de la diapositiva"},
+        {"type": "text", "id": "text", "label": "Texto"},
+        {"type": "text", "id": "button_label", "label": "Botón principal", "info": "Se muestra solo si tiene texto y enlace.", "default": "Ver productos"},
+        {"type": "url", "id": "button_link", "label": "Enlace del botón principal", "default": "/collections/all"},
+        {"type": "text", "id": "button2_label", "label": "Botón secundario", "info": "Se muestra solo si tiene texto y enlace."},
         {"type": "url", "id": "button2_link", "label": "Enlace del botón secundario"}
       ]
     }
@@ -165,10 +193,11 @@
     {
       "name": "Carrusel principal",
       "blocks": [
-        {"type": "slide"},
-        {"type": "slide", "settings": {"panel_scheme": "dark", "eyebrow": "Llantas y cámaras", "heading": "Llantas para bici y scooter", "text": "Macizas, antipinchazos y todo terreno. Encuentra tu medida.", "button_label": "Ver llantas"}}
+        {"type": "slide", "settings": {"eyebrow": "Luces y seguridad", "heading": "Que te vean de día y de noche", "text": "Luces delanteras, posteriores y linternas para cada ruta."}},
+        {"type": "slide", "settings": {"panel_scheme": "dark", "eyebrow": "Llantas y cámaras", "heading": "Llantas para bici y scooter", "text": "Macizas, antipinchazos y todo terreno. Encuentra tu medida."}}
       ]
     }
-  ]
+  ],
+  "disabled_on": {"groups": ["header", "footer"]}
 }
 {% endschema %}

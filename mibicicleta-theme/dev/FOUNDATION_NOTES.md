@@ -27,6 +27,23 @@ Foundation files are read-only for everyone else. If you need a change, put it i
 | Cart events | `MiBici.cart.add()` itself dispatches `cart:updated`. `<product-form>` only dispatches `cart:open` afterwards, so you never get a double `cart:updated`. |
 | Announcements | global.js already announces cart updates in `#A11yLive`: "Carrito actualizado. N productos" after change/update, and "¡Listo! Lo agregamos…" after add. **Do not announce again** in cart.js. |
 | Password layout | Loads base, components and components-ui CSS plus fonts. No product-card.css and no JS. |
+| **List reset has zero specificity** | `:where(ul[role="list"], ol[role="list"]) { list-style:none; margin:0; padding:0 }`. Any class you put on a list (`.chip-row--bleed`, `.chip-row`'s 4px block padding, your own margins) now wins. Local workarounds with raised specificity (`ul.x`) are no longer needed. |
+| **Carousel slide semantics** | Slides inside a `<ul>/<ol>/[role=list]` track keep native list semantics (no `role=group`: axe `aria-required-children`). Only non-list slides (e.g. `<div class="carousel__track"><div class="carousel__slide">`) get `role=group` + "diapositiva" + "n de N". Use divs when you want the APG slide pattern (the hero). |
+| **Carousel autoplay + touch** | Hover-pause listens to mouse pointers only (`pointerenter/leave`), and a touch on the pause button is left to its click, so one tap pauses (label "Reproducir carrusel"). |
+| **Carousel track with product cards** | `.carousel__track:has(.product-card)` gets `padding: 6px; margin: -6px` so the card focus ring isn't clipped by the scroller. Slide widths are unchanged; `.carousel--bleed` still wins inline below 990. |
+| **Overlay arrows at the ends** | `.carousel--arrows-overlay` prev/next with `aria-disabled="true"` are hidden (opacity 0, visibility hidden) unless keyboard-focused (then they stay at 35%, so focus is never lost). |
+| **`cart:updated` after add** | `MiBici.cart.add()` no longer waits for `GET /cart.js` when a returned section exposes the totals: **C** puts `data-cart-item-count="{{ cart.item_count }}" data-cart-total-price="{{ cart.total_price }}"` on `.cart-drawer__inner` / `.main-cart__inner`. Then `detail.cart` is **partial**: `{item_count, total_price, partial: true}`. Otherwise it falls back to `/cart.js` (full cart). Read only `item_count`/`total_price` from an `add` event. Do **not** name it `data-cart-count`: that selector is the header badge that `updateCartCount` overwrites. |
+| **Network errors** | `fetchJSON` turns a failed `fetch()` (offline, dropped connection) into `Error(MiBici.strings.networkError)` with `.status = 0`, `.network = true` ("No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo."). `AbortError` is re-thrown untouched. HTTP errors are unchanged. |
+| **Free-shipping bar, empty cart** | With total 0 the bar (Liquid and JS) reads "**Envío gratis** desde S/ 220." (`shipping.intro_html`, `MiBici.strings.freeShippingIntro`) instead of "¡Te faltan S/ 220.00…!". |
+| **Web fonts don't block rendering** | Google Fonts (and the Adobe kit) load via `<link rel="preload" as="style" onload="this.rel='stylesheet'">` + `<noscript>`. Until they arrive, `--font-heading` / `--font-body` fall to metric-matched Arial faces (`'Urbanist Fallback'`, `'Libre Franklin Fallback'`, `size-adjust` etc. in css-variables), so lines don't reflow on swap. Theme Check reports AssetPreload warnings for these two links; they are intentional. |
+| **Product card** | Multi-variant cards: the "Elegir opciones" link is a **white** round button with an `arrow-right` icon (it navigates), so it no longer looks like the yellow `bag-plus` add. The hover image is `display:none` outside `(hover:hover) and (min-width:990px)`, so phones never download it. |
+| **Quantity** | `.qty--sm` buttons have an invisible 44×44 hit area (`::after`). Without JS the ± buttons are hidden and the number field widens to 4em. |
+| **payment-icons `scope`** | `{% render 'payment-icons', scope: 'cart' %}` rewrites Shopify's fixed `pi-*` ids (title id, `aria-labelledby`, `url(#…)`) to `pi-cart-*`. Use it for the second copy on a page (cart summary; the footer has none). |
+| **WhatsApp** | Prefilled text uses `%20` for spaces (`url_encode \| replace: '+', '%20'`). The number drops a leading `00`, and a bare 9-digit mobile starting with 9 gets `51` (snippet and `MiBici.settings.whatsapp`). |
+| **Price labels** | The visually-hidden "Precio de oferta" / "Precio habitual" spans carry their own spaces (Liquid and `priceHTML`). |
+| **Forced colors** | `@media (forced-colors: active)`: swatches keep their colours, active chips/tabs and the active carousel dot use `Highlight`, the free-shipping fill is `Highlight`. Selected variant pills/swatches are P's (section CSS). |
+| **Theme editor** | global-ui.js opens the `<details>` a selected block is or contains (FAQ, product collapsible rows, mobile footer columns) and closes it on deselect only if it opened it (`data-editor-opened`). |
+| **Tokens / misc** | `--color-success-strong` (#146C32) for text on the #E8F5EC success tint (`.form-message--success` uses it). The focused skip link is a yellow pill. `cart_checkout_note` defaults to "El envío se calcula en el checkout." (the "Impuestos incluidos." line is C's, shown only when `cart.taxes_included`). `general.collections` is "Categorías". |
 | Additions (no conflict) | `.scheme-cream` (pale-yellow band, not a section option); vars `--scheme-surface`, `--scheme-sale`, `--scheme-focus`, `--media-bg`, `--color-border-strong`; `.btn--ghost`, `.btn--whatsapp`; `.chip-row--bleed`, `.carousel--bleed`, `.carousel--arrows-overlay`; `.accordion--card`; `.eyebrow--dot`; `.flow`, `.cluster`, `.page-width--narrow`; `MiBici.priceHTML/updatePrice/updateCartCount/updateFreeShipping/initReveal/measureHeader/getFocusable/emit/define/reducedMotion`; `MiBici.SideDrawer` (class, for extending). |
 
 ## 1. Load order and globals (layout/theme.liquid)
@@ -53,7 +70,8 @@ MiBici.settings = { cartType: 'drawer'|'page', freeShippingThreshold: 22000 /* c
                     predictiveSearch: true, designMode: false }
 MiBici.strings  = { addToCart, soldOut, unavailable, adding, added, cartError, cartUpdated,
                     itemsOne "[count] producto", itemsOther "[count] productos", priceSale, priceRegular,
-                    freeShippingRemaining (HTML, "[amount]"), freeShippingReached (HTML), freeShippingZone,
+                    networkError, freeShippingRemaining (HTML, "[amount]"), freeShippingReached (HTML),
+                    freeShippingIntro (HTML, empty cart), freeShippingZone,
                     close, loading, copied, decrease, increase, newWindow,
                     carouselPrev, carouselNext, carouselPause, carouselPlay, carouselGoTo "[index]",
                     carouselSlide "[index] de [total]", carouselLabel, carouselSlideLabel }
@@ -118,7 +136,7 @@ Never put white text on yellow. Use red (`--color-accent`) only for dots and mar
 **Badges**: `.badges` > `.badge.badge--sale|--new|--soldout|--dark|--soft`.
 **Chips**: `.chip` (36px pill); active is `.is-active`, `[aria-pressed=true]`, `[aria-selected=true]` or `[aria-current=page]` (inverts scheme fg/bg). `.chip-row` scrolls on mobile and wraps ≥990 unless you add `.chip-row--scroll`. Add `.chip-row--bleed` to bleed to the screen edges below 990.
 **Price, rating, swatch**: see snippets. Price sizes `.price--sm|md|lg`.
-**Quantity**: see the `quantity-input` snippet. `.qty--sm` is 36px tall (cart lines), md is 44px.
+**Quantity**: see the `quantity-input` snippet. `.qty--sm` is 36px tall (cart lines; its buttons have a 44×44 invisible hit area), md is 44px. Without JS only the number field shows.
 **Accordion**:
 ```html
 <details class="accordion [accordion--card]" [open]>
@@ -171,7 +189,7 @@ ESC, overlay and `[data-drawer-close]` all close the drawer, which returns focus
 
 Autoplay inserts `.carousel__pause` (btn--icon btn--sm btn--outline) into `.carousel__controls` (or the element). If you add your own `.carousel__pause`, it is used instead. Autoplay pauses on hover/focus, when off-screen and when the tab is hidden. It stops for good after any touch, arrow or dot use. It never runs under reduced motion.
 
-Slides get `.is-active` while in view, `role=group` and `aria-label "n de N"` unless they already have a label. Events: `carousel:change {page, index}`. Methods: `goTo(slideIndex)`, `goToPage(n)`, `next()`, `prev()`, `refresh()`. Theme editor `shopify:block:select` on a slide scrolls to it and holds autoplay.
+Slides get `.is-active` while in view. Non-list slides (divs) also get `role=group`, `aria-roledescription` "diapositiva" and `aria-label "n de N"` unless they already have a label; `<li>` slides in a list track keep plain list semantics. Events: `carousel:change {page, index}`. Methods: `goTo(slideIndex)`, `goToPage(n)`, `next()`, `prev()`, `refresh()`. Theme editor `shopify:block:select` on a slide scrolls to it and holds autoplay.
 
 ## 6. Snippets (all in `snippets/`, params optional unless noted)
 
@@ -189,7 +207,7 @@ Slides get `.is-active` while in view, `role=group` and `aria-label "n de N"` un
 | breadcrumbs | `{% render 'breadcrumbs', class: '', schema: true %}` (`schema: false` skips JSON-LD if you render it twice). |
 | section-heading | `{% render 'section-heading', title:, subtitle:, eyebrow:, link_url:, link_label:, align: 'left'\|'center', tag: 'h2', id:, dot: true, class: '' %}` (link default "Ver todo" → `general.view_all`). |
 | whatsapp-button | `{% render 'whatsapp-button', style: 'float'\|'button'\|'link'\|'card', label:, text:, message:, class: '' %}`: **renders nothing when the number setting is blank.** `text` is the card's second line. |
-| social-icons | `{% render 'social-icons', class: '' %}` · payment-icons `{% render 'payment-icons', class: '' %}` · pagination `{% render 'pagination', paginate: paginate, anchor: '#x' %}` · meta-tags (layout only) · logo (see SPEC §2) |
+| social-icons | `{% render 'social-icons', class: '' %}` · payment-icons `{% render 'payment-icons', class: '', scope: '' %}` (`scope` makes the ids unique when a page shows the icons twice) · pagination `{% render 'pagination', paginate: paginate, anchor: '#x' %}` · meta-tags (layout only) · logo (see SPEC §2) |
 
 ## 7. JavaScript API (window.MiBici)
 
@@ -213,7 +231,7 @@ MiBici.cart.get() -> cart
 Cart calls are serialized in a queue, so rapid clicks don't race. `sections` + `sections_url` are appended automatically. Shopify renders at most **5** sections per request.
 
 **Events** (all on `document`, bubbling):
-* `cart:updated {cart, sections, source: 'add'|'change'|'update', lineKey?, item|items?}`: after every successful cart call.
+* `cart:updated {cart, sections, source: 'add'|'change'|'update', lineKey?, item|items?}`: after every successful cart call. For `source: 'add'`, `cart` may be partial (`{item_count, total_price, partial: true}`, read from the section's `data-cart-item-count` / `data-cart-total-price`).
 * `cart:error {message, source, status}`.
 * `cart:open {opener}`.
 * `drawer:open` / `drawer:close {id}`.
@@ -265,7 +283,7 @@ Buttons outside the form (the sticky bar) use `form="{{ product_form_id }}"` (an
 
 ## 8. Locale keys you can reuse (F namespace, read-only)
 
-`general.close`, `general.loading`, `general.copied`, `general.view_all`, `general.home`, `general.search`, `general.cart`, `general.collections`, `general.breadcrumbs`, `general.payment_methods`, `general.carousel.previous|next|pause|play`, `general.pagination.*`, `general.whatsapp.label|float_text|card_text`, `general.social.follow` (`network:`), `accessibility.skip_to_content|new_window|decrease|increase|quantity`, `products.price.sale|regular|from`, `products.badges.sold_out|sale|new|best_seller|save` (`percent:`), `products.card.quick_add|choose_options` (`title:`), `cart.general.add_to_cart|sold_out|unavailable|adding|added|error|updated`, `shipping.remaining_html` (`amount:`), `shipping.reached_html`, `shipping.zone` (`zone:`), `shipping.progress_label`.
+`general.close`, `general.loading`, `general.copied`, `general.view_all`, `general.home`, `general.search`, `general.cart`, `general.collections`, `general.breadcrumbs`, `general.payment_methods`, `general.carousel.previous|next|pause|play`, `general.pagination.*`, `general.whatsapp.label|float_text|card_text`, `general.social.follow` (`network:`), `accessibility.skip_to_content|new_window|decrease|increase|quantity`, `products.price.sale|regular|from`, `products.badges.sold_out|sale|new|best_seller|save` (`percent:`), `products.card.quick_add|choose_options` (`title:`), `cart.general.add_to_cart|sold_out|unavailable|adding|added|error|network_error|updated`, `shipping.intro_html` (`amount:`), `shipping.remaining_html` (`amount:`), `shipping.reached_html`, `shipping.zone` (`zone:`), `shipping.progress_label`.
 Add new keys only under your own namespace (SPEC §11).
 
 ## 9. Settings you will read (settings_schema ids)

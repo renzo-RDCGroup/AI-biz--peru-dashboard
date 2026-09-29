@@ -12,6 +12,12 @@
 /* Keep the last row clear of the floating WhatsApp button at the end of the page. */
 .footer--float { padding-bottom: calc(var(--pad-bottom) * .75 + 72px); }
 @media (min-width: 750px) { .footer--float { padding-bottom: calc(var(--pad-bottom) + 72px); } }
+/* Fixed bottom bars (product sticky add-to-cart, cart checkout bar) publish their height as
+   --bottom-offset. The bottom row gets that much extra padding so it stays reachable above the
+   bar, and the equal negative margin lets the dark footer fill any space reserved under it
+   (body padding) instead of adding to it: the reserve is never doubled, and without one the
+   footer simply overflows the page end, which still scrolls. */
+.footer { margin-bottom: calc(var(--bottom-offset, 0px) * -1); }
 
 .footer__main {
   display: flex;
@@ -74,6 +80,8 @@
   letter-spacing: .09em;
   text-transform: uppercase;
 }
+/* Desktop twin of the summary heading (see footer.liquid); only one of them renders. */
+.footer__col-title--wide { display: none; }
 .footer__chevron {
   --icon-size: 20px;
   color: var(--scheme-muted);
@@ -140,6 +148,7 @@
   gap: 12px;
   margin-top: 28px;
   padding-top: 20px;
+  padding-bottom: var(--bottom-offset, 0px);
   border-top: 1px solid var(--scheme-border);
   color: var(--scheme-muted);
   font-size: var(--fs-xs);
@@ -165,13 +174,8 @@
     border-top: 0;
   }
   .footer__details { border-bottom: 0; }
-  .footer__summary {
-    min-height: 0;
-    margin-bottom: 14px;
-    cursor: default;
-    pointer-events: none;
-  }
-  .footer__chevron { display: none; }
+  .footer__summary { display: none; }
+  .footer__col-title--wide { display: block; margin-bottom: 14px; }
   .footer__panel { padding: 0; }
   .footer__link { display: inline-flex; min-height: 0; padding-block: 6px; }
   .footer__links li { line-height: 1; }

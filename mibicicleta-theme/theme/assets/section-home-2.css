@@ -36,6 +36,7 @@
 }
 .promo--type .promo__heading { font-size: clamp(2.5rem, 1.7rem + 3vw, 4rem); line-height: .94; letter-spacing: -.03em; }
 .promo__text { max-width: 26rem; color: var(--scheme-muted); }
+.promo__text, .iwt__text, .newsletter__text, .rich-text__text { text-wrap: pretty; }
 /* Stretched hit area: the whole card follows the button (content stays static so the
    ::after resolves against .promo; media and watermark sit at z-index -1 inside the
    card's isolated stacking context). */
@@ -147,13 +148,16 @@
 .is-paused .brand-marquee__toggle .icon--pause { display: none; }
 .is-paused .brand-marquee__toggle .icon--play { display: inline-block; }
 
-.brand-marquee__viewport { overflow: hidden; }
+/* Block padding (offset by the negative margin, so the layout is unchanged) keeps the
+   focused link's ring inside the clipped viewport. */
+.brand-marquee__viewport { margin-block: -6px; padding-block: 6px; overflow: hidden; }
 .brand-marquee__track {
   display: flex;
   width: max-content;
   animation: brand-marquee var(--marquee-dur, 40s) linear infinite;
 }
-.brand-marquee__group {
+/* Two-class selector: base.css's ul[role=list] reset (0,1,1) would zero the seam padding. */
+.brand-marquee__track > .brand-marquee__group {
   --item-gap: clamp(28px, 2vw + 16px, 56px);
   display: flex;
   flex: none;
@@ -184,16 +188,22 @@
 .brand-marquee__viewport:hover .brand-marquee__track,
 .brand-marquee__wrap:focus-within .brand-marquee__track,
 .is-paused .brand-marquee__track { animation-play-state: paused; }
+/* Keyboard focus on a brand (or the block selected in the editor): back to the start so the
+   real, focusable copy is in the viewport; home.js then scrolls it fully into view.
+   :focus-visible (not :focus-within) so a mouse click never makes the link jump. */
+.brand-marquee__viewport:has(:focus-visible) .brand-marquee__track,
+.is-revealing .brand-marquee__track { padding-left: var(--gutter); animation: none; }
 @keyframes brand-marquee { to { transform: translateX(-50%); } }
 
 @media (prefers-reduced-motion: reduce) {
   .brand-marquee__track { display: block; width: auto; animation: none; }
-  .brand-marquee__group { flex-wrap: wrap; justify-content: center; row-gap: 12px; padding: 0 var(--gutter); }
+  .brand-marquee__track > .brand-marquee__group { flex-wrap: wrap; justify-content: center; row-gap: 12px; padding: 0 var(--gutter); }
   .brand-marquee__name { font-size: clamp(1.75rem, 1.2rem + 2.4vw, 3rem); }
   .brand-marquee__group[aria-hidden="true"],
   .brand-marquee__item--dup,
   .brand-marquee__toggle { display: none; }
-  .brand-marquee__item--last .brand-marquee__dot { display: none; }
+  /* Wrapped lines would end in a dangling dot; the gap + filled/outline rhythm separates. */
+  .brand-marquee__dot { display: none; }
 }
 
 /* ---------- image-with-text ---------------------------------------------- */
@@ -224,7 +234,7 @@
 }
 .iwt__stamp .logo { width: 56%; min-width: 0; }
 .iwt__content { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
-.iwt__heading { font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem); }
+.iwt__heading { font-size: var(--fs-3xl); }
 .iwt__text { max-width: 36rem; font-size: var(--fs-md); color: var(--scheme-muted); }
 .iwt__actions { margin-top: 8px; }
 
@@ -233,7 +243,8 @@
   .iwt__grid--img-right .iwt__visual { order: 2; }
   .iwt__visual { padding: 0 22px 22px 0; }
   .iwt__visual::before { inset: 22px 0 0 22px; }
-  .iwt__stamp { left: -26px; bottom: -18px; width: 124px; height: 124px; border-width: 6px; }
+  /* Never closer than 10px to the viewport edge (gutter is only 24px below 1200). */
+  .iwt__stamp { left: max(-26px, calc(10px - var(--gutter))); bottom: -18px; width: 124px; height: 124px; border-width: 6px; }
   .iwt__grid--img-right .iwt__stamp { left: auto; right: -8px; }
 }
 
@@ -244,7 +255,7 @@
 .faq__grid--stack .faq__heading { margin-bottom: var(--space-4); }
 .faq__intro { display: grid; gap: 20px; align-content: start; }
 .faq__heading { margin-bottom: 0; }
-.faq__heading .section-heading__title { font-size: clamp(2rem, 1.4rem + 2.6vw, 3.25rem); }
+.faq__heading .section-heading__title { font-size: var(--fs-3xl); }
 .faq__wa { max-width: 420px; }
 .faq__item .accordion__summary { font-size: var(--fs-base); }
 .faq__item .accordion__summary .icon {
@@ -277,7 +288,7 @@
 /* ---------- newsletter --------------------------------------------------- */
 .newsletter__grid { position: relative; z-index: 1; display: grid; gap: 24px; align-items: center; }
 .newsletter__intro { display: grid; gap: 12px; }
-.newsletter__heading { font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem); }
+.newsletter__heading { font-size: var(--fs-3xl); }
 .newsletter__text { max-width: 34rem; font-size: var(--fs-md); color: var(--scheme-muted); }
 .newsletter__form { display: grid; gap: 10px; }
 .newsletter__field { display: flex; flex-direction: column; gap: 10px; }

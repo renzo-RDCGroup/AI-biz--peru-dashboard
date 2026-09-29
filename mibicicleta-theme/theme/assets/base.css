@@ -15,6 +15,7 @@
   --color-border-strong: #8A8A82; /* form controls: ≥3:1 on white (WCAG 1.4.11) */
   --color-muted: #5C5C56;
   --color-success: #17803A;
+  --color-success-strong: #146C32; /* text on the #E8F5EC success tint (5.8:1) */
   --color-warning: #9A5B00;
   --color-whatsapp: #25D366;
 
@@ -184,7 +185,8 @@ svg { max-width: 100%; }
 input, button, textarea, select { font: inherit; color: inherit; letter-spacing: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: .18em; }
-ul[role="list"], ol[role="list"] { list-style: none; margin: 0; padding: 0; }
+/* Zero specificity: any component class (.chip-row--bleed, .category-grid__list…) wins. */
+:where(ul[role="list"], ol[role="list"]) { list-style: none; margin: 0; padding: 0; }
 table { border-collapse: collapse; }
 hr { border: 0; border-top: 1px solid var(--scheme-border); margin: var(--space-6) 0; }
 [hidden] { display: none !important; }
@@ -402,7 +404,8 @@ h5, h6 { font-size: var(--fs-md); }
   font-weight: 700;
   text-decoration: none;
 }
-.skip-link:focus { top: 12px; }
+/* Yellow pill: reads on the black announcement bar and on the white header. */
+.skip-link:focus { top: 12px; background: var(--color-brand); color: #000; box-shadow: var(--shadow-md); }
 
 @media (max-width: 749.98px) { .hide-mobile { display: none !important; } }
 @media (min-width: 990px) { .hide-desktop { display: none !important; } }

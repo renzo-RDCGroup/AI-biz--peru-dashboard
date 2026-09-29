@@ -2,12 +2,25 @@
    Mi Bici 2026 — section-home.css
    search-hero · category-grid · usp-strip (also used on product pages) ·
    featured-collection. Colours come from the section's --scheme-* vars.
+   Two-class list selectors (.category-grid .category-grid__list …): base.css resets
+   ul[role=list] margin/padding at (0,1,1), which would cancel single-class list rules.
    ========================================================================== */
 
 /* ---------- search-hero -------------------------------------------------- */
 /* z-index lets the predictive dropdown overlap the next sections. The watermark
    lives in its own clipped layer so the dropdown itself is never clipped. */
 .search-hero { z-index: 4; }
+/* Brand rule on top of the dark band: keeps the edge visible when the slide above it is
+   also dark (hero slide 2 → both #0B0B0B). */
+.search-hero.scheme-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1;
+  height: 4px;
+  background: var(--color-brand);
+  pointer-events: none;
+}
 .search-hero__bg {
   position: absolute;
   inset: 0;
@@ -24,8 +37,7 @@
   gap: 22px;
 }
 .search-hero__intro { display: grid; gap: 10px; }
-.search-hero__title { font-size: clamp(1.875rem, 1.35rem + 2.4vw, 3.25rem); }
-.search-hero__text { max-width: 34rem; color: var(--scheme-muted); font-size: var(--fs-md); line-height: 1.5; }
+.search-hero__text { max-width: 34rem; color: var(--scheme-muted); font-size: var(--fs-md); line-height: 1.5; text-wrap: pretty; }
 .search-hero__wa { font-size: var(--fs-base); }
 .search-hero__wa .whatsapp-link { text-decoration-color: var(--color-brand); text-decoration-thickness: 2px; }
 .scheme-brand .search-hero__wa .whatsapp-link { text-decoration-color: currentColor; }
@@ -102,7 +114,8 @@
   text-transform: uppercase;
   color: var(--scheme-muted);
 }
-.search-hero__chip-row { list-style: none; margin-block: 0; }
+/* Bleeds on mobile/tablet; 6px block padding keeps the 3px + 2px focus ring unclipped. */
+.search-hero .search-hero__chip-row { margin: -2px calc(var(--gutter) * -1); padding: 6px var(--gutter); list-style: none; }
 .search-hero__chip { min-height: 40px; padding-inline: 18px; font-weight: 600; }
 .scheme-dark .search-hero__chip { border-color: rgba(255, 255, 255, .28); }
 .search-hero__chip:hover { border-color: currentColor; background: var(--scheme-fg); color: var(--scheme-bg); }
@@ -113,16 +126,19 @@
   .search-hero__submit-label { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
 }
 @media (min-width: 990px) {
+  .search-hero .search-hero__chip-row { margin-inline: 0; padding-inline: 0; }
   .search-hero__inner { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: 64px; }
   .search-hero__watermark { right: -3%; bottom: -58%; width: 400px; }
 }
 
 /* ---------- category-grid ------------------------------------------------ */
-.category-grid__list {
+/* Mobile scroller: bleeds to the screen edges; 10px/8px padding (offset by -6px) leaves room
+   for the 3px focus ring + 3px offset + 3px lift inside the overflow box. */
+.category-grid .category-grid__list {
   display: flex;
   gap: 4px;
-  margin: 0 calc(var(--gutter) * -1);
-  padding: 4px var(--gutter) 6px;
+  margin: -6px calc(var(--gutter) * -1) 0;
+  padding: 10px var(--gutter) 8px;
   overflow-x: auto;
   list-style: none;
   scroll-snap-type: x proximity;
@@ -182,7 +198,7 @@
 .category-card:focus-visible .category-card__circle { outline: 3px solid var(--scheme-focus); outline-offset: 3px; }
 
 @media (min-width: 750px) {
-  .category-grid__list {
+  .category-grid .category-grid__list {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 28px 16px;
@@ -194,7 +210,7 @@
   .category-card__title { font-size: .9375rem; }
 }
 @media (min-width: 990px) {
-  .category-grid__list { grid-template-columns: repeat(var(--cat-cols, 10), minmax(0, 1fr)); gap: 28px 12px; }
+  .category-grid .category-grid__list { grid-template-columns: repeat(var(--cat-cols, 10), minmax(0, 1fr)); gap: 28px 12px; }
   .category-card { --circle: 120px; }
 }
 

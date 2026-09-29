@@ -1,2 +1,2 @@
-<div class="recs" data-intent="{{ recommendations.intent }}" data-count="{{ recommendations.products_count }}" data-performed="{{ recommendations.performed }}">{% for p in recommendations.products %}<span class="rec">{{ p.handle }}</span>{% endfor %}</div>
+<div class="recs" data-intent="{{ recommendations.intent }}" data-count="{{ recommendations.products_count }}" data-performed="{{ recommendations.performed }}" data-performed-q="{{ recommendations.performed? }}" data-product="{{ product.handle }}">{% for p in recommendations.products %}<span class="rec">{{ p.handle }}</span>{% endfor %}</div>
 {% schema %}{ "name": "Recomendaciones", "settings": [] }{% endschema %}

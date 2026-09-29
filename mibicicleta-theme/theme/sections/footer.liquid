@@ -4,8 +4,9 @@
   · link columns from blocks (menu / text / contact). Then an optional edge-to-edge logo
   lockup and the bottom bar (© year shop · policies · payment icons).
   Mobile (<750): every column is a <details> accordion. The columns are server-rendered
-  open (so they work without JS); <footer-menus> collapses them on phones and turns the
-  summaries into plain headings from 750px up.
+  open (so they work without JS); <footer-menus> collapses them on phones and keeps them open
+  from 750px up, where CSS hides the <summary> and shows a plain h2 instead (no inert
+  disclosure button for screen readers). Exactly one of the two h2s is rendered per width.
 {%- endcomment -%}
 {{ 'section-footer.css' | asset_url | stylesheet_tag }}
 
@@ -89,6 +90,7 @@
             -%}
             {%- if show_col -%}
               <div class="footer__col footer__col--{{ block.type }}" {{ block.shopify_attributes }}>
+                <h2 class="footer__col-title footer__col-title--wide">{{ col_title | escape }}</h2>
                 <details class="footer__details" open>
                   <summary class="footer__summary">
                     <h2 class="footer__col-title">{{ col_title | escape }}</h2>
@@ -154,29 +156,18 @@
         <script>
           (function () {
             if (customElements.get('footer-menus')) return;
-            /* Phones: collapsed accordions. >=750px: always open, summaries act as plain headings. */
+            /* Phones: collapsed accordions. >=750px: always open (CSS hides the summaries). */
             class FooterMenus extends HTMLElement {
               connectedCallback() {
                 this.mq = window.matchMedia('(min-width: 750px)');
                 this.sync = () => {
                   const wide = this.mq.matches;
-                  this.querySelectorAll('.footer__details').forEach((d) => {
-                    d.open = wide;
-                    const s = d.querySelector('summary');
-                    if (!s) return;
-                    if (wide) s.setAttribute('tabindex', '-1');
-                    else s.removeAttribute('tabindex');
-                  });
+                  this.querySelectorAll('.footer__details').forEach((d) => { d.open = wide; });
                 };
-                this.onClick = (e) => {
-                  if (this.mq.matches && e.target.closest('summary')) e.preventDefault();
-                };
-                this.addEventListener('click', this.onClick);
                 this.mq.addEventListener('change', this.sync);
                 this.sync();
               }
               disconnectedCallback() {
-                this.removeEventListener('click', this.onClick);
                 if (this.mq) this.mq.removeEventListener('change', this.sync);
               }
             }
@@ -229,8 +220,8 @@
     {"type": "richtext", "id": "text", "label": "Texto", "default": "<p>Accesorios y repuestos para bicicleta y scooter. Seguridad, confort y estilo en cada trayecto.</p>"},
     {"type": "checkbox", "id": "show_social", "label": "Mostrar redes sociales", "info": "Se configuran en Configuración del tema › Redes sociales.", "default": true},
     {"type": "checkbox", "id": "show_whatsapp", "label": "Mostrar tarjeta de WhatsApp", "info": "Solo aparece si hay un número en Configuración del tema › Contacto.", "default": true},
-    {"type": "text", "id": "whatsapp_label", "label": "Título de la tarjeta", "default": "¿Dudas con un repuesto?"},
-    {"type": "text", "id": "whatsapp_text", "label": "Texto de la tarjeta", "default": "Escríbenos con una foto"},
+    {"type": "text", "id": "whatsapp_label", "label": "Título de la tarjeta", "default": "¿Dudas con un repuesto?", "visible_if": "{{ section.settings.show_whatsapp }}"},
+    {"type": "text", "id": "whatsapp_text", "label": "Texto de la tarjeta", "default": "Escríbenos con una foto", "visible_if": "{{ section.settings.show_whatsapp }}"},
     {"type": "header", "content": "Barra inferior"},
     {"type": "checkbox", "id": "show_policies", "label": "Mostrar políticas", "default": true},
     {"type": "checkbox", "id": "show_payment", "label": "Mostrar métodos de pago", "default": true},
@@ -264,7 +255,7 @@
         {"type": "paragraph", "content": "Muestra solo los datos que completes en Configuración del tema › Contacto (WhatsApp, teléfono, correo, dirección y horario). Si todos están vacíos, la columna no aparece."},
         {"type": "text", "id": "heading", "label": "Título", "default": "Contacto"},
         {"type": "checkbox", "id": "show_whatsapp", "label": "Incluir WhatsApp", "default": true},
-        {"type": "text", "id": "whatsapp_label", "label": "Texto del enlace de WhatsApp", "default": "Escríbenos por WhatsApp"}
+        {"type": "text", "id": "whatsapp_label", "label": "Texto del enlace de WhatsApp", "default": "Escríbenos por WhatsApp", "visible_if": "{{ block.settings.show_whatsapp }}"}
       ]
     }
   ],

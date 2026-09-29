@@ -29,7 +29,7 @@
       {%- endif -%}
 
       {%- if ss.show_search -%}
-        <form class="pill-search" action="{{ routes.search_url }}" method="get" role="search">
+        <form class="pill-search" action="{{ routes.search_url }}" method="get" role="search" aria-label="{{ 'not_found.search_label' | t }}">
           <label class="visually-hidden" for="{{ search_id }}">{{ 'not_found.search_label' | t }}</label>
           <span class="pill-search__icon" aria-hidden="true">{% render 'icon', name: 'search' %}</span>
           <input class="pill-search__input" type="search" id="{{ search_id }}" name="q" placeholder="{{ ss.search_placeholder | escape }}" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
@@ -39,9 +39,10 @@
       {%- endif -%}
 
       {%- if ss.menu != blank and ss.menu.links.size > 0 -%}
-        <nav class="not-found__cats" aria-label="{{ 'not_found.categories' | t }}">
+        {%- assign cats_id = 'NotFoundCats-' | append: section.id -%}
+        <nav class="not-found__cats" {% if ss.categories_heading != blank %}aria-labelledby="{{ cats_id }}"{% else %}aria-label="{{ 'not_found.categories' | t }}"{% endif %}>
           {%- if ss.categories_heading != blank -%}
-            <p class="not-found__cats-title">{{ ss.categories_heading | escape }}</p>
+            <p class="not-found__cats-title" id="{{ cats_id }}">{{ ss.categories_heading | escape }}</p>
           {%- endif -%}
           <ul class="chip-row chip-row--bleed not-found__chips" role="list">
             {%- for link in ss.menu.links -%}

@@ -3,7 +3,9 @@
                      ←/→/Home/End), swaps the server-rendered panels and the "Ver todo" link,
                      refreshes the carousel that becomes visible. Theme editor block select aware.
    <marquee-toggle>  sections/brand-marquee.liquid: pause/play button for the brand ribbon
-                     (WCAG 2.2.2); the ribbon also pauses on hover/focus via CSS. */
+                     (WCAG 2.2.2); the ribbon also pauses on hover/focus via CSS. Keyboard focus
+                     (and the editor's block select) scroll the real brand link into view.
+   Theme editor      a selected FAQ question (sections/faq.liquid) opens while selected. */
 (function () {
   'use strict';
 
@@ -94,18 +96,78 @@
   class MarqueeToggle extends HTMLElement {
     connectedCallback() {
       if (this._ready) return;
-      this.button = this.querySelector('[data-marquee-toggle]');
-      if (!this.button) return;
       this._ready = true;
-      this.button.addEventListener('click', () => this.toggle());
+      this.viewport = this.querySelector('.brand-marquee__viewport');
+      this.button = this.querySelector('[data-marquee-toggle]');
+      const vp = this.viewport;
+      if (vp) {
+        // CSS stops the animation on :focus-visible (the track snaps back to the real copy);
+        // the viewport is overflow:hidden, so scroll it to show the whole focused link.
+        vp.addEventListener('focusin', (e) => {
+          const t = e.target;
+          let kb = false;
+          try { kb = t instanceof Element && t.matches(':focus-visible'); } catch (err) { kb = false; }
+          if (kb) this.reveal(t);
+        });
+        vp.addEventListener('focusout', (e) => {
+          if (!vp.contains(e.relatedTarget)) vp.scrollLeft = 0;
+        });
+      }
+      if (this.button) this.button.addEventListener('click', () => this.setPaused(!this.classList.contains('is-paused')));
+      // Theme editor: stop on the selected brand and keep it in view while selected.
+      this.addEventListener('shopify:block:select', (e) => {
+        if (!(e.target instanceof Element)) return;
+        if (!this.classList.contains('is-paused')) this.setPaused(true, true);
+        this.classList.add('is-revealing');
+        this.reveal(e.target);
+      });
+      this.addEventListener('shopify:block:deselect', () => {
+        this.classList.remove('is-revealing');
+        if (this.classList.contains('is-editor-paused')) this.setPaused(false);
+        if (vp) vp.scrollLeft = 0;
+      });
     }
 
-    toggle() {
-      const paused = !this.classList.contains('is-paused');
+    setPaused(paused, editor) {
       this.classList.toggle('is-paused', paused);
+      this.classList.toggle('is-editor-paused', !!(paused && editor));
       const label = paused ? this.dataset.playLabel : this.dataset.pauseLabel;
-      if (label) this.button.setAttribute('aria-label', label);
+      if (label && this.button) this.button.setAttribute('aria-label', label);
     }
+
+    reveal(el) {
+      const vp = this.viewport;
+      if (!vp || !el) return;
+      requestAnimationFrame(() => {
+        // 24px of breathing room from the viewport edge.
+        const r = el.getBoundingClientRect();
+        const b = vp.getBoundingClientRect();
+        if (r.right > b.right - 24) vp.scrollLeft += r.right - b.right + 24;
+        else if (r.left < b.left + 24) vp.scrollLeft -= b.left - r.left + 24;
+      });
+    }
+  }
+
+  // Theme editor only: open the selected FAQ question; close it again on deselect if we opened
+  // it. (home.js can be included by several sections, hence the once-flag.)
+  const designMode = (window.Shopify && window.Shopify.designMode) || (window.MiBici && window.MiBici.settings && window.MiBici.settings.designMode);
+  if (designMode && !window.__mibiHomeEditor) {
+    window.__mibiHomeEditor = true;
+    const faqItem = (e) => (e.target instanceof Element ? e.target.closest('details.faq__item') : null);
+    document.addEventListener('shopify:block:select', (e) => {
+      const d = faqItem(e);
+      if (d && !d.open) {
+        d.open = true;
+        d.setAttribute('data-editor-opened', '');
+      }
+    });
+    document.addEventListener('shopify:block:deselect', (e) => {
+      const d = faqItem(e);
+      if (d && d.hasAttribute('data-editor-opened')) {
+        d.open = false;
+        d.removeAttribute('data-editor-opened');
+      }
+    });
   }
 
   define('featured-tabs', FeaturedTabs);

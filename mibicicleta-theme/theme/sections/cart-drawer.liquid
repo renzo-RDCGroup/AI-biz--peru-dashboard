@@ -3,6 +3,8 @@
   <cart-drawer> (assets/cart.js) extends <side-drawer>: registers this section for the Section
   Rendering API, swaps .cart-drawer__inner on every `cart:updated`, animates the free-shipping bike
   and handles line quantity / remove with inline errors. Styles: assets/component-cart.css.
+  Line images are lazy and the closed panel is content-visibility:hidden, so a closed drawer
+  downloads no thumbnails.
 {%- endcomment -%}
 {{ 'component-cart.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'cart.js' | asset_url }}" defer></script>
@@ -10,16 +12,19 @@
 {%- liquid
   assign empty_menu = section.settings.empty_menu
   assign stock_msg = 'cart.line.stock_limit' | t
+  assign stock_msg_one = 'cart.line.stock_limit_one' | t
 -%}
 <cart-drawer
   id="CartDrawer"
   class="drawer cart-drawer"
   data-section="{{ section.id }}"
   data-stock-msg="{{ stock_msg | escape }}"
+  data-stock-msg-one="{{ stock_msg_one | escape }}"
 >
   <div class="drawer__overlay" data-drawer-close></div>
   <div class="drawer__panel cart-drawer__panel" role="dialog" aria-modal="true" aria-labelledby="CartDrawer-title" tabindex="-1">
-    <div class="cart-drawer__inner{% if cart.item_count == 0 %} is-empty{% endif %}">
+    {%- comment -%} Count + total: global.js reads them from the add.js bundled sections (no extra GET /cart.js). {%- endcomment -%}
+    <div class="cart-drawer__inner{% if cart.item_count == 0 %} is-empty{% endif %}" data-cart-item-count="{{ cart.item_count }}" data-cart-total-price="{{ cart.total_price }}">
       <div class="drawer__header cart-drawer__header">
         <h2 class="drawer__title cart-drawer__title" id="CartDrawer-title" tabindex="-1" data-cart-heading>
           {{- 'cart.title' | t -}}
@@ -46,7 +51,7 @@
 
           <ul class="cart-lines" role="list" aria-label="{{ 'cart.items_label' | t }}">
             {%- for item in cart.items -%}
-              {%- render 'cart-line-item', item: item, index: forloop.index, prefix: 'CartDrawer', form: 'CartDrawer-form', lazy: false -%}
+              {%- render 'cart-line-item', item: item, index: forloop.index, prefix: 'CartDrawer', form: 'CartDrawer-form', lazy: true -%}
             {%- endfor -%}
           </ul>
 

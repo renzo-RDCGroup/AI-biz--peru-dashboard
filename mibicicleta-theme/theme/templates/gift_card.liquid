@@ -107,9 +107,9 @@
         {%- endif -%}
 
         <div class="gc-code">
-          <p class="gc-code__label" id="GiftCardCodeLabel">{{ 'gift_card.code' | t }}</p>
+          <p class="gc-code__label">{{ 'gift_card.code' | t }}</p>
           <div class="gc-code__row">
-            <p class="gc-code__value" aria-labelledby="GiftCardCodeLabel" data-gift-code>{{ code }}</p>
+            <p class="gc-code__value" data-gift-code>{{ code }}</p>
             <button type="button" class="btn btn--outline gc-copy" data-copy-code hidden>
               {%- render 'icon', name: 'copy' -%}
               <span data-copy-label>{{ 'gift_card.copy' | t }}</span>

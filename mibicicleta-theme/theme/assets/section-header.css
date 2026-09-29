@@ -160,6 +160,7 @@
 .scheme-brand .header-nav__link::after { background: rgba(0, 0, 0, .35); }
 .scheme-brand .header-nav__link.is-active::after { background: #000; }
 .header-nav__toggle {
+  position: relative;
   display: grid;
   place-items: center;
   width: 26px;
@@ -169,6 +170,8 @@
   color: inherit;
 }
 .header-nav__toggle:hover { background: var(--scheme-surface); }
+/* 44×44 hit area: grows into the 26px gap on the right, never over the link text. */
+.header-nav__toggle::before { content: ""; position: absolute; inset: -6px -18px -6px 0; }
 .header-nav__toggle .icon { --icon-size: 16px; transition: transform var(--dur) var(--ease); }
 .header-nav__item.is-open > .header-nav__toggle .icon { transform: rotate(180deg); }
 

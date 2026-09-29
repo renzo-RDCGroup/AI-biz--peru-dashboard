@@ -31,10 +31,6 @@
 
 {%- paginate collection.products by per_page -%}
   {%- liquid
-    assign has_filters = false
-    if ps.enable_filtering and collection.filters.size > 0
-      assign has_filters = true
-    endif
     assign active_count = 0
     for filter in collection.filters
       if filter.type == 'price_range'
@@ -51,6 +47,20 @@
     endif
     assign results_count = collection.products_count
     assign shown = paginate.current_offset | plus: collection.products.size
+
+    # An empty collection gets no toolbar / filters, only the empty state.
+    assign has_products = false
+    if collection.all_products_count > 0 or active_count > 0
+      assign has_products = true
+    endif
+    assign has_filters = false
+    if has_products and ps.enable_filtering and collection.filters.size > 0
+      assign has_filters = true
+    endif
+    assign show_toolbar = has_filters
+    if has_products and ps.enable_sorting
+      assign show_toolbar = true
+    endif
   -%}
   <facet-results
     class="section results scheme-{{ ps.scheme }} results--{{ layout }}{% if has_filters %} results--has-filters{% endif %} results--cols-{{ cols }}"
@@ -58,7 +68,7 @@
     data-section-id="{{ section.id }}"
     style="--pad-top: {{ ps.padding_top }}px; --pad-bottom: {{ ps.padding_bottom }}px;"
   >
-    {%- if ps.enable_sorting or has_filters -%}
+    {%- if show_toolbar -%}
       {%- assign count_label = 'collections.product_count' | t: count: results_count -%}
       {%- render 'facets', context: 'toolbar', results: collection, results_url: collection.url, section_id: section.id, layout: layout, has_filters: has_filters, sorting: ps.enable_sorting, count_label: count_label, active_count: active_count, clear_url: clear_url -%}
     {%- endif -%}
@@ -79,6 +89,7 @@
 
         <div class="results__body" data-swap="results">
           {%- if collection.products.size > 0 -%}
+            {%- render 'facets', context: 'prev', paginate: paginate, paging: ps.paging -%}
             <ul class="{{ grid_class }}" role="list" id="ProductGrid-{{ section.id }}" data-results-grid>
               {%- for product in collection.products -%}
                 {%- liquid
@@ -96,7 +107,7 @@
             {%- render 'facets', context: 'more', paginate: paginate, paging: ps.paging, shown: shown, section_id: section.id -%}
           {%- else -%}
             <div class="results-empty">
-              <span class="results-empty__icon beacon" aria-hidden="true">{% render 'icon', name: 'filter' %}</span>
+              <span class="results-empty__icon beacon" aria-hidden="true">{% if active_count > 0 %}{% render 'icon', name: 'filter' %}{% else %}{% render 'icon', name: 'box' %}{% endif %}</span>
               {%- if active_count > 0 -%}
                 <h3 class="results-empty__title">{{ 'filters.empty.title' | t }}</h3>
                 <p class="results-empty__text">{{ 'filters.empty.text' | t }}</p>
@@ -130,7 +141,7 @@
     {"type": "select", "id": "paging", "label": "Paginación", "options": [{"value": "load_more", "label": "Botón «Cargar más»"}, {"value": "pages", "label": "Páginas numeradas"}], "default": "load_more"},
     {"type": "header", "content": "Filtros y orden"},
     {"type": "checkbox", "id": "enable_filtering", "label": "Mostrar filtros", "info": "Los filtros se configuran en la app Search & Discovery de Shopify.", "default": true},
-    {"type": "select", "id": "filter_layout", "label": "Filtros en escritorio", "options": [{"value": "sidebar", "label": "Barra lateral"}, {"value": "drawer", "label": "Panel desplegable"}], "default": "sidebar"},
+    {"type": "select", "id": "filter_layout", "label": "Filtros en escritorio", "visible_if": "{{ section.settings.enable_filtering }}", "options": [{"value": "sidebar", "label": "Barra lateral"}, {"value": "drawer", "label": "Panel desplegable"}], "default": "sidebar"},
     {"type": "checkbox", "id": "enable_sorting", "label": "Mostrar «Ordenar por»", "default": true},
     {"type": "header", "content": "Espaciado"},
     {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0},

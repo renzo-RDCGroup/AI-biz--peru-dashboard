@@ -142,8 +142,12 @@
       [this.prevBtn, this.nextBtn].forEach((btn) => {
         if (btn && (!this.controlsEl || !this.controlsEl.contains(btn))) btn.hidden = !scrollable;
       });
+      // <ul>/<li> tracks keep native list semantics ("lista, N elementos"): a role=group child
+      // is not allowed inside role=list (axe aria-required-children). Only non-list slides
+      // (e.g. <div> hero slides) get the APG "diapositiva n de N" group pattern.
+      const listy = this.track.matches('ul, ol, [role="list"]');
       m.slides.forEach((slide, i) => {
-        if (slide.hasAttribute('aria-label') || slide.hasAttribute('aria-labelledby')) return;
+        if (listy || slide.tagName === 'LI' || slide.hasAttribute('aria-label') || slide.hasAttribute('aria-labelledby')) return;
         slide.setAttribute('role', 'group');
         slide.setAttribute('aria-roledescription', s.carouselSlideLabel || 'diapositiva');
         slide.setAttribute('aria-label', (s.carouselSlide || '[index] / [total]').replace('[index]', i + 1).replace('[total]', m.slides.length));
@@ -222,15 +226,21 @@
         this.renderPause();
       });
 
-      this.addEventListener('mouseenter', () => { this._hover = true; this.stop(); });
-      this.addEventListener('mouseleave', () => { this._hover = false; this.start(); });
+      // Real mice only: a tap fires emulated mouseenter/mouseleave that would leave a stale hover.
+      this.addEventListener('pointerenter', (e) => { if (e.pointerType !== 'mouse') return; this._hover = true; this.stop(); });
+      this.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'mouse') return; this._hover = false; this.start(); });
       this.addEventListener('focusin', () => { this._focus = true; this.stop(); });
       this.addEventListener('focusout', (e) => {
         if (e.relatedTarget && this.contains(e.relatedTarget)) return;
         this._focus = false;
         this.start();
       });
-      this.addEventListener('touchstart', () => this.userStop(), { passive: true });
+      // A swipe stops autoplay for good. Touches on the pause button are left to its click
+      // handler: stopping here first would make that click toggle straight back to "playing".
+      this.addEventListener('touchstart', (e) => {
+        if (this.pauseBtn && e.target instanceof Node && this.pauseBtn.contains(e.target)) return;
+        this.userStop();
+      }, { passive: true });
 
       if ('IntersectionObserver' in window) {
         this._io = new IntersectionObserver((entries) => {

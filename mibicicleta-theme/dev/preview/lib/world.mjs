@@ -130,7 +130,7 @@ export class World {
     lazy('blog', () => (o.blog ? blogDrop(w, o.blog) : null));
     lazy('article', () => (o.article ? new ArticleDrop(w, o.article) : null));
     lazy('search', () => (r.pageType === 'search' ? new SearchDrop(w) : null));
-    lazy('recommendations', () => (o.recommendations ? new RecommendationsDrop(w, o.recommendations) : new RecommendationsDrop(w, { product: null, intent: 'related', limit: 0 })));
+    lazy('recommendations', () => new RecommendationsDrop(w, o.recommendations || { product: null, intent: null, limit: 0 }));
     lazy('predictive_search', () => (o.predictive ? new PredictiveSearchDrop(w, o.predictive) : null));
     lazy('current_tags', () => w.currentTags);
     lazy('page_title', () => w.pageTitle());

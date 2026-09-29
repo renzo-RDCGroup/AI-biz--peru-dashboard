@@ -13,13 +13,20 @@
       <link rel="icon" type="image/svg+xml" href="{{ 'favicon.svg' | asset_url }}">
     {%- endif -%}
 
+    {%- comment -%}
+      Web fonts load without blocking the first paint (preload → stylesheet on load, <noscript>
+      fallback). Until they arrive, text uses metric-matched Arial faces from css-variables.
+    {%- endcomment -%}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     {%- if settings.adobe_fonts_kit != blank -%}
+      {%- assign adobe_css = 'https://use.typekit.net/' | append: settings.adobe_fonts_kit | strip | escape | append: '.css' -%}
       <link rel="preconnect" href="https://use.typekit.net" crossorigin>
-      <link rel="stylesheet" href="https://use.typekit.net/{{ settings.adobe_fonts_kit | strip | escape }}.css">
+      <link rel="preload" as="style" href="{{ adobe_css }}" onload="this.onload=null;this.rel='stylesheet'">
+      <noscript><link rel="stylesheet" href="{{ adobe_css }}"></noscript>
     {%- endif -%}
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Urbanist:wght@700;800;900&display=swap">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Urbanist:wght@700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Urbanist:wght@700;800;900&display=swap"></noscript>
 
     {%- liquid
       assign meta_tags = current_tags | join: ', '
@@ -45,7 +52,17 @@
 
     {%- liquid
       assign free_ship_cents = settings.free_shipping_threshold | default: 0 | times: 100 | round
+      assign fs_intro_amount = free_ship_cents | money_without_trailing_zeros
+      # Same normalisation as snippets/whatsapp-button: "00" prefix dropped, 9-digit mobile → 51…
       assign wa_digits = settings.whatsapp_number | strip | remove: ' ' | remove: '+' | remove: '-' | remove: '(' | remove: ')' | remove: '.'
+      assign wa_head = wa_digits | slice: 0, 2
+      if wa_head == '00'
+        assign wa_digits = wa_digits | remove_first: '00'
+      endif
+      assign wa_head = wa_digits | slice: 0
+      if wa_digits.size == 9 and wa_head == '9'
+        assign wa_digits = '51' | append: wa_digits
+      endif
     -%}
     <script>
       window.MiBici = window.MiBici || {};
@@ -76,6 +93,7 @@
         adding: {{ 'cart.general.adding' | t | json }},
         added: {{ 'cart.general.added' | t | json }},
         cartError: {{ 'cart.general.error' | t | json }},
+        networkError: {{ 'cart.general.network_error' | t | json }},
         cartUpdated: {{ 'cart.general.updated' | t | json }},
         itemsOne: {{ 'cart.general.items_one' | t: n: '[count]' | json }},
         itemsOther: {{ 'cart.general.items_other' | t: n: '[count]' | json }},
@@ -83,6 +101,7 @@
         priceRegular: {{ 'products.price.regular' | t | json }},
         freeShippingRemaining: {{ 'shipping.remaining_html' | t: amount: '[amount]' | json }},
         freeShippingReached: {{ 'shipping.reached_html' | t | json }},
+        freeShippingIntro: {{ 'shipping.intro_html' | t: amount: fs_intro_amount | json }},
         freeShippingZone: {{ 'shipping.zone' | t: zone: settings.free_shipping_zone | json }},
         close: {{ 'general.close' | t | json }},
         loading: {{ 'general.loading' | t | json }},

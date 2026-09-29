@@ -73,10 +73,8 @@
           if tabs.size > 0
             assign idx = i | minus: 1
             assign col = tabs[idx].settings.collection
-            assign panel_label = tabs[idx].settings.label | default: col.title
           else
             assign col = section.settings.collection
-            assign panel_label = col.title | default: section.settings.heading
           endif
           assign panel_uid = section.id | append: '-' | append: i
         -%}
@@ -89,7 +87,8 @@
           {%- if col != blank and col.products_count == 0 -%}
             <p class="featured__empty">{{ 'home.featured.empty' | t }}</p>
           {%- else -%}
-            <carousel-slider class="carousel carousel--bleed carousel--arrows-overlay featured__carousel" aria-label="{{ panel_label | escape }}">
+            {%- comment -%} role=group (not carousel.js's default region): the section/tabpanel is already the landmark; a second region would repeat it. {%- endcomment -%}
+            <carousel-slider class="carousel carousel--bleed carousel--arrows-overlay featured__carousel" role="group"{% if use_tabs %} aria-labelledby="FeaturedTab-{{ section.id }}-{{ i }}"{% elsif section.settings.heading != blank %} aria-labelledby="{{ title_id }}"{% endif %}>
               <ul class="carousel__track" role="list">
                 {%- if col != blank -%}
                   {%- for item in col.products limit: limit -%}
@@ -157,6 +156,7 @@
         {"type": "tab", "settings": {"label": "Luces"}}
       ]
     }
-  ]
+  ],
+  "disabled_on": {"groups": ["header", "footer"]}
 }
 {% endschema %}

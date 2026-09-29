@@ -966,17 +966,23 @@ export class PredictiveSearchDrop extends BaseDrop {
   }
 }
 
+// Shopify only populates `recommendations` when a section is rendered through
+// /recommendations/products (http.mjs passes `performed: true`). Everywhere else — page
+// renders and plain Section Rendering API calls — `performed?` is false and `products` is empty.
 export class RecommendationsDrop extends BaseDrop {
-  constructor(w, { product, intent, limit }) {
+  constructor(w, { product, intent, limit, performed = false }) {
     super(w);
-    this.intent = intent;
+    this.intent = performed ? intent : null;
     Object.defineProperty(this, '_p', { value: product, enumerable: false });
     Object.defineProperty(this, '_limit', { value: limit, enumerable: false });
+    Object.defineProperty(this, '_performed', { value: Boolean(performed && product), enumerable: false });
   }
-  get performed() { return true; }
+  get ['performed?']() { return this._performed; }
+  // Undocumented alias that Dawn uses; same value as `performed?`.
+  get performed() { return this._performed; }
   get products() {
     return this._cached('products', () => {
-      const src = this._p;
+      const src = this._performed ? this._p : null;
       if (!src) return [];
       const others = this._w.store.products.filter((p) => p.id !== src.id);
       let ranked;

@@ -47,7 +47,7 @@
   font: 700 var(--fs-sm)/1.2 var(--font-heading);
   color: var(--scheme-muted);
 }
-.collection-banner__count::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent); }
+.collection-banner__count::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .35; }
 .collection-banner__desc-wrap { grid-area: desc; max-width: 62ch; margin-top: 12px; }
 .collection-banner__desc { font-size: var(--fs-sm); line-height: 1.55; }
 .js .collection-banner__desc:not(.is-expanded) { max-height: calc(1.55em * 3); overflow: hidden; }
@@ -96,7 +96,11 @@
 }
 
 /* ---------- Results section + sticky toolbar ------------------------------- */
+/* Custom element: block, or the section's padding and scheme background never paint. */
+facet-results { display: block; }
 .results { --toolbar-h: 64px; --side-w: 240px; --side-gap: 32px; }
+/* Focused cards scrolled into view must clear header + sticky toolbar (65px + 16px). */
+html:has(.results-toolbar) { scroll-padding-top: calc(var(--header-height, 0px) + 81px); }
 @media (min-width: 1200px) { .results { --side-w: 264px; --side-gap: 48px; } }
 
 .results-toolbar {
@@ -140,7 +144,7 @@
 }
 .results-toolbar__btn:active { transform: scale(.98); }
 .results-toolbar__btn .icon { --icon-size: 20px; }
-.results-toolbar__filter { flex: 0 0 auto; min-width: 40%; }
+.results-toolbar__filter { flex: 0 0 auto; }
 .results-toolbar__count { display: none; font-size: var(--fs-sm); color: var(--scheme-muted); white-space: nowrap; }
 .results-toolbar__count:focus { outline: none; }
 .results-toolbar__side { display: none; }
@@ -161,8 +165,10 @@
 }
 .sort-by .btn { flex: none; }
 
+@media (max-width: 749.98px) {
+  .results-toolbar__inner { min-height: 56px; padding-block: 6px; }
+}
 @media (min-width: 750px) {
-  .results-toolbar__filter { min-width: 0; }
   .results-toolbar__count { display: block; margin-right: auto; }
   .sort-by { flex: 0 0 auto; }
   .sort-by__label { position: static; width: auto; height: auto; overflow: visible; clip: auto; font-size: var(--fs-sm); color: var(--scheme-muted); }
@@ -190,16 +196,13 @@
     column-gap: var(--side-gap);
     align-items: start;
   }
+  /* Sticky only while it fits the viewport (.is-fit, facets.js); else it scrolls with the page. */
   .results__sidebar {
-    position: sticky;
     top: calc(var(--header-height, 0px) + var(--toolbar-h) + 8px);
-    max-height: calc(100vh - var(--header-height, 0px) - var(--toolbar-h) - 24px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    padding: 8px 12px 24px 0;
+    padding: 8px 0 24px;
     transition: top .3s var(--ease);
   }
+  .results__sidebar.is-fit { position: sticky; }
   .results--sidebar.results--has-filters .results-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .results--cols-3 .results-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
@@ -242,6 +245,7 @@
 .results__body { transition: opacity var(--dur) var(--ease); }
 .results.is-loading .results__body { opacity: .45; pointer-events: none; }
 
+.results-prev { display: flex; justify-content: center; margin-bottom: 28px; }
 .results-more { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 48px; text-align: center; }
 .results-more__status { font-size: var(--fs-sm); color: var(--scheme-muted); }
 .results-more__bar { width: min(260px, 70%); height: 4px; overflow: hidden; border-radius: var(--radius-pill); background: var(--scheme-border); }
@@ -284,7 +288,8 @@
 }
 .collection-card__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
 .collection-card__media--icon { background: var(--color-brand-soft); }
-.collection-card__icon { width: 44%; max-width: 128px; aspect-ratio: 1; --beacon-ring: var(--color-brand-soft); }
+.collection-card__icon { width: 44%; max-width: 128px; aspect-ratio: 1; }
+.collection-card__icon::after { content: none; } /* one red dot per page, not one per tile */
 .collection-card__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .collection-card__title { font: 800 var(--fs-base)/1.2 var(--font-heading); letter-spacing: -.01em; }
 .collection-card__count { font-size: var(--fs-xs); color: var(--scheme-muted); }

@@ -1,6 +1,8 @@
 {%- comment -%}
   Custom Liquid: lets the merchant paste Liquid/HTML (embeds, app snippets, tracking widgets)
   anywhere, wrapped in the theme's scheme + spacing so it sits in the page rhythm.
+  While empty it renders nothing on the storefront; in the theme editor it shows a dashed
+  placeholder so the new section has a visible area to click.
 {%- endcomment -%}
 {%- liquid
   assign ss = section.settings
@@ -13,6 +15,12 @@
   <div class="section custom-liquid scheme-{{ ss.scheme }}" style="--pad-top: {{ ss.padding_top }}px; --pad-bottom: {{ ss.padding_bottom }}px;">
     <div class="{{ wrap_class }}">
       {{ ss.custom_liquid }}
+    </div>
+  </div>
+{%- elsif request.design_mode -%}
+  <div class="section custom-liquid scheme-{{ ss.scheme }}" style="--pad-top: {{ ss.padding_top }}px; --pad-bottom: {{ ss.padding_bottom }}px;">
+    <div class="page-width">
+      <p class="custom-liquid__empty" style="padding: 32px 20px; border: 2px dashed var(--scheme-border); border-radius: var(--radius); color: var(--scheme-muted); font-size: var(--fs-sm); text-align: center;">{{ 'pages.custom_liquid.empty' | t }}</p>
     </div>
   </div>
 {%- endif -%}

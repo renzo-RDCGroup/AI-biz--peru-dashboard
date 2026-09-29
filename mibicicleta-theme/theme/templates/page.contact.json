@@ -33,7 +33,7 @@
           "settings": {
             "icon": "truck",
             "title": "Envíos a todo el Perú",
-            "text": "Envío estándar S/ 14. Gratis en pedidos desde S/ 220."
+            "text": "Envío estándar S/ 14. Gratis en pedidos desde [envio_gratis]."
           }
         },
         "cambios": {

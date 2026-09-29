@@ -27,11 +27,13 @@
       "remove_label": "Eliminar {{ title }} del carrito",
       "quantity_label": "Cantidad de {{ title }}",
       "line_total": "Total del producto",
-      "stock_limit": "Solo hay [quantity] disponibles de este producto."
+      "stock_limit": "Solo quedan [quantity] unidades de este producto.",
+      "stock_limit_one": "Solo queda 1 unidad de este producto."
     },
     "totals": {
       "summary": "Resumen del pedido",
       "subtotal": "Subtotal",
+      "taxes_included": "Impuestos incluidos.",
       "discounts": "Descuentos",
       "savings_html": "Ahorras <strong>{{ amount }}</strong>",
       "checkout": "Finalizar pedido",

@@ -29,18 +29,18 @@
             "icon_1": "medal",
             "text_1": "Productos originales",
             "icon_2": "truck",
-            "text_2": "Envío gratis desde S/ 220",
+            "text_2": "Envíos a todo el Perú",
             "icon_3": "return",
-            "text_3": "7 días para cambios"
+            "text_3": "Cambios en 7 días, sin abrir"
           }
         },
-        "description": { "type": "description", "settings": { "heading": "Descripción", "icon": "none", "open": true } },
+        "description": { "type": "description", "settings": { "heading": "Descripción", "icon": "info", "open": true } },
         "shipping": {
           "type": "collapsible",
           "settings": {
             "heading": "Envíos",
             "icon": "truck",
-            "content": "<p>Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde S/ 220.</p>",
+            "content": "<p>Enviamos a todo el Perú. El envío estándar cuesta S/ 14 y es gratis en pedidos desde [envio_gratis].</p>",
             "open": false
           }
         },
@@ -93,7 +93,7 @@
       "settings": {
         "intent": "complementary",
         "heading": "Complétalo con",
-        "heading_dot": false,
+        "heading_dot": true,
         "limit": 8,
         "columns_desktop": "4",
         "scheme": "soft",
@@ -110,11 +110,11 @@
         },
         "envios": {
           "type": "item",
-          "settings": { "icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde S/ 220" }
+          "settings": { "icon": "truck", "title": "Envíos a todo el Perú", "text": "Gratis desde [envio_gratis]" }
         },
         "whatsapp": {
           "type": "item",
-          "settings": { "icon": "whatsapp", "title": "Atención por WhatsApp", "text": "Consultas y pedidos por chat" }
+          "settings": { "icon": "whatsapp", "title": "Atención por WhatsApp", "text": "Consultas y pedidos por chat", "link_whatsapp": true }
         },
         "cambios": {
           "type": "item",

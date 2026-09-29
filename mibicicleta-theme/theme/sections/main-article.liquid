@@ -19,7 +19,7 @@
   assign comments_id = 'Comments-' | append: section.id
 -%}
 
-<article class="article scheme-{{ ss.scheme }}">
+<article class="article scheme-{{ ss.scheme }}" style="--article-pad-top: {{ ss.padding_top | default: 20 }}px; --article-pad-bottom: {{ ss.padding_bottom | default: 56 }}px;">
   <header class="article__header page-width page-width--read">
     {%- render 'breadcrumbs', class: 'article__crumbs' -%}
     {%- if article.tags.size > 0 -%}
@@ -193,7 +193,10 @@
     {"type": "checkbox", "id": "show_image", "label": "Mostrar imagen destacada", "default": true},
     {"type": "checkbox", "id": "show_author", "label": "Mostrar autor", "default": false},
     {"type": "checkbox", "id": "show_share", "label": "Mostrar botones para compartir", "default": true},
-    {"type": "checkbox", "id": "show_more", "label": "Mostrar más artículos", "default": true}
+    {"type": "checkbox", "id": "show_more", "label": "Mostrar más artículos", "default": true},
+    {"type": "header", "content": "Espaciado"},
+    {"type": "range", "id": "padding_top", "label": "Margen superior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 20},
+    {"type": "range", "id": "padding_bottom", "label": "Margen inferior", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56}
   ]
 }
 {% endschema %}

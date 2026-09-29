@@ -1,13 +1,24 @@
 {%- comment -%}
   Payment method icons enabled in Shopify Payments / checkout settings.
-  {% render 'payment-icons', class: '' %} — renders nothing when none are enabled.
+  {% render 'payment-icons', class: '', scope: '' %} — renders nothing when none are enabled.
+  scope: set it when the icons appear twice on a page (e.g. scope: 'cart' in the cart summary; the
+  footer has none). payment_type_svg_tag prints fixed ids (<title id="pi-visa">, aria-labelledby,
+  url(#pi-…)); scope rewrites all of them to "pi-<scope>-…" so ids stay unique.
 {%- endcomment -%}
 {%- if shop.enabled_payment_types.size > 0 -%}
   <div class="payment-icons-wrap{% if class != blank %} {{ class }}{% endif %}">
     <span class="visually-hidden">{{ 'general.payment_methods' | t }}</span>
     <ul class="payment-icons" role="list">
       {%- for type in shop.enabled_payment_types -%}
-        <li>{{ type | payment_type_svg_tag: class: 'payment-icon' }}</li>
+        {%- liquid
+          assign pi_svg = type | payment_type_svg_tag: class: 'payment-icon'
+          if scope != blank
+            assign pi_attr = '"pi-' | append: scope | append: '-'
+            assign pi_ref = '#pi-' | append: scope | append: '-'
+            assign pi_svg = pi_svg | replace: '"pi-', pi_attr | replace: '#pi-', pi_ref
+          endif
+        -%}
+        <li>{{ pi_svg }}</li>
       {%- endfor -%}
     </ul>
   </div>

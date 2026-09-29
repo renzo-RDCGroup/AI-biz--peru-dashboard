@@ -129,7 +129,7 @@
     }
 
     stockMessage(n) {
-      const tpl = this.getAttribute('data-stock-msg') || '';
+      const tpl = (n === 1 && this.getAttribute('data-stock-msg-one')) || this.getAttribute('data-stock-msg') || '';
       return tpl ? tpl.replace('[quantity]', n) : M.strings.cartError;
     }
 
@@ -214,7 +214,10 @@
         if (!line) return;
         line.classList.add('is-added');
         setTimeout(() => line.classList.remove('is-added'), 2000);
-        if (i === 0 && line.closest('[data-cart-scroll]')) line.scrollIntoView({ block: 'nearest' });
+        if (i !== 0 || !line.closest('[data-cart-scroll]')) return;
+        // A closed drawer skips rendering its contents (content-visibility): scroll once it opens.
+        if (this.isOpen === false) this._reveal = line;
+        else line.scrollIntoView({ block: 'nearest' });
       });
     }
 
@@ -301,6 +304,8 @@
     get innerSelector() { return '.cart-drawer__inner'; }
 
     onReady() {
+      // Start from what the page already shows: a cart that's already complete doesn't replay the ride.
+      this._shown = this.shipProgress();
       if (this._drawerReady) return;
       this._drawerReady = true;
       window.addEventListener('pageshow', (e) => {
@@ -313,10 +318,13 @@
     }
 
     open(opener) {
+      const line = this._reveal;
+      this._reveal = null;
       // Added from the cart page itself: the page already shows it, no need for the drawer.
       if (opener instanceof Element && opener.closest('.main-cart__inner')) return;
       const wasOpen = this.isOpen;
       super.open(opener);
+      if (line && line.isConnected) line.scrollIntoView({ block: 'nearest' });
       if (!wasOpen) this.glide(280); // let the panel slide in first
     }
 

@@ -23,11 +23,11 @@
       assign r_pill = 4
   endcase
 
-  assign font_heading = "'Urbanist', 'Helvetica Neue', Arial, sans-serif"
+  assign font_heading = "'Urbanist', 'Urbanist Fallback', 'Helvetica Neue', Arial, sans-serif"
   assign fw_heading = 800
   assign fw_display = 900
   if settings.adobe_fonts_kit != blank
-    assign font_heading = "'all-round-gothic', 'Urbanist', 'Helvetica Neue', Arial, sans-serif"
+    assign font_heading = "'all-round-gothic', 'Urbanist', 'Urbanist Fallback', 'Helvetica Neue', Arial, sans-serif"
     assign fw_heading = 700
     assign fw_display = 700
   endif
@@ -35,6 +35,13 @@
   assign body_scale = settings.body_scale | default: 100 | divided_by: 100.0
 -%}
 <style>
+  {%- comment -%}
+    Metric-matched Arial stand-ins shown while the web fonts load (layout/theme.liquid loads them
+    without blocking), so lines don't reflow on swap. Measured against Arial-metric faces.
+  {%- endcomment %}
+  @font-face { font-family: 'Libre Franklin Fallback'; src: local('Arial'), local('ArialMT'), local('Liberation Sans'); font-weight: 400; size-adjust: 101.7%; ascent-override: 95.4%; descent-override: 24.6%; line-gap-override: 0%; }
+  @font-face { font-family: 'Libre Franklin Fallback'; src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'); font-weight: 700; size-adjust: 99.1%; ascent-override: 97.9%; descent-override: 25.2%; line-gap-override: 0%; }
+  @font-face { font-family: 'Urbanist Fallback'; src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'); font-weight: 700; size-adjust: 94.4%; ascent-override: 100.7%; descent-override: 26.5%; line-gap-override: 0%; }
   :root {
     --color-brand: {{ settings.color_brand | default: '#FFD219' }};
     --color-brand-soft: {{ settings.color_brand_soft | default: '#FFF6CF' }};
@@ -42,7 +49,7 @@
     --color-accent: {{ settings.color_accent | default: '#FF0000' }};
     --color-sale: {{ settings.color_sale | default: '#D10000' }};
     --font-heading: {{ font_heading }};
-    --font-body: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif;
+    --font-body: 'Libre Franklin', 'Libre Franklin Fallback', 'Helvetica Neue', Arial, sans-serif;
     --fw-heading: {{ fw_heading }};
     --fw-display: {{ fw_display }};
     --body-scale: {{ body_scale }};

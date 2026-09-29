@@ -10,6 +10,7 @@
   %}
   Source: settings.cart_upsell_collection, else collections['destacados']. Skips products already in
   the cart and sold-out products. Renders nothing when no product qualifies.
+  compact: two passes, so one-tap "Agregar" (single-variant) cards come before "Ver opciones" ones.
 {%- endcomment -%}
 {%- liquid
   assign up_collection = settings.cart_upsell_collection
@@ -29,14 +30,26 @@
     assign in_cart = in_cart | append: line.product_id | append: ','
   endfor
   assign up_count = 0
+  assign up_passes = 1
+  if up_layout == 'compact'
+    assign up_passes = 2
+  endif
 -%}
 {%- if up_collection != blank and up_collection.products_count > 0 -%}
   {%- capture up_slides -%}
+    {%- for pass in (1..up_passes) -%}
     {%- for product in up_collection.products limit: 30 -%}
       {%- liquid
         assign needle = ',' | append: product.id | append: ','
         if in_cart contains needle or product.available == false
           continue
+        endif
+        if up_passes == 2
+          if pass == 1 and product.variants.size > 1
+            continue
+          elsif pass == 2 and product.variants.size == 1
+            continue
+          endif
         endif
         assign up_count = up_count | plus: 1
       -%}
@@ -85,6 +98,8 @@
         </li>
       {%- endif -%}
       {%- if up_count >= up_limit -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+    {%- if up_count >= up_limit -%}{%- break -%}{%- endif -%}
     {%- endfor -%}
   {%- endcapture -%}
 

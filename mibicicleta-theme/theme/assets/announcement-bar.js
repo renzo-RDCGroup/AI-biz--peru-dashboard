@@ -1,6 +1,7 @@
 /* Mi Bici 2026 — announcement-bar.js
    <announcement-bar>: seamless marquee (adds aria-hidden, untabbable copies until the screen is
-   covered, slides by exactly one copy; pause button; CSS pauses on hover/focus) or one message
+   covered, slides by exactly one copy; pause button; CSS pauses on hover/focus; keyboard focus
+   parks the track and scrolls the focused link into view) or one message
    at a time (prev/next; any interaction stops the rotation; never auto-rotates under reduced
    motion). Discount-code chips copy to the clipboard with "¡Copiado!" feedback. */
 (function () {
@@ -72,6 +73,28 @@
     bindMarquee() {
       const pause = this.querySelector('[data-announcement-pause]');
       if (pause) pause.addEventListener('click', () => this.setPaused(!this.classList.contains('is-paused')));
+      // Keyboard focus: CSS parks the track at 0 and drops the edge masks (:has(:focus-visible));
+      // scroll the focused link or chip fully into view with room for its ring (start first if it
+      // is wider than the bar). Back to 0 when focus leaves so the loop stays seamless.
+      // Mouse/touch focus (not :focus-visible) never moves anything.
+      const vp = this.viewport;
+      if (!vp) return;
+      vp.addEventListener('focusin', (e) => {
+        const t = e.target;
+        let visible = false;
+        try { visible = t instanceof Element && t.matches(':focus-visible'); } catch (err) { visible = false; }
+        if (!visible) return;
+        requestAnimationFrame(() => {
+          const r = t.getBoundingClientRect();
+          const b = vp.getBoundingClientRect();
+          const m = 8;
+          if (r.left < b.left + m || r.width > b.width - 2 * m) vp.scrollLeft += r.left - b.left - m;
+          else if (r.right > b.right - m) vp.scrollLeft += r.right - b.right + m;
+        });
+      });
+      vp.addEventListener('focusout', (e) => {
+        if (!reducedMotion() && !vp.contains(e.relatedTarget)) vp.scrollLeft = 0;
+      });
     }
 
     observe() {

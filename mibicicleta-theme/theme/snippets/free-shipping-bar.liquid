@@ -3,6 +3,7 @@
   {% render 'free-shipping-bar', total: cart.total_price, style: 'card'|'inline', class: '' %}
   Renders nothing when the threshold is 0. global.js re-computes every [data-free-shipping]
   on `cart:updated` (text, --progress on .free-ship__track, aria-valuenow, .is-complete).
+  Empty cart (total 0): "Envío gratis desde S/ 220." instead of "¡Te faltan S/ 220.00…!".
 {%- endcomment -%}
 {%- assign fs_threshold = settings.free_shipping_threshold | default: 0 | times: 100 | round -%}
 {%- if fs_threshold > 0 -%}
@@ -18,10 +19,13 @@
       assign fs_pct = 100
     endif
     assign fs_amount = fs_remaining | money
+    assign fs_intro = fs_threshold | money_without_trailing_zeros
   -%}
   <div class="free-ship free-ship--{{ fs_style }}{% if fs_remaining == 0 %} is-complete{% endif %}{% if class != blank %} {{ class }}{% endif %}" data-free-shipping data-threshold="{{ fs_threshold }}">
     <p class="free-ship__text" data-free-shipping-text>
-      {%- if fs_remaining > 0 -%}
+      {%- if fs_total == 0 -%}
+        {{- 'shipping.intro_html' | t: amount: fs_intro -}}
+      {%- elsif fs_remaining > 0 -%}
         {{- 'shipping.remaining_html' | t: amount: fs_amount -}}
       {%- else -%}
         {{- 'shipping.reached_html' | t -}}
